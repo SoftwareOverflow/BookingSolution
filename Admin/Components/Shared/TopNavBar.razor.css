@@ -1,0 +1,25 @@
+﻿.top-bar {
+    height: 55px;
+    display: flex;
+    background-color: rebeccapurple;
+    padding: 10px;
+    justify-content: left;
+    align-items: center;
+}
+
+.top-bar .material-icons {
+    width: 55px;
+    height: 55px;
+    font-size: 32px;
+    padding: 10px;
+}
+
+.logo {
+    width: 55px;
+    height: 55px;
+    padding: 10px 10px;
+}
+
+.nav-link {
+    margin: 0px 10px;
+}

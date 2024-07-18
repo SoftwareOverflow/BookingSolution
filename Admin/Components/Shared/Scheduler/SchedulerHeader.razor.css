@@ -1,0 +1,48 @@
+﻿.scheduler-header {
+    justify-content: space-between;
+    background-color: #f8f9fa;
+}
+
+.header-left {
+    padding-left: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-right {
+    padding-right: 10px;
+}
+
+.date-string-dropdown {
+    display: inline-flex;
+    align-items: center
+}
+
+.date-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scheduler-view-button {
+    padding: 0px 10px;
+}
+
+.scheduler-view-button.active:not(:hover) {
+    color: dodgerblue;
+}
+
+button {
+    background-color: unset;
+    border: unset;
+    border-radius: 3px;
+    transition: color 0.2s;
+    transition: background-color 0.2s;
+    padding: 5px 10px;
+}
+
+    button:hover {
+        color: navajowhite;
+        background-color: dimgrey;
+    }

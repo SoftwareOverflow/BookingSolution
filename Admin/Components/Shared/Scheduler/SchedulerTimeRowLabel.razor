@@ -1,0 +1,15 @@
+﻿<tr class="time-slot-row" >
+    <td class="time-slot time-slot-label">
+        <span>
+            @Time
+        </span>
+    </td>
+</tr>
+<tr class="time-slow-row">
+    <td class="time-slot" />
+</tr>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Time { get; set; }
+}

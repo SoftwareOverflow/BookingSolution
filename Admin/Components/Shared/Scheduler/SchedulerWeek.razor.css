@@ -1,0 +1,36 @@
+﻿.outer-scheduler-week-table {
+    width: 100%;
+}
+
+th {
+    border-bottom: 1px solid lightgray;
+    border-right: 1px solid lightgray;
+}
+
+.table-left-indent {
+    width: 85px;
+}
+
+.day-date-header-container {
+    padding-right: 16px;
+}
+
+.day-date-header {
+    width: 100%;
+    padding: 5px;
+    border-right: 1px solid lightgray;
+}
+
+.time-slot-wrapper {
+    height: 400px;
+    overflow-y: hidden;
+}
+
+.scheduler-content-wrapper {
+    height: 400px;
+    overflow-y: hidden;
+}
+
+.time-slot-row {
+    display: table-row
+}

@@ -1,0 +1,43 @@
+﻿<div class="flex-row-center scheduler-header">
+    <div class="header-left">
+        <div>
+            <button class="flex-row-center">
+                <span class="material-icons">keyboard_arrow_left</span>
+            </button>
+        </div>
+        <div>
+            <button class="flex-row-center">
+                <span class="material-icons">keyboard_arrow_right</span>
+            </button>
+        </div>
+        <div class="flex-row-center date-string-dropdown">
+            <button class="date-button">
+                <span>
+                    @DateDisplayString
+                </span>
+                <span class="material-icons">keyboard_arrow_down</span>
+            </button>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="scheduler-view-button">
+            Today
+        </button>
+        <span class="vertical-divider" />
+        <button class="scheduler-view-button">
+            Day
+        </button>
+        <button class="scheduler-view-button active">
+            Week
+        </button>
+        <button class="scheduler-view-button">
+            Work Week
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string DateDisplayString { get; set; }
+
+}

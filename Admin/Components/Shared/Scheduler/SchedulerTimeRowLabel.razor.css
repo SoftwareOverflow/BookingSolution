@@ -1,0 +1,9 @@
+﻿.time-slot {
+    display: table-cell;
+    height: 36px;
+    background-color: lightgray;
+}
+
+.time-slot-label {
+    border-top: 1px dashed white; 
+}

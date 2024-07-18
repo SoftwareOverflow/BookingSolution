@@ -1,6 +1,5 @@
 using Admin.Components;
-using LocalNetCoreAuth.IndividualAccounts.Components.Extensions;
-using Data.Extensions;
+using Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddAuthenticationLayer();
-builder.Services.AddPersistanceLayer();
+builder.Services.AddApplicationLayers();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
