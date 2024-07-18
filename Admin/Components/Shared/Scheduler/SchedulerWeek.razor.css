@@ -7,6 +7,10 @@ th {
     border-right: 1px solid lightgray;
 }
 
+.scheduler-wrapper ::deep td {
+    height: 36px;
+}
+
 .table-left-indent {
     width: 85px;
 }
@@ -34,3 +38,14 @@ th {
 .time-slot-row {
     display: table-row
 }
+
+.table-scheduler {
+    width: 100%;
+    overflow-y: scroll;
+}
+
+    /*.table-scheduler td {*/
+        /*height: 36px;*/
+        /*border-right: 1px solid darkgrey;
+        border-bottom: 1px solid lightgray;
+    }*/
