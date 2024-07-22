@@ -1,0 +1,22 @@
+﻿.day-col-container {
+    position: relative;
+}
+
+.cell-half-hour {
+    border-bottom: 1px dotted lightgray;
+    background-color: antiquewhite;
+}
+
+.cell-hour {
+    border-bottom: 1px solid darkgray;
+    background-color: aquamarine;
+}
+
+.event {
+    width: 80%;
+    background-color: blueviolet;
+    border: 1px solid red;
+    top: var(--event-start);
+    height: var(--event-height);
+    position: absolute;
+}

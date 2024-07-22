@@ -1,8 +1,8 @@
-﻿<div class="scheduler-container">
+﻿@using Admin.Data.Events
+<div class="scheduler-container" style="--scheduler-table-cell-height: @(EventLayoutConsts.CellHeight)px">
     <SchedulerHeader DateDisplayString="01 July - 07 July 24" />
     <SchedulerWeek />
 </div>
 
 @code {
-    
 }

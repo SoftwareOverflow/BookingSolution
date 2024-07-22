@@ -1,53 +1,41 @@
-﻿<div class="scheduler-week-container">
-    <table class="outer-scheduler-week-table" role="presentation">
-        <tbody>
-            <tr>
-                <th class="table-left-indent" />
-                <th>
-                    <div class="flex-row-center day-date-header-container">
-                        <div class="day-date-header">
-                            <div>Mon</div>
-                            <div>15</div>
-                        </div>
-                        <div class="day-date-header">
-                            <div>Tue</div>
-                            <div>16</div>
-                        </div>
-                        <div class="day-date-header">
-                            <div>Wed</div>
-                            <div>17</div>
-                        </div>
-                        <div class="day-date-header">
-                            <div>Thu</div>
-                            <div>18</div>
-                        </div>
-                        <div class="day-date-header">
-                            <divp>Fri</divp>
-                            <div>19</div>
-                        </div>
-                        <div class="day-date-header">
-                            <div>Sat</div>
-                            <div>20</div>
-                        </div>
-                        <div class="day-date-header">
-                            <div>Sun</div>
-                            <div>21</div>
-                        </div>
-
-                        @* <th>Mon</th>
-                        <th>Tue</th>
-                        <th>Wed</th>
-                        <th>Thu</th>
-                        <th>Fri</th>
-                        <th>Sat</th>
-                        <th>Sun</th> *@
-                    </div>
-                </th>
-            </tr>
-            <tr class="scheduler-wrapper">
-                <td>
-                    <div class="scheduler-content-wrapper">
-                        <table class="table-left-indent">
+﻿<div class="scheduler-outer-container">
+    <div class="flex-row-center header-row">
+        <div class="left-indent" />
+        <div class="day-date-header">
+            <div>Mon</div>
+            <div>15</div>
+        </div>
+        <div class="day-date-header">
+            <div>Tue</div>
+            <div>16</div>
+        </div>
+        <div class="day-date-header">
+            <div>Wed</div>
+            <div>17</div>
+        </div>
+        <div class="day-date-header">
+            <div>Thu</div>
+            <div>18</div>
+        </div>
+        <div class="day-date-header">
+            <divp>Fri</divp>
+            <div>19</div>
+        </div>
+        <div class="day-date-header">
+            <div>Sat</div>
+            <div>20</div>
+        </div>
+        <div class="day-date-header">
+            <div>Sun</div>
+            <div>21</div>
+        </div>
+    </div>
+    <div class="scheduler-container">
+        <table class="scheduler-outer-container">
+            <tbody>
+                <tr>
+                    <td class="time-label-col">
+                        <table class="scheduler-inner-table time-label-table">
                             <tbody>
                                 <SchedulerTimeRowLabel Time="12:00 AM" />
                                 <SchedulerTimeRowLabel Time="1:00 AM" />
@@ -75,98 +63,35 @@
                                 <SchedulerTimeRowLabel Time="11:00 PM" />
                             </tbody>
                         </table>
-                    </div>
-                </td>
-                <td>
-                    <div class="scheduler-content-wrapper">
-                        <table class="table-scheduler">
-                            <colgroup>
-                                <col />
-                                <col />
-                                <col />
-                                <col />
-                                <col />
-                                <col />
-                                <col />
-                            </colgroup>
-                            <tbody>
-                                <tr>
-                                    <td class="scheduler-td" colspan="1">
-                                        <table>
-                                            <tbody>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>30 min</td>
-                                                </tr>
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
+                    <td>
+                            <SchedulerInnerDayTableContents />
+                    </td>
 
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td class="" colspan="1">
-                                        Hello 2
-                                    </td>
-                                    <td class="" colspan="1">
-                                        Hello 3
-                                    </td>
-                                    <td class="" colspan="1">
-                                        Hello 4
-                                    </td>
-                                    <td class="" colspan="1">
-                                        Hello 5
-                                    </td>
-                                    <td class="" colspan="1">
-                                        Hello 6
-                                    </td>
-                                    <td class="" colspan="1">
-                                        Hello 7
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @code {
-    private DateOnly StartOfWeek;
-    private DateOnly EndOfWeek;
+
 }

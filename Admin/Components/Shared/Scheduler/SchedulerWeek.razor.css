@@ -1,51 +1,40 @@
-﻿.outer-scheduler-week-table {
+﻿.scheduler-outer-container {
     width: 100%;
 }
 
-th {
-    border-bottom: 1px solid lightgray;
-    border-right: 1px solid lightgray;
-}
-
-.scheduler-wrapper ::deep td {
-    height: 36px;
-}
-
-.table-left-indent {
-    width: 85px;
-}
-
-.day-date-header-container {
+.header-row {
     padding-right: 16px;
 }
 
 .day-date-header {
     width: 100%;
     padding: 5px;
-    border-right: 1px solid lightgray;
+    border-left: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
 }
 
-.time-slot-wrapper {
-    height: 400px;
-    overflow-y: hidden;
+.left-indent {
+    margin-right: 85px;
 }
 
-.scheduler-content-wrapper {
-    height: 400px;
-    overflow-y: hidden;
-}
-
-.time-slot-row {
-    display: table-row
-}
-
-.table-scheduler {
-    width: 100%;
+.scheduler-container {
+    height: 500px;
     overflow-y: scroll;
 }
 
-    /*.table-scheduler td {*/
-        /*height: 36px;*/
-        /*border-right: 1px solid darkgrey;
-        border-bottom: 1px solid lightgray;
-    }*/
+.time-label-col {
+    width: 85px;
+}
+
+::deep .scheduler-inner-table {
+    width: 100%;
+}
+
+    ::deep .scheduler-inner-table td {
+        height: var(--scheduler-table-cell-height);
+        width: 100%;
+    }
+
+.time-label-table {
+    width: 85px;
+}
