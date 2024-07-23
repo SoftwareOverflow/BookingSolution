@@ -1,5 +1,6 @@
 ﻿using Admin.Data.Events;
 using Core.Dto;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Admin.Tests.Data.Events
 {
@@ -18,9 +19,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = new DateTime(date, new TimeOnly(14, 30)),
                     EventPaddingStart = TimeSpan.Zero,
                     EventPaddingEnd = TimeSpan.Zero,
-                },
-                clashes: []
-            );
+                });
 
             Assert.False(booking.HasPadding(date));
         }
@@ -36,9 +35,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = DateTime.Now,
                     EventPaddingStart = TimeSpan.FromMinutes(7),
                     EventPaddingEnd = TimeSpan.Zero,
-                },
-                clashes: []
-            );
+                });
 
             Assert.True(booking.HasPadding(date));
         }
@@ -55,9 +52,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = new DateTime(date, new TimeOnly(15, 55)),
                     EventPaddingStart = TimeSpan.Zero,
                     EventPaddingEnd = TimeSpan.FromMinutes(35),
-                },
-                clashes: []
-            );
+                });
 
             Assert.True(booking.HasPadding(date));
         }
@@ -74,9 +69,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = new DateTime(date, new TimeOnly(20, 00)),
                     EventPaddingStart = TimeSpan.FromMinutes(76),
                     EventPaddingEnd = TimeSpan.FromMinutes(35),
-                },
-                clashes: []
-            );
+                });
 
             Assert.True(booking.HasPadding(date));
         }
@@ -94,9 +87,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
                     EventPaddingStart = TimeSpan.FromMinutes(76),
                     EventPaddingEnd = TimeSpan.FromMinutes(35),
-                },
-                clashes: []
-            );
+                });
 
             Assert.True(booking.HasPadding(startDate));
             Assert.True(booking.HasPadding(endDate));
@@ -113,9 +104,7 @@ namespace Admin.Tests.Data.Events
                 booking: new EventBooking
                 {
                     StartTime = dateTime
-                },
-                clashes: []
-                );
+                });
 
 
             // 3 hours and 45 mins
@@ -136,9 +125,7 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = dateTime,
                     EventPaddingStart = TimeSpan.FromMinutes(50)
-                },
-                clashes: []
-                );
+                });
 
             // 2h 35m (- 50 mins) => 2h 35m (1h 45m)
             var expectedUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * (2 + (35f / 60f)));
@@ -159,9 +146,7 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45)
-                },
-                clashes: []
-                );
+                });
 
 
             // 3h 45m.
@@ -183,9 +168,7 @@ namespace Admin.Tests.Data.Events
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45),
                     EventPaddingStart = new TimeSpan(0, 15, 0)
-                },
-                clashes: []
-                );
+                });
 
 
             var expectedHeightUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * 3.75);
@@ -207,12 +190,10 @@ namespace Admin.Tests.Data.Events
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(7).AddMinutes(15),
                     EventPaddingEnd = new TimeSpan(0, 30, 0)
-                },
-                clashes: []
-                );
+                });
 
 
-            var expectedHeightUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * 7.25);   
+            var expectedHeightUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * 7.25);
             var expectedHeightPadded = (int)((EventLayoutConsts.CellHeight * 2) * 7.75);
 
             Assert.Equal(expectedHeightUnpadded, booking.HeightPx(date));
@@ -223,61 +204,11 @@ namespace Admin.Tests.Data.Events
         public void Event_LTR_NoClash()
         {
             var booking = new PositionedEventBooking(
-                booking: new EventBooking(),
-                clashes: []
-                );
+                booking: new EventBooking());
 
-            // Only fill 85% of the width so there is place to still click.
-            Assert.Equal(85, booking.WidthPc(DateOnly.MaxValue));
+            // Only fill EventLayoutConsts.EventsWidthPc of the width so there is place to still click.
+            Assert.Equal(EventLayoutConsts.EventsWidthPc, booking.WidthPc(DateOnly.MaxValue));
             Assert.Equal(0, booking.LeftPc(DateOnly.MaxValue));
-        }
-
-        [Fact]
-        public void Event_LTR_PosStart()
-        {
-            var date = DateOnly.Parse("2024-07-06");
-
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
-                {
-                    StartTime = new DateTime(date, new TimeOnly(10, 15)),
-                    EndTime = new DateTime(date, new TimeOnly(10, 45)),
-                },
-                clashes: new Dictionary<DateOnly, EventClash> {
-                    { date, new EventClash { Position = 0, Clashes = 3 } }
-                }
-                );
-
-            // 3 clashes = 4 conc events.
-            // Only fill 85% of the width so there is place to still click.
-            var expectedWidthPc = (int)(85f / 4f);
-
-            Assert.Equal(expectedWidthPc, booking.WidthPc(date));
-            Assert.Equal(0, booking.LeftPc(date));
-        }
-
-        [Fact]
-        public void Event_LTR_PosNotStart()
-        {
-            var date = DateOnly.Parse("2024-07-06");
-
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
-                {
-                    StartTime = new DateTime(date, new TimeOnly(10, 15)),
-                    EndTime = new DateTime(date, new TimeOnly(10, 45)),
-                },
-                clashes: new Dictionary<DateOnly, EventClash> {
-                    { date, new EventClash { Position = 7, Clashes = 7 } }
-                }
-                );
-
-            // 7 clashes = 8 conc events.
-            // Only fill 85% of the width so there is place to still click.
-            var expectedWidthPc = (int)(85f / 8f);
-
-            Assert.Equal(expectedWidthPc, booking.WidthPc(date));
-            Assert.Equal(expectedWidthPc * 7, booking.LeftPc(date));
         }
 
         [Fact]
@@ -293,9 +224,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
                     EventPaddingStart = TimeSpan.FromMinutes(120),
                     EventPaddingEnd = TimeSpan.FromMinutes(240),
-                },
-                clashes: []
-            );
+                });
 
             Assert.Equal(0, booking.TopPx(startDate, true));
             Assert.NotEqual(0, booking.TopPx(startDate, false));
@@ -320,9 +249,7 @@ namespace Admin.Tests.Data.Events
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
                     EventPaddingStart = TimeSpan.FromMinutes(120),
                     EventPaddingEnd = TimeSpan.FromMinutes(240),
-                },
-                clashes: []
-            );
+                });
 
             // A full height day starts at 00:00 and ends at 23:59
             var fullHeight = (int)((EventLayoutConsts.CellHeight * 2) * new TimeOnly(23, 59).ToTimeSpan().TotalHours);
@@ -335,6 +262,106 @@ namespace Admin.Tests.Data.Events
 
             Assert.Equal(fullHeight, booking.HeightPx(endDate, true));
             Assert.NotEqual(fullHeight, booking.HeightPx(endDate, false));
+        }
+
+        [Fact]
+        public void Event_LTR_Pos_AddClash()
+        {
+            var date = DateOnly.Parse("2024-07-06");
+
+            var booking = new PositionedEventBooking(
+                booking: new EventBooking
+                {
+                    StartTime = new DateTime(date, new TimeOnly(10, 15)),
+                    EndTime = new DateTime(date, new TimeOnly(10, 45)),
+                }
+                );
+
+            booking.AddClash(date, 7, 7);
+            booking.AddClash(date.AddDays(1), 0, 3);
+
+            // 7 clashes = 8 conc events.
+            // Only fill EventLayoutConsts.EventsWidthPc% of the width so there is place to still click.
+            var expectedWidthPc = (int)(EventLayoutConsts.EventsWidthPc / 8f);
+            Assert.Equal(expectedWidthPc, booking.WidthPc(date));
+            Assert.Equal(expectedWidthPc * 7, booking.LeftPc(date));
+
+            expectedWidthPc = (int)(EventLayoutConsts.EventsWidthPc / 4f);
+            Assert.Equal(expectedWidthPc, booking.WidthPc(date.AddDays(1)));
+            Assert.Equal(0, booking.LeftPc(date.AddDays(1)));
+        }
+
+        [Fact]
+        public void Event_LTR_Pos_AddUnkownClash()
+        {
+            var date = DateOnly.Parse("2024-07-06");
+
+            var booking = new PositionedEventBooking(
+                booking: new EventBooking
+                {
+                    StartTime = new DateTime(date, new TimeOnly(10, 15)),
+                    EndTime = new DateTime(date, new TimeOnly(10, 45)),
+                }
+                );
+
+            Assert.Equal(EventLayoutConsts.EventsWidthPc, booking.WidthPc(date));
+            
+            booking.AddClash(date);
+
+            Assert.True(EventLayoutConsts.EventsWidthPc > booking.WidthPc(date));
+        }
+
+        [Fact]
+        public void Event_RequestWrongDay()
+        {
+            var date = new DateOnly(2024, 7, 6);
+
+            var booking = new PositionedEventBooking(
+                booking: new EventBooking
+                {
+                    StartTime = new DateTime(date, new TimeOnly(10, 15)),
+                    EndTime = new DateTime(date, new TimeOnly(10, 45)),
+                }
+                );
+
+            Assert.Equal(0, booking.TopPx(date.AddDays(1)));
+            Assert.Equal(0, booking.TopPx(date.AddDays(-1)));
+
+            Assert.Equal(0, booking.HeightPx(date.AddDays(1)));
+            Assert.Equal(0, booking.HeightPx(date.AddDays(-1)));
+            Assert.NotEqual(0, booking.HeightPx(date));
+        }
+
+        [Fact]
+        public void Event_GetStart_Padding()
+        {
+            var date = new DateOnly(2024, 7, 6);
+            var booking = new PositionedEventBooking(
+            booking: new EventBooking
+            {
+                StartTime = new DateTime(date, new TimeOnly(0, 0)),
+                EndTime = new DateTime(date, new TimeOnly(10, 45)),
+                EventPaddingStart = new TimeSpan(0, 15, 0)
+            });
+
+            Assert.Equal(date, booking.GetStartDate(false));
+            Assert.Equal(date.AddDays(-1), booking.GetStartDate(true));
+        }
+
+        [Fact]
+        public void Event_GetEnd_Padding()
+        {
+            var date = new DateOnly(2024, 7, 6);
+            var booking = new PositionedEventBooking(
+            booking: new EventBooking
+            {
+                StartTime = new DateTime(date, new TimeOnly(0, 0)),
+                EndTime = new DateTime(date, new TimeOnly(22, 45)),
+                EventPaddingEnd = new TimeSpan(3, 15, 0)
+            });
+
+            Assert.Equal(date, booking.GetEndDate(false));
+            Assert.Equal(date.AddDays(1), booking.GetEndDate(true));
         }
     }
 }

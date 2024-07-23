@@ -6,47 +6,67 @@ namespace Admin.Data.Events
     {
         public EventBooking Event { get; set; }
 
-        private readonly double CellHeightHour = EventLayoutConsts.CellHeight * 2f; // Each cell is 30 minutes
-        private double CellHeightMin => CellHeightHour / 60f;
-
         /// <summary>
         /// Contains clash information for each date of the event.
         /// As events can span across multiple days, it is possible to have different
         /// clashes each day
         /// </summary>
-        private Dictionary<DateOnly, EventClash> ClashDict;
+        private Dictionary<DateOnly, EventClash> ClashDict = [];
 
-        public PositionedEventBooking(EventBooking booking, Dictionary<DateOnly, EventClash> clashes)
+        public PositionedEventBooking(EventBooking booking)
         {
             Event = booking;
-            ClashDict = clashes;
         }
 
-        private TimeOnly GetStartTime(DateOnly date, bool padded)
+        public DateOnly GetStartDate(bool padded = false)
+        {
+            var startDate = padded ? Event.StartTime.Subtract(Event.EventPaddingStart) : Event.StartTime;
+            return DateOnly.FromDateTime(startDate);
+        }
+
+        public DateOnly GetEndDate(bool padded = false)
+        {
+            var end = padded ? Event.EndTime.Add(Event.EventPaddingEnd) : Event.EndTime;
+            return DateOnly.FromDateTime(end);
+        }
+
+        protected internal TimeOnly GetStartTime(DateOnly date, bool padded)
         {
             var start = padded ? Event.StartTime.Subtract(Event.EventPaddingStart) : Event.StartTime;
+            var startDate = DateOnly.FromDateTime(start);
 
-            if (DateOnly.FromDateTime(start) != date)
+
+            if (startDate == date)
             {
+                return TimeOnly.FromDateTime(start);
+            }
+            else
+            {
+                // This includes both days within the event and outside the event
+                return new TimeOnly(0, 0);
+            }
+        }
+
+        protected internal TimeOnly GetEndTime(DateOnly date, bool padded)
+        {
+            var end = padded ? Event.EndTime.Add(Event.EventPaddingEnd) : Event.EndTime;
+            var endDate = DateOnly.FromDateTime(end);
+
+            var start = padded ? Event.StartTime.Subtract(Event.EventPaddingStart) : Event.StartTime;
+            var startDate = DateOnly.FromDateTime(start);
+
+            if (date == endDate)
+            {
+                return TimeOnly.FromDateTime(end);
+            }
+            else if (date < startDate || date > endDate)
+            {
+
                 return new TimeOnly(0, 0);
             }
             else
             {
-                return TimeOnly.FromDateTime(start);
-            }
-        }
-
-        private TimeOnly GetEndTime(DateOnly date, bool padded)
-        {
-            var end = padded ? Event.EndTime.Add(Event.EventPaddingEnd) : Event.EndTime;
-
-            if (DateOnly.FromDateTime(end) != date)
-            {
                 return new TimeOnly(23, 59, 59);
-            }
-            else
-            {
-                return TimeOnly.FromDateTime(end);
             }
         }
 
@@ -62,32 +82,33 @@ namespace Admin.Data.Events
         {
             var start = GetStartTime(date, padded);
 
-            int top = (int)((start.Hour * CellHeightHour) + (start.Minute * CellHeightMin));
+            int top = (int)(start.ToTimeSpan().TotalMinutes * EventLayoutConsts.CellHeightMin);
 
             return top;
         }
 
         public int HeightPx(DateOnly date, bool padded = false) =>
-            (int)(GetDurationMins(date, padded) * CellHeightMin);
+            (int)(GetDurationMins(date, padded) * EventLayoutConsts.CellHeightMin);
 
         public int WidthPc(DateOnly date)
         {
             if (ClashDict.TryGetValue(date, out var eventClash))
             {
-                return (int)(85f / (eventClash.Clashes + 1f));
+                return (int)(EventLayoutConsts.EventsWidthPc / (eventClash.Clashes + 1f));
             }
             else
             {
-                return 85;
+                return EventLayoutConsts.EventsWidthPc;
             }
         }
 
         public int LeftPc(DateOnly date)
         {
-            if(ClashDict.TryGetValue(date, out var eventClash))
+            if (ClashDict.TryGetValue(date, out var eventClash))
             {
                 return WidthPc(date) * eventClash.Position;
-            } else
+            }
+            else
             {
                 return 0;
             }
@@ -110,6 +131,25 @@ namespace Admin.Data.Events
             {
                 return false;
             }
+        }
+
+        public void AddClash(DateOnly date, int position, int clashes)
+        {
+            ClashDict[date] = new EventClash
+            {
+                Position = position,
+                Clashes = clashes
+            };
+        }
+
+        public void AddClash(DateOnly date)
+        {
+            ClashDict.TryGetValue(date, out var clash);
+            clash ??= new EventClash();
+
+            clash.Clashes++;
+
+            ClashDict[date] = clash;
         }
     }
 }

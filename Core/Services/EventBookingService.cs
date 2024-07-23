@@ -1,16 +1,13 @@
 ﻿using Core.Dto;
 using Core.Interfaces;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Core.Services
 {
     public class EventBookingService : IEventBookingDataService
     {
-
-        // TODO this will need changing to load between some dates
-        public Task<List<EventBooking>> GetAllEntries()
+        public Task<List<EventBooking>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
         {
-            DateTime date = DateTime.Now;
+            DateTime date = new DateTime(2024, 7, 15, 12, 0, 0);
 
             return Task.FromResult(new List<EventBooking>
             {
@@ -40,7 +37,7 @@ namespace Core.Services
                     EventPaddingStart = TimeSpan.FromMinutes(18),
                     Location = "Studio"
                 }
-            });
+            }.ToList());
         }
     }
 }

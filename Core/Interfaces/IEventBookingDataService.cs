@@ -2,7 +2,10 @@
 
 namespace Core.Interfaces
 {
-    public interface IEventBookingDataService : IBaseDataService<EventBooking>
+    public interface IEventBookingDataService
     {
+
+        public Task<List<EventBooking>> GetBookingsBetweenDates(DateOnly start, DateOnly end);
+
     }
 }
