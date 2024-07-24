@@ -1,4 +1,8 @@
-﻿<div class="scheduler-outer-container">
+﻿@using Admin.Data.Events
+
+@inject EventViewService EventService
+
+<div class="scheduler-outer-container">
     <div class="flex-row-center header-row">
         <div class="left-indent" />
         <div class="day-date-header">
@@ -65,25 +69,25 @@
                         </table>
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))" Events="@Events" />
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today))" Events="@Events" />
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(11)))" Events="@Events" />
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(2)))" Events="@Events" />
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(3)))" Events="@Events" />
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(4)))" Events="@Events"  />
                     </td>
                     <td>
-                            <SchedulerInnerDayTableContents />
+                        <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(5)))" Events="@Events" />
                     </td>
 
                 </tr>
@@ -93,5 +97,10 @@
 </div>
 
 @code {
+    private List<PositionedEventBooking> Events = [];
 
+    protected override async Task OnInitializedAsync()
+    {
+        Events = await EventService.GetEvents(DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today.AddDays(3)));
+    }
 }

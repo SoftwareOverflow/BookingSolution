@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Dto;
+using Core.Interfaces;
 
 namespace Admin.Data.Events
 {
@@ -6,6 +7,7 @@ namespace Admin.Data.Events
     {
         public async Task<List<PositionedEventBooking>> GetEvents(DateOnly start, DateOnly end)
         {
+            // TODO error handling
             var events = await dataService.GetBookingsBetweenDates(start, end);
 
             return events.GetPositionedEventBookings();

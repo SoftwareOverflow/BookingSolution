@@ -12,11 +12,19 @@
     background-color: aquamarine;
 }
 
-.event {
-    width: 80%;
-    background-color: blueviolet;
-    border: 1px solid red;
-    top: var(--event-start);
+.event-container {
+    top: var(--event-top);
     height: var(--event-height);
+    left: var(--event-left);
+    width: var(--event-width);
     position: absolute;
+    padding-right: 4px;
+}
+
+.event {
+    background-color: cornflowerblue;
+    border: 1px solid blue;
+    width: 100%;
+    height:100%;
+    text-overflow: ellipsis;
 }

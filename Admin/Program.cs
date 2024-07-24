@@ -1,4 +1,5 @@
 using Admin.Components;
+using Admin.Data.Events;
 using Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddApplicationLayers();
+builder.Services.AddScoped<EventViewService>();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();

@@ -4,7 +4,7 @@
     {
         public readonly static int CellHeight = 36;
 
-        public readonly static int EventsWidthPc = 85;
+        public readonly static int EventsWidthPc = 90;
 
         private readonly static double CellHeightHour = EventLayoutConsts.CellHeight * 2f; // Each cell is 30 minutes
         public static double CellHeightMin => CellHeightHour / 60f;

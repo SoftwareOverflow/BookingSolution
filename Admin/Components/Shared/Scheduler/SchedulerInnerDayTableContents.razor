@@ -1,4 +1,5 @@
-﻿@using Core.Dto;
+﻿@using Admin.Data.Events
+@using Core.Dto;
 
 <div class="day-col-container">
     <table class="scheduler-inner-table">
@@ -11,13 +12,29 @@
         </tbody>
     </table>
 
+    @foreach (var item in Events)
+    {
+        if (item.HeightPx(Date, true) == 0)
+        {
+            continue;
+        }
 
-
-    <div class="event" style="--event-start: 72px; --event-height: 72px">
-    </div>
+        <div class="event-container" style="--event-top: @(item.TopPx(Date, true))px;
+                --event-height: @(item.HeightPx(Date, true))px;
+                --event-left: @(item.LeftPc(Date))%;
+                --event-width: @(item.WidthPc(Date))%;">
+            <div class="event">
+                <p>@item.Event.Name</p>
+                <p>@item.Event.Location</p>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
+    [Parameter, EditorRequired]
+    public DateOnly Date { get; set; }
+
     [Parameter]
-    public List<EventBooking> Events { get; set; } = new List<EventBooking>();
+    public List<PositionedEventBooking> Events { get; set; } = new List<PositionedEventBooking>();
 }

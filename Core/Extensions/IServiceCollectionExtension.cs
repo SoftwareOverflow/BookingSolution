@@ -1,4 +1,6 @@
-﻿using Data.Extensions;
+﻿using Core.Interfaces;
+using Core.Services;
+using Data.Extensions;
 using LocalNetCoreAuth.IndividualAccounts.Components.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +12,8 @@ namespace Core.Extensions
         {
             services.AddAuthenticationLayer();
             services.AddPersistanceLayer();
+
+            services.AddTransient<IEventBookingDataService, EventBookingService>();
         }
     }
 }
