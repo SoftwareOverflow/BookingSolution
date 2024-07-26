@@ -1,5 +1,5 @@
 ﻿.top-bar {
-    height: 55px;
+    height: 100%;
     display: flex;
     background-color: rebeccapurple;
     padding: 10px;
@@ -8,10 +8,8 @@
 }
 
 .top-bar .material-icons {
-    width: 55px;
-    height: 55px;
     font-size: 32px;
-    padding: 10px;
+    flex-grow: 1;
 }
 
 .logo {
@@ -22,4 +20,5 @@
 
 .nav-link {
     margin: 0px 10px;
+    height: 100%;
 }

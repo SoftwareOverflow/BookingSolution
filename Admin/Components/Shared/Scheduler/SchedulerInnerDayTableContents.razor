@@ -23,9 +23,12 @@
                 --event-height: @(item.HeightPx(Date, true))px;
                 --event-left: @(item.LeftPc(Date))%;
                 --event-width: @(item.WidthPc(Date))%;">
-            <div class="event">
-                <p>@item.Event.Name</p>
-                <p>@item.Event.Location</p>
+            <div class="event-padding">
+                <div class="event" style="--event-top-unpadded: @(item.GetRelativeTopPx(Date))px;
+                    --event-height-unpadded: @(item.GetRelativeHeightPc(Date))%;">
+                    <p>@item.Event.Name</p>
+                    <p>@item.Event.Location</p>
+                </div>
             </div>
         </div>
     }

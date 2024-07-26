@@ -70,12 +70,12 @@ namespace Admin.Data.Events
             }
         }
 
-        private int GetDurationMins(DateOnly date, bool padded)
+        private double GetDurationMins(DateOnly date, bool padded)
         {
             var start = GetStartTime(date, padded).ToTimeSpan();
             var end = GetEndTime(date, padded).ToTimeSpan();
 
-            return (int)end.Subtract(start).TotalMinutes;
+            return end.Subtract(start).TotalMinutes;
         }
 
         public int TopPx(DateOnly date, bool padded = false)
@@ -150,6 +150,30 @@ namespace Admin.Data.Events
             clash.Clashes++;
 
             ClashDict[date] = clash;
+        }
+
+        /// <summary>
+        /// Returns the top in px of the actual event compared to the padding
+        /// </summary>
+        public int GetRelativeTopPx(DateOnly date)
+            => TopPx(date, false) - TopPx(date, true);
+
+        /// <summary>
+        /// Returns the height in % of the event without padding, to the event with padding. 
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public int GetRelativeHeightPc(DateOnly date){
+
+            if(GetEndTime(date, false) >= new TimeOnly(23, 59))
+            {
+                return 100;
+            }
+
+            double totalHeight = GetDurationMins(date, true);
+            double unpadded = GetDurationMins(date, false);
+
+            return (int)((unpadded * 100f / (totalHeight * 100f)) * 100f);
         }
     }
 }

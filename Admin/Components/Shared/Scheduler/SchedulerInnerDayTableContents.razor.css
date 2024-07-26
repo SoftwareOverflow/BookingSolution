@@ -1,5 +1,6 @@
 ﻿.day-col-container {
     position: relative;
+    overflow-y: hidden;
 }
 
 .cell-half-hour {
@@ -19,12 +20,24 @@
     width: var(--event-width);
     position: absolute;
     padding-right: 4px;
+    font-size: 12px;
+}
+
+.event-padding {
+    height: 100%;
+    background-color: rgba(100, 149, 237, 0.25);
+    border: 1px dotted blue;
+    border-radius: 4px;
+    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .event {
     background-color: cornflowerblue;
-    border: 1px solid blue;
+    top: var(--event-top-unpadded);
     width: 100%;
-    height:100%;
+    height: var(--event-height-unpadded);
     text-overflow: ellipsis;
+    position: relative;
 }

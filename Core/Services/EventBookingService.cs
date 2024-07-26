@@ -13,28 +13,32 @@ namespace Core.Services
                 //region day1
                 new EventBooking
                 {
-                    Name = "This is event #1 with my really long name",
+                    Name = "1, Atrosciously Long Name",
                     Location = "Studio",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
                 },
                 new EventBooking
                 {
-                    Name = "2",
-                    StartTime = new DateTime(day1, new TimeOnly(1, 0)),
+                    Name = "2, Pad Start",
+                    StartTime = new DateTime(day1, new TimeOnly(1, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
+                    EventPaddingStart = TimeSpan.FromMinutes(15)
                 },
                 new EventBooking
                 {
-                    Name = "3",
+                    Name = "3, Pad End",
                     StartTime = new DateTime(day1, new TimeOnly(1, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 0)),
+                    EventPaddingEnd = TimeSpan.FromMinutes(30)
                 },
                 new EventBooking
                 {
-                    Name = "4",
+                    Name = "4, Pad Both",
                     StartTime = new DateTime(day1, new TimeOnly(2, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 30)),
+                    EventPaddingStart = TimeSpan.FromMinutes(10),
+                    EventPaddingEnd = TimeSpan.FromMinutes(30)
                 },
                 new EventBooking
                 {

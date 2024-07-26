@@ -5,7 +5,7 @@ body {
 }
 
     body > header {
-        height: 55px;
+        height: 75px;
     }
 
     body > main {
@@ -40,6 +40,13 @@ h1:focus {
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
+}
+
+.flex-column-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .flex-row-center {
