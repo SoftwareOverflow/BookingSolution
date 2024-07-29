@@ -30,7 +30,7 @@
 
     private Tuple<DateTime, DateTime> DateRange;
 
-    private List<PositionedEventBooking> Events;
+    private List<PositionedEventBooking> Events = [];
 
     protected override async Task OnParametersSetAsync()
     {
@@ -44,10 +44,9 @@
         Date = date;
 
         DateRange = DateHelpers.GetDateRange(layoutType, date);
-
         Events = await LoadEvents();
 
-        // TODO might need StateHasChanged();
+        StateHasChanged();
     }
 
     private async Task<List<PositionedEventBooking>> LoadEvents()

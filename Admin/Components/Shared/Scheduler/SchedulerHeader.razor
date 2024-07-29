@@ -15,7 +15,7 @@
         </div>
         <div class="flex-row-center date-string-dropdown">
             <button class="date-button">
-                <MudDatePicker Mask="@(new DateMask(""))" @bind-Date="Date" ShowToolbar="false" />
+                <MudDatePicker Mask="@(new DateMask(""))" @bind-Date="BackingDate" ShowToolbar="false" />
                 <div class="overlay flex-column-center">
                     <span class="">@DateLabel</span>
                 </div>
@@ -53,6 +53,23 @@
 </div>
 
 @code {
+    private DateTime? BackingDate
+    {
+        get
+        {
+            return this.Date;
+        }
+
+        set
+        {
+            if (value != null)
+            {
+                this.Date = value;
+                OnCalendarStateChange(LayoutType, value.Value);
+            }
+        }
+    }
+
     [Parameter, EditorRequired]
     public DateTime? Date { get; set; } = default;
 
@@ -67,7 +84,7 @@
 
     private void GoToToday()
     {
-        
+
     }
 
     // TODO write tests using bUnit.
