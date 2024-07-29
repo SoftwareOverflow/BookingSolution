@@ -34,24 +34,24 @@ namespace Admin.Tests.Data.Events
                             Name = "Event #2 - Example",
                             StartTime = new DateTime(date, new TimeOnly(2, 30)),
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(0),
-                            EventPaddingStart = TimeSpan.FromMinutes(0),
+                            PaddingEnd = TimeSpan.FromMinutes(0),
+                            PaddingStart = TimeSpan.FromMinutes(0),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
                             StartTime = new DateTime(date, new TimeOnly(5, 30)),
                             EndTime = new DateTime(date, new TimeOnly(9, 0)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(0),
-                            EventPaddingStart = TimeSpan.FromMinutes(0),
+                            PaddingEnd = TimeSpan.FromMinutes(0),
+                            PaddingStart = TimeSpan.FromMinutes(0),
                             Location = "Studio"
                         },
                         new() {
                             Name = "Event #1",
                             StartTime = new DateTime(date, new TimeOnly(0, 0)),
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(0),
-                            EventPaddingStart = TimeSpan.FromMinutes(0),
+                            PaddingEnd = TimeSpan.FromMinutes(0),
+                            PaddingStart = TimeSpan.FromMinutes(0),
                             Location = "Home"
                         },
                     };
@@ -91,24 +91,24 @@ namespace Admin.Tests.Data.Events
                             Name = "Event #1",
                             StartTime = new DateTime(date, new TimeOnly(1, 30)),
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(0),
-                            EventPaddingStart = TimeSpan.FromMinutes(0),
+                            PaddingEnd = TimeSpan.FromMinutes(0),
+                            PaddingStart = TimeSpan.FromMinutes(0),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #2 - Example",
                             StartTime = new DateTime(date, new TimeOnly(2, 30)),
                             EndTime = new DateTime(date, new TimeOnly(5, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(0),
-                            EventPaddingStart = TimeSpan.FromMinutes(0),
+                            PaddingEnd = TimeSpan.FromMinutes(0),
+                            PaddingStart = TimeSpan.FromMinutes(0),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
                             StartTime = new DateTime(date, new TimeOnly(4, 0)),
                             EndTime = new DateTime(date, new TimeOnly(7, 0)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(0),
-                            EventPaddingStart = TimeSpan.FromMinutes(0),
+                            PaddingEnd = TimeSpan.FromMinutes(0),
+                            PaddingStart = TimeSpan.FromMinutes(0),
                             Location = "Studio"
                         }
                     };
@@ -154,24 +154,24 @@ namespace Admin.Tests.Data.Events
                             Name = "Event #1",
                             StartTime = new DateTime(date, new TimeOnly(1, 00)),
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(45),
-                            EventPaddingStart = TimeSpan.FromMinutes(45),
+                            PaddingEnd = TimeSpan.FromMinutes(45),
+                            PaddingStart = TimeSpan.FromMinutes(45),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #2 - Example",
                             StartTime = new DateTime(date, new TimeOnly(8, 0)),
                             EndTime = new DateTime(date, new TimeOnly(10, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(15),
-                            EventPaddingStart = TimeSpan.FromMinutes(15),
+                            PaddingEnd = TimeSpan.FromMinutes(15),
+                            PaddingStart = TimeSpan.FromMinutes(15),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
                             StartTime = new DateTime(date, new TimeOnly(17, 0)),
                             EndTime = new DateTime(date, new TimeOnly(18, 0)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(180),
-                            EventPaddingStart = TimeSpan.FromMinutes(60),
+                            PaddingEnd = TimeSpan.FromMinutes(180),
+                            PaddingStart = TimeSpan.FromMinutes(60),
                             Location = "Studio"
                         }
                     };
@@ -211,24 +211,24 @@ namespace Admin.Tests.Data.Events
                             Name = "Event #1",
                             StartTime = new DateTime(date, new TimeOnly(1, 00)),
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(45),
-                            EventPaddingStart = TimeSpan.FromMinutes(45),
+                            PaddingEnd = TimeSpan.FromMinutes(45),
+                            PaddingStart = TimeSpan.FromMinutes(45),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #2 - Example",
                             StartTime = new DateTime(date, new TimeOnly(2, 0)),
                             EndTime = new DateTime(date, new TimeOnly(5, 30)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(15),
-                            EventPaddingStart = TimeSpan.FromMinutes(30),
+                            PaddingEnd = TimeSpan.FromMinutes(15),
+                            PaddingStart = TimeSpan.FromMinutes(30),
                             Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
                             StartTime = new DateTime(date, new TimeOnly(6, 30)),
                             EndTime = new DateTime(date, new TimeOnly(8, 0)),
-                            EventPaddingEnd = TimeSpan.FromMinutes(60),
-                            EventPaddingStart = TimeSpan.FromMinutes(60),
+                            PaddingEnd = TimeSpan.FromMinutes(60),
+                            PaddingStart = TimeSpan.FromMinutes(60),
                             Location = "Studio"
                         }
                     };
@@ -326,8 +326,8 @@ namespace Admin.Tests.Data.Events
                     Name = "9",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(22, 0)),
                     EndTime = new DateTime(day1.AddDays(3), new TimeOnly(1, 30)),
-                    EventPaddingStart = TimeSpan.FromMinutes(180),
-                    EventPaddingEnd = TimeSpan.FromMinutes(100)
+                    PaddingStart = TimeSpan.FromMinutes(180),
+                    PaddingEnd = TimeSpan.FromMinutes(100)
                 },
                 new EventBooking
                 {

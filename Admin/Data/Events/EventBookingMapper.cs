@@ -8,7 +8,7 @@ namespace Admin.Data.Events
         {
             var result = new List<PositionedEventBooking>();
 
-            var positionedEvents = events.OrderBy(x => x.StartTime.Subtract(x.EventPaddingStart)).Select(x => new PositionedEventBooking(x)).ToList();
+            var positionedEvents = events.OrderBy(x => x.StartTime.Subtract(x.PaddingStart)).Select(x => new PositionedEventBooking(x)).ToList();
 
             var minDate = positionedEvents.Min(x => x.GetStartDate(true));
             var maxDate = positionedEvents.Max(x => x.GetEndDate(true));
@@ -118,8 +118,8 @@ namespace Admin.Data.Events
         {
             var result = new Dictionary<DateOnly, EventBooking>();
 
-            var paddedStart = booking.Event.StartTime.Subtract(booking.Event.EventPaddingStart);
-            var paddedEnd = booking.Event.EndTime.Add(booking.Event.EventPaddingEnd);
+            var paddedStart = booking.Event.StartTime.Subtract(booking.Event.PaddingStart);
+            var paddedEnd = booking.Event.EndTime.Add(booking.Event.PaddingEnd);
 
             var startDate = DateOnly.FromDateTime(paddedStart);
             var endDate = DateOnly.FromDateTime(paddedEnd);
@@ -131,8 +131,8 @@ namespace Admin.Data.Events
                 {
                     StartTime = new DateTime(currDate, booking.GetStartTime(currDate, true)),
                     EndTime = new DateTime(currDate, booking.GetEndTime(currDate, true)),
-                    EventPaddingEnd = TimeSpan.Zero,
-                    EventPaddingStart = TimeSpan.Zero,
+                    PaddingEnd = TimeSpan.Zero,
+                    PaddingStart = TimeSpan.Zero,
                 };
 
                 currDate = currDate.AddDays(1);

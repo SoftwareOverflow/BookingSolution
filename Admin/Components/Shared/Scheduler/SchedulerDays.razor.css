@@ -1,9 +1,6 @@
 ﻿.scheduler-outer-container {
     width: 100%;
-}
-
-.header-row {
-    padding-right: 16px;
+    position: relative;
 }
 
 .day-date-header {
@@ -14,7 +11,7 @@
 }
 
 .left-indent {
-    margin-right: 85px;
+    margin-left: 85px;
 }
 
 .scheduler-container {
@@ -37,4 +34,21 @@
 
 .time-label-table {
     width: 85px;
+}
+
+.divider-container {
+    position: absolute;
+    margin-left: 85px;
+    width: calc(100% - 85px);
+    height: 100%;
+    left: 0px;
+    top: 0px;
+}
+
+.divider-overlay {
+    left: calc((100% / (var(--divider-count) + 1)) * (var(--divider-index) + 1));
+    height: 100%;
+    width: 1px;
+    background-color: gray;
+    position: absolute;
 }

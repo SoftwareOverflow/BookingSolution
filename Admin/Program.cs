@@ -1,6 +1,7 @@
 using Admin.Components;
 using Admin.Data.Events;
 using Core.Extensions;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddApplicationLayers();
 builder.Services.AddScoped<EventViewService>();
+
+builder.Services.AddMudServices();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();

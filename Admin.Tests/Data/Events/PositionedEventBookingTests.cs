@@ -17,8 +17,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(date, new TimeOnly(12, 30)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(14, 30)),
-                    EventPaddingStart = TimeSpan.Zero,
-                    EventPaddingEnd = TimeSpan.Zero,
+                    PaddingStart = TimeSpan.Zero,
+                    PaddingEnd = TimeSpan.Zero,
                 });
 
             Assert.False(booking.HasPadding(date));
@@ -33,8 +33,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(date, new TimeOnly(17, 59)).AddMinutes(-45),
                     EndTime = DateTime.Now,
-                    EventPaddingStart = TimeSpan.FromMinutes(7),
-                    EventPaddingEnd = TimeSpan.Zero,
+                    PaddingStart = TimeSpan.FromMinutes(7),
+                    PaddingEnd = TimeSpan.Zero,
                 });
 
             Assert.True(booking.HasPadding(date));
@@ -50,8 +50,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(date, new TimeOnly(15, 25)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(15, 55)),
-                    EventPaddingStart = TimeSpan.Zero,
-                    EventPaddingEnd = TimeSpan.FromMinutes(35),
+                    PaddingStart = TimeSpan.Zero,
+                    PaddingEnd = TimeSpan.FromMinutes(35),
                 });
 
             Assert.True(booking.HasPadding(date));
@@ -67,8 +67,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(date, new TimeOnly(17, 30)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(20, 00)),
-                    EventPaddingStart = TimeSpan.FromMinutes(76),
-                    EventPaddingEnd = TimeSpan.FromMinutes(35),
+                    PaddingStart = TimeSpan.FromMinutes(76),
+                    PaddingEnd = TimeSpan.FromMinutes(35),
                 });
 
             Assert.True(booking.HasPadding(date));
@@ -85,8 +85,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(17, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
-                    EventPaddingStart = TimeSpan.FromMinutes(76),
-                    EventPaddingEnd = TimeSpan.FromMinutes(35),
+                    PaddingStart = TimeSpan.FromMinutes(76),
+                    PaddingEnd = TimeSpan.FromMinutes(35),
                 });
 
             Assert.True(booking.HasPadding(startDate));
@@ -124,7 +124,7 @@ namespace Admin.Tests.Data.Events
                 booking: new EventBooking
                 {
                     StartTime = dateTime,
-                    EventPaddingStart = TimeSpan.FromMinutes(50)
+                    PaddingStart = TimeSpan.FromMinutes(50)
                 });
 
             // 2h 35m (- 50 mins) => 2h 35m (1h 45m)
@@ -167,7 +167,7 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45),
-                    EventPaddingStart = new TimeSpan(0, 15, 0)
+                    PaddingStart = new TimeSpan(0, 15, 0)
                 });
 
 
@@ -189,7 +189,7 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(7).AddMinutes(15),
-                    EventPaddingEnd = new TimeSpan(0, 30, 0)
+                    PaddingEnd = new TimeSpan(0, 30, 0)
                 });
 
 
@@ -222,8 +222,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(1, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
-                    EventPaddingStart = TimeSpan.FromMinutes(120),
-                    EventPaddingEnd = TimeSpan.FromMinutes(240),
+                    PaddingStart = TimeSpan.FromMinutes(120),
+                    PaddingEnd = TimeSpan.FromMinutes(240),
                 });
 
             Assert.Equal(0, booking.TopPx(startDate, true));
@@ -247,8 +247,8 @@ namespace Admin.Tests.Data.Events
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(1, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
-                    EventPaddingStart = TimeSpan.FromMinutes(120),
-                    EventPaddingEnd = TimeSpan.FromMinutes(240),
+                    PaddingStart = TimeSpan.FromMinutes(120),
+                    PaddingEnd = TimeSpan.FromMinutes(240),
                 });
 
             // A full height day starts at 00:00 and ends at 23:59
@@ -341,7 +341,7 @@ namespace Admin.Tests.Data.Events
             {
                 StartTime = new DateTime(date, new TimeOnly(0, 0)),
                 EndTime = new DateTime(date, new TimeOnly(10, 45)),
-                EventPaddingStart = new TimeSpan(0, 15, 0)
+                PaddingStart = new TimeSpan(0, 15, 0)
             });
 
             Assert.Equal(date, booking.GetStartDate(false));
@@ -357,7 +357,7 @@ namespace Admin.Tests.Data.Events
             {
                 StartTime = new DateTime(date, new TimeOnly(0, 0)),
                 EndTime = new DateTime(date, new TimeOnly(22, 45)),
-                EventPaddingEnd = new TimeSpan(3, 15, 0)
+                PaddingEnd = new TimeSpan(3, 15, 0)
             });
 
             Assert.Equal(date, booking.GetEndDate(false));

@@ -20,19 +20,19 @@ namespace Admin.Data.Events
 
         public DateOnly GetStartDate(bool padded = false)
         {
-            var startDate = padded ? Event.StartTime.Subtract(Event.EventPaddingStart) : Event.StartTime;
+            var startDate = padded ? Event.StartTime.Subtract(Event.PaddingStart) : Event.StartTime;
             return DateOnly.FromDateTime(startDate);
         }
 
         public DateOnly GetEndDate(bool padded = false)
         {
-            var end = padded ? Event.EndTime.Add(Event.EventPaddingEnd) : Event.EndTime;
+            var end = padded ? Event.EndTime.Add(Event.PaddingEnd) : Event.EndTime;
             return DateOnly.FromDateTime(end);
         }
 
         protected internal TimeOnly GetStartTime(DateOnly date, bool padded)
         {
-            var start = padded ? Event.StartTime.Subtract(Event.EventPaddingStart) : Event.StartTime;
+            var start = padded ? Event.StartTime.Subtract(Event.PaddingStart) : Event.StartTime;
             var startDate = DateOnly.FromDateTime(start);
 
 
@@ -49,10 +49,10 @@ namespace Admin.Data.Events
 
         protected internal TimeOnly GetEndTime(DateOnly date, bool padded)
         {
-            var end = padded ? Event.EndTime.Add(Event.EventPaddingEnd) : Event.EndTime;
+            var end = padded ? Event.EndTime.Add(Event.PaddingEnd) : Event.EndTime;
             var endDate = DateOnly.FromDateTime(end);
 
-            var start = padded ? Event.StartTime.Subtract(Event.EventPaddingStart) : Event.StartTime;
+            var start = padded ? Event.StartTime.Subtract(Event.PaddingStart) : Event.StartTime;
             var startDate = DateOnly.FromDateTime(start);
 
             if (date == endDate)
@@ -116,8 +116,8 @@ namespace Admin.Data.Events
 
         public bool HasPadding(DateOnly date)
         {
-            if (Event.EventPaddingEnd.TotalMinutes == 0 &&
-                Event.EventPaddingStart.TotalMinutes == 0)
+            if (Event.PaddingEnd.TotalMinutes == 0 &&
+                Event.PaddingStart.TotalMinutes == 0)
                 return false;
 
             var startDate = DateOnly.FromDateTime(Event.StartTime);

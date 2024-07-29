@@ -3,10 +3,18 @@ using Core.Interfaces;
 
 namespace Core.Services
 {
-    public class EventBookingService : IEventBookingDataService
+    internal class EventBookingService : IEventBookingDataService
     {
+        /// <summary>
+        /// Get all <see cref="EventBooking"/> objects in a given date range.
+        /// </summary>
+        /// <param name="start">The start date of the range (inclusive)</param>
+        /// <param name="end">The end date of the range (inclusive)</param>
+        /// <returns>Any events which occur in whole or part within the specified range</returns>
         public Task<List<EventBooking>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
         {
+
+
             var day1 = DateOnly.FromDateTime(DateTime.Today);
             var events = new List<EventBooking>
             {
@@ -23,22 +31,22 @@ namespace Core.Services
                     Name = "2, Pad Start",
                     StartTime = new DateTime(day1, new TimeOnly(1, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
-                    EventPaddingStart = TimeSpan.FromMinutes(15)
+                    PaddingStart = TimeSpan.FromMinutes(15)
                 },
                 new EventBooking
                 {
                     Name = "3, Pad End",
                     StartTime = new DateTime(day1, new TimeOnly(1, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 0)),
-                    EventPaddingEnd = TimeSpan.FromMinutes(30)
+                    PaddingEnd = TimeSpan.FromMinutes(30)
                 },
                 new EventBooking
                 {
                     Name = "4, Pad Both",
                     StartTime = new DateTime(day1, new TimeOnly(2, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 30)),
-                    EventPaddingStart = TimeSpan.FromMinutes(10),
-                    EventPaddingEnd = TimeSpan.FromMinutes(30)
+                    PaddingStart = TimeSpan.FromMinutes(10),
+                    PaddingEnd = TimeSpan.FromMinutes(30)
                 },
                 new EventBooking
                 {
@@ -72,8 +80,8 @@ namespace Core.Services
                     Name = "9",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(22, 0)),
                     EndTime = new DateTime(day1.AddDays(3), new TimeOnly(1, 30)),
-                    EventPaddingStart = TimeSpan.FromMinutes(180),
-                    EventPaddingEnd = TimeSpan.FromMinutes(100)
+                    PaddingStart = TimeSpan.FromMinutes(180),
+                    PaddingEnd = TimeSpan.FromMinutes(100)
                 },
                 new EventBooking
                 {
@@ -91,7 +99,12 @@ namespace Core.Services
                 },
             };
 
+            // TODO filter these records
+
             return Task.FromResult(events);
         }
+
+        private DateTime PaddedStart(EventBooking e) => e.StartTime.Subtract(e.PaddingStart); 
+        private DateTime PaddedEnd(EventBooking e) => e.EndTime.Add(e.PaddingEnd); 
     }
 }

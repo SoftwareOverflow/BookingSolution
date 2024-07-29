@@ -2,6 +2,7 @@
 
 body {
     font-family: Roboto, Arial;
+    scrollbar-width: auto;
 }
 
     body > header {
@@ -11,6 +12,10 @@ body {
     body > main {
         padding: 10px 20px;
     }
+
+.active {
+    color: dodgerblue;
+}
 
 h1:focus {
     outline: none;

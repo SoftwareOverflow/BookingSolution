@@ -1,6 +1,6 @@
 ﻿namespace Core.Dto
 {
-    public  record class EventBooking
+    public record class EventBooking
     {
         public string Name { get; set; }
 
@@ -19,11 +19,11 @@
         /// <summary>
         /// Time padding to be added before the event starts
         /// </summary>
-        public TimeSpan EventPaddingStart { get; set; }
+        public TimeSpan PaddingStart { get; set; }
 
         /// <summary>
         /// Time padding to be added after the event finishes
         /// </summary>
-        public TimeSpan EventPaddingEnd { get; set; }
+        public TimeSpan PaddingEnd { get; set; }
     }
 }

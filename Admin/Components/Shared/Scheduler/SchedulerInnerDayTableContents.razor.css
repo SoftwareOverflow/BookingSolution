@@ -1,6 +1,7 @@
 ﻿.day-col-container {
     position: relative;
     overflow-y: hidden;
+    width: 100%;
 }
 
 .cell-half-hour {
@@ -19,7 +20,7 @@
     left: var(--event-left);
     width: var(--event-width);
     position: absolute;
-    padding-right: 4px;
+    padding-left: 4px;
     font-size: 12px;
 }
 

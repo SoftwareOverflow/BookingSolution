@@ -19,21 +19,11 @@
     align-items: center
 }
 
-.date-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .scheduler-view-button {
     padding: 0px 10px;
 }
 
-.scheduler-view-button.active:not(:hover) {
-    color: dodgerblue;
-}
-
-button {
+button ::deep {
     background-color: unset;
     border: unset;
     border-radius: 3px;
@@ -42,7 +32,38 @@ button {
     padding: 5px 10px;
 }
 
-    button:hover {
-        color: navajowhite;
-        background-color: dimgrey;
+button:hover ::deep {
+    color: navajowhite;
+    background-color: dimgrey;
+}
+
+.date-button {
+    padding: 0px;
+    margin: 2px 5px;
+}
+
+.overlay {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: calc(100% - 36px);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+::deep .mud-input {
+    color: currentColor;
+}
+
+::deep .mud-icon-button {
+    color: currentColor;
+}
+
+    ::deep .mud-icon-button:hover {
+        background-color: inherit;
     }
+
+::deep .mud-icon-root.mud-svg-icon {
+    fill: currentColor;
+}

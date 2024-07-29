@@ -1,4 +1,7 @@
-﻿<div class="flex-row-center scheduler-header">
+﻿@using Admin.Data.Events
+@using Admin.Data.Helpers
+
+<div class="flex-row-center scheduler-header">
     <div class="header-left">
         <div>
             <button class="flex-row-center">
@@ -12,35 +15,60 @@
         </div>
         <div class="flex-row-center date-string-dropdown">
             <button class="date-button">
-                <span>
-                    @DateDisplayString
-                </span>
-                <span class="material-icons">keyboard_arrow_down</span>
+                <MudDatePicker Mask="@(new DateMask(""))" @bind-Date="Date" ShowToolbar="false" />
+                <div class="overlay flex-column-center">
+                    <span class="">@DateLabel</span>
+                </div>
             </button>
         </div>
     </div>
     <div class="header-right">
-        <button class="scheduler-view-button">
+        <button class="scheduler-view-button" @onclick="GoToToday">
             Today
         </button>
         <span class="vertical-divider" />
-        <button class="scheduler-view-button">
-            Day
+
+        @foreach (var layoutType in CalendarLayoutType.Types)
+        {
+            var activeClass = (LayoutType == layoutType) ? "active" : "";
+
+            <button class="scheduler-view-button @activeClass" @onclick="@(() => OnCalendarStateChange(layoutType, Date ?? DateTime.Now))">
+                @layoutType.Name
+            </button>
+        }
+
+        @*         <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.Day ? "active" : "")">
+        Day
         </button>
-        <button class="scheduler-view-button active">
-            Week
+        <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.Week ? "active" : "")">
+        Week
         </button>
-        <button class="scheduler-view-button">
-            Work Week
+        <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.WorkWeek ? "active" : "")">
+        Work Week
         </button>
-        <button class="scheduler-view-button">
-            Month
-        </button>
+        <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.Month ? "active" : "")">
+        Month
+        </button> *@
     </div>
 </div>
 
 @code {
     [Parameter, EditorRequired]
-    public string DateDisplayString { get; set; }
+    public DateTime? Date { get; set; } = default;
 
+    [Parameter, EditorRequired]
+    public CalendarLayoutType LayoutType { get; set; } = CalendarLayoutType.Week;
+
+    [Parameter, EditorRequired]
+    public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
+
+
+    private string DateLabel => DateHelpers.GetDateLabel(Date, LayoutType);
+
+    private void GoToToday()
+    {
+        
+    }
+
+    // TODO write tests using bUnit.
 }
