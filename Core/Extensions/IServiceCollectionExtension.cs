@@ -13,7 +13,7 @@ namespace Core.Extensions
             services.AddAuthenticationLayer();
             services.AddPersistanceLayer();
 
-            services.AddTransient<IEventBookingDataService, EventBookingService>();
+            services.AddTransient<IAppointmentDataService, AppointmentService>();
         }
     }
 }

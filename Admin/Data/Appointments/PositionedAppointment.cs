@@ -2,18 +2,18 @@
 
 namespace Admin.Data.Events
 {
-    public class PositionedEventBooking
+    public class PositionedAppointment
     {
-        public EventBooking Event { get; set; }
+        public Appointment Event { get; set; }
 
         /// <summary>
         /// Contains clash information for each date of the event.
         /// As events can span across multiple days, it is possible to have different
         /// clashes each day
         /// </summary>
-        private Dictionary<DateOnly, EventClash> ClashDict = [];
+        private Dictionary<DateOnly, AppointmentClash> ClashDict = [];
 
-        public PositionedEventBooking(EventBooking booking)
+        public PositionedAppointment(Appointment booking)
         {
             Event = booking;
         }
@@ -82,23 +82,23 @@ namespace Admin.Data.Events
         {
             var start = GetStartTime(date, padded);
 
-            int top = (int)(start.ToTimeSpan().TotalMinutes * EventLayoutConsts.CellHeightMin);
+            int top = (int)(start.ToTimeSpan().TotalMinutes * AppointmentLayoutConsts.CellHeightMin);
 
             return top;
         }
 
         public int HeightPx(DateOnly date, bool padded = false) =>
-            (int)(GetDurationMins(date, padded) * EventLayoutConsts.CellHeightMin);
+            (int)(GetDurationMins(date, padded) * AppointmentLayoutConsts.CellHeightMin);
 
         public int WidthPc(DateOnly date)
         {
             if (ClashDict.TryGetValue(date, out var eventClash))
             {
-                return (int)(EventLayoutConsts.EventsWidthPc / (eventClash.Clashes + 1f));
+                return (int)(AppointmentLayoutConsts.EventsWidthPc / (eventClash.Clashes + 1f));
             }
             else
             {
-                return EventLayoutConsts.EventsWidthPc;
+                return AppointmentLayoutConsts.EventsWidthPc;
             }
         }
 
@@ -135,7 +135,7 @@ namespace Admin.Data.Events
 
         public void AddClash(DateOnly date, int position, int clashes)
         {
-            ClashDict[date] = new EventClash
+            ClashDict[date] = new AppointmentClash
             {
                 Position = position,
                 Clashes = clashes
@@ -145,7 +145,7 @@ namespace Admin.Data.Events
         public void AddClash(DateOnly date)
         {
             ClashDict.TryGetValue(date, out var clash);
-            clash ??= new EventClash();
+            clash ??= new AppointmentClash();
 
             clash.Clashes++;
 

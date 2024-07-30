@@ -1,6 +1,6 @@
 ﻿namespace Core.Dto
 {
-    public record class EventBooking
+    public record class Appointment
     {
         public string Name { get; set; }
 

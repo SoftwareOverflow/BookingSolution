@@ -80,7 +80,7 @@
     public DateTime EndDate { get; set; } = default;
 
     [Parameter, EditorRequired]
-    public List<PositionedEventBooking> Events { get; set; } = [];
+    public List<PositionedAppointment> Events { get; set; } = [];
 
     [Parameter, EditorRequired]
     public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;

@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddApplicationLayers();
-builder.Services.AddScoped<EventViewService>();
+builder.Services.AddScoped<AppointmentViewService>();
 
 builder.Services.AddMudServices();
 

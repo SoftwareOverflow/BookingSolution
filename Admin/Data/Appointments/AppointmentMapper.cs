@@ -2,13 +2,13 @@
 
 namespace Admin.Data.Events
 {
-    internal static class EventBookingMapper
+    internal static class AppointmentMapper
     {
-        internal static List<PositionedEventBooking> GetPositionedEventBookings(this List<EventBooking> events)
+        internal static List<PositionedAppointment> GetPositionedEventBookings(this List<Appointment> events)
         {
-            var result = new List<PositionedEventBooking>();
+            var result = new List<PositionedAppointment>();
 
-            var positionedEvents = events.OrderBy(x => x.StartTime.Subtract(x.PaddingStart)).Select(x => new PositionedEventBooking(x)).ToList();
+            var positionedEvents = events.OrderBy(x => x.StartTime.Subtract(x.PaddingStart)).Select(x => new PositionedAppointment(x)).ToList();
 
             var minDate = positionedEvents.Min(x => x.GetStartDate(true));
             var maxDate = positionedEvents.Max(x => x.GetEndDate(true));
@@ -18,7 +18,7 @@ namespace Admin.Data.Events
             var currDate = minDate;
             while (currDate <= maxDate)
             {
-                var rowEventMap = new Dictionary<int, List<PositionedEventBooking>>();
+                var rowEventMap = new Dictionary<int, List<PositionedAppointment>>();
 
                 for (int i = index; i < positionedEvents.Count; i++)
                 {
@@ -68,55 +68,12 @@ namespace Admin.Data.Events
                 currDate = currDate.AddDays(1);
             }
 
-            /*for (int i = 0; i < positionedEvents.Count; i++)
-            {
-                var pe = positionedEvents[i];
-
-                var startDate = DateOnly.FromDateTime(pe.Event.StartTime);
-                var endDate = DateOnly.FromDateTime(pe.Event.EndTime);
-
-                var currDate = startDate;
-                while (currDate <= endDate)
-                {
-                    var clashes = 0;
-
-                    var eventStart = pe.GetStartTime(currDate, true);
-                    var eventEnd = pe.GetEndTime(currDate, true);
-
-                    int j = i + 1;
-                    for (j = i + 1; j < positionedEvents.Count; j++)
-                    {
-                        var eventToCheck = positionedEvents[j];
-                        var nextEventStart = eventToCheck.GetStartTime(currDate, true);
-
-                        if (nextEventStart > eventEnd)
-                        {
-                            clashes++;
-                        } else
-                        {
-                            break;
-                        }
-                    }
-
-                    // TODO This might not work at extremes (k = i, or j = max)
-                    int k = i;
-                    for (k = i; k < j && k < positionedEvents.Count; k++)
-                    {
-                        int position = k - i;
-
-                        positionedEvents[k].AddClash(currDate, position, clashes);
-                    }
-
-                    currDate = currDate.AddDays(1);
-                }
-            }*/
-
             return positionedEvents;
         }
 
-        private static Dictionary<DateOnly, EventBooking> SplitEventsByDate(PositionedEventBooking booking)
+        private static Dictionary<DateOnly, Appointment> SplitEventsByDate(PositionedAppointment booking)
         {
-            var result = new Dictionary<DateOnly, EventBooking>();
+            var result = new Dictionary<DateOnly, Appointment>();
 
             var paddedStart = booking.Event.StartTime.Subtract(booking.Event.PaddingStart);
             var paddedEnd = booking.Event.EndTime.Add(booking.Event.PaddingEnd);

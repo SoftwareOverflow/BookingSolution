@@ -1,7 +1,7 @@
 ﻿@using Admin.Data.Events
 @using Admin.Data.Helpers
 
-@inject EventViewService EventService
+@inject AppointmentViewService EventService
 
 <div class="scheduler-outer-container">
     <div class="flex-row-center header-row">
@@ -79,7 +79,7 @@
     public DateTime EndDate { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public List<PositionedEventBooking> Events { get; set; } = [];
+    public List<PositionedAppointment> Events { get; set; } = [];
 
     [Parameter, EditorRequired]
     public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;

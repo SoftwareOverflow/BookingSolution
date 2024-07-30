@@ -4,7 +4,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Admin.Tests.Data.Events
 {
-    public class PositionedEventBookingTests
+    public class PositionedAppointmentTests
     {
 
         [Fact]
@@ -12,8 +12,8 @@ namespace Admin.Tests.Data.Events
         {
             var date = DateOnly.Parse("2024-12-21");
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(12, 30)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(14, 30)),
@@ -28,8 +28,8 @@ namespace Admin.Tests.Data.Events
         public void Event_PaddingStart_ReturnsTrue()
         {
             var date = DateOnly.Parse("2024-12-21");
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(17, 59)).AddMinutes(-45),
                     EndTime = DateTime.Now,
@@ -45,8 +45,8 @@ namespace Admin.Tests.Data.Events
         {
             var date = DateOnly.Parse("2024-05-15");
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(15, 25)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(15, 55)),
@@ -62,8 +62,8 @@ namespace Admin.Tests.Data.Events
         {
             var date = new DateOnly(2023, 1, 29);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(17, 30)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(20, 00)),
@@ -80,8 +80,8 @@ namespace Admin.Tests.Data.Events
             var startDate = DateOnly.Parse("2023-01-01");
             var endDate = new DateOnly(2023, 01, 03);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(17, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
@@ -100,15 +100,15 @@ namespace Admin.Tests.Data.Events
             var dateTime = DateTime.Parse("2024-01-01 03:45");
             var date = DateOnly.FromDateTime(dateTime);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = dateTime
                 });
 
 
             // 3 hours and 45 mins
-            var expectedTop = (int)((EventLayoutConsts.CellHeight * 2) * 3.75);
+            var expectedTop = (int)((AppointmentLayoutConsts.CellHeight * 2) * 3.75);
 
             Assert.Equal(expectedTop, booking.TopPx(date));
             Assert.Equal(expectedTop, booking.TopPx(date, true));
@@ -120,16 +120,16 @@ namespace Admin.Tests.Data.Events
             var dateTime = DateTime.Parse("2024-01-01 02:35");
             var date = DateOnly.FromDateTime(dateTime);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = dateTime,
                     PaddingStart = TimeSpan.FromMinutes(50)
                 });
 
             // 2h 35m (- 50 mins) => 2h 35m (1h 45m)
-            var expectedUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * (2 + (35f / 60f)));
-            var expectedPaddedTop = (int)((EventLayoutConsts.CellHeight * 2) * 1.75f);
+            var expectedUnpadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * (2 + (35f / 60f)));
+            var expectedPaddedTop = (int)((AppointmentLayoutConsts.CellHeight * 2) * 1.75f);
 
             Assert.Equal(expectedUnpadded, booking.TopPx(date, false));
             Assert.Equal(expectedPaddedTop, booking.TopPx(date, true));
@@ -141,8 +141,8 @@ namespace Admin.Tests.Data.Events
             var dateTime = DateTime.Parse("2024-01-01 03:45");
             var date = DateOnly.FromDateTime(dateTime);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45)
@@ -150,7 +150,7 @@ namespace Admin.Tests.Data.Events
 
 
             // 3h 45m.
-            var expectedHeight = (int)((EventLayoutConsts.CellHeight * 2) * 3.75);
+            var expectedHeight = (int)((AppointmentLayoutConsts.CellHeight * 2) * 3.75);
 
             Assert.Equal(expectedHeight, booking.HeightPx(date));
             Assert.Equal(expectedHeight, booking.TopPx(date, true));
@@ -162,8 +162,8 @@ namespace Admin.Tests.Data.Events
             var dateTime = DateTime.Parse("2024-01-01 03:45");
             var date = DateOnly.FromDateTime(dateTime);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45),
@@ -171,8 +171,8 @@ namespace Admin.Tests.Data.Events
                 });
 
 
-            var expectedHeightUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * 3.75);
-            var expectedHeightPadded = (int)((EventLayoutConsts.CellHeight * 2) * 4);
+            var expectedHeightUnpadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 3.75);
+            var expectedHeightPadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 4);
 
             Assert.Equal(expectedHeightUnpadded, booking.HeightPx(date));
             Assert.Equal(expectedHeightPadded, booking.HeightPx(date, true));
@@ -184,8 +184,8 @@ namespace Admin.Tests.Data.Events
             var dateTime = DateTime.Parse("2024-01-01 03:45");
             var date = DateOnly.FromDateTime(dateTime);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(7).AddMinutes(15),
@@ -193,8 +193,8 @@ namespace Admin.Tests.Data.Events
                 });
 
 
-            var expectedHeightUnpadded = (int)((EventLayoutConsts.CellHeight * 2) * 7.25);
-            var expectedHeightPadded = (int)((EventLayoutConsts.CellHeight * 2) * 7.75);
+            var expectedHeightUnpadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 7.25);
+            var expectedHeightPadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 7.75);
 
             Assert.Equal(expectedHeightUnpadded, booking.HeightPx(date));
             Assert.Equal(expectedHeightPadded, booking.HeightPx(date, true));
@@ -203,11 +203,11 @@ namespace Admin.Tests.Data.Events
         [Fact]
         public void Event_LTR_NoClash()
         {
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking());
+            var booking = new PositionedAppointment(
+                booking: new Appointment());
 
             // Only fill EventLayoutConsts.EventsWidthPc of the width so there is place to still click.
-            Assert.Equal(EventLayoutConsts.EventsWidthPc, booking.WidthPc(DateOnly.MaxValue));
+            Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, booking.WidthPc(DateOnly.MaxValue));
             Assert.Equal(0, booking.LeftPc(DateOnly.MaxValue));
         }
 
@@ -217,8 +217,8 @@ namespace Admin.Tests.Data.Events
             var startDate = DateOnly.Parse("2023-01-01");
             var endDate = new DateOnly(2023, 01, 03);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(1, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
@@ -242,8 +242,8 @@ namespace Admin.Tests.Data.Events
             var startDate = DateOnly.Parse("2023-01-01");
             var endDate = new DateOnly(2023, 01, 03);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(1, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
@@ -252,7 +252,7 @@ namespace Admin.Tests.Data.Events
                 });
 
             // A full height day starts at 00:00 and ends at 23:59
-            var fullHeight = (int)((EventLayoutConsts.CellHeight * 2) * new TimeOnly(23, 59).ToTimeSpan().TotalHours);
+            var fullHeight = (int)((AppointmentLayoutConsts.CellHeight * 2) * new TimeOnly(23, 59).ToTimeSpan().TotalHours);
 
             Assert.Equal(fullHeight, booking.HeightPx(startDate, true));
             Assert.NotEqual(fullHeight, booking.HeightPx(startDate, false));
@@ -269,8 +269,8 @@ namespace Admin.Tests.Data.Events
         {
             var date = DateOnly.Parse("2024-07-06");
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(10, 15)),
                     EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -282,11 +282,11 @@ namespace Admin.Tests.Data.Events
 
             // 7 clashes = 8 conc events.
             // Only fill EventLayoutConsts.EventsWidthPc% of the width so there is place to still click.
-            var expectedWidthPc = (int)(EventLayoutConsts.EventsWidthPc / 8f);
+            var expectedWidthPc = (int)(AppointmentLayoutConsts.EventsWidthPc / 8f);
             Assert.Equal(expectedWidthPc, booking.WidthPc(date));
             Assert.Equal(expectedWidthPc * 7, booking.LeftPc(date));
 
-            expectedWidthPc = (int)(EventLayoutConsts.EventsWidthPc / 4f);
+            expectedWidthPc = (int)(AppointmentLayoutConsts.EventsWidthPc / 4f);
             Assert.Equal(expectedWidthPc, booking.WidthPc(date.AddDays(1)));
             Assert.Equal(0, booking.LeftPc(date.AddDays(1)));
         }
@@ -296,19 +296,19 @@ namespace Admin.Tests.Data.Events
         {
             var date = DateOnly.Parse("2024-07-06");
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(10, 15)),
                     EndTime = new DateTime(date, new TimeOnly(10, 45)),
                 }
                 );
 
-            Assert.Equal(EventLayoutConsts.EventsWidthPc, booking.WidthPc(date));
+            Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, booking.WidthPc(date));
             
             booking.AddClash(date);
 
-            Assert.True(EventLayoutConsts.EventsWidthPc > booking.WidthPc(date));
+            Assert.True(AppointmentLayoutConsts.EventsWidthPc > booking.WidthPc(date));
         }
 
         [Fact]
@@ -316,8 +316,8 @@ namespace Admin.Tests.Data.Events
         {
             var date = new DateOnly(2024, 7, 6);
 
-            var booking = new PositionedEventBooking(
-                booking: new EventBooking
+            var booking = new PositionedAppointment(
+                booking: new Appointment
                 {
                     StartTime = new DateTime(date, new TimeOnly(10, 15)),
                     EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -336,8 +336,8 @@ namespace Admin.Tests.Data.Events
         public void Event_GetStart_Padding()
         {
             var date = new DateOnly(2024, 7, 6);
-            var booking = new PositionedEventBooking(
-            booking: new EventBooking
+            var booking = new PositionedAppointment(
+            booking: new Appointment
             {
                 StartTime = new DateTime(date, new TimeOnly(0, 0)),
                 EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -352,8 +352,8 @@ namespace Admin.Tests.Data.Events
         public void Event_GetEnd_Padding()
         {
             var date = new DateOnly(2024, 7, 6);
-            var booking = new PositionedEventBooking(
-            booking: new EventBooking
+            var booking = new PositionedAppointment(
+            booking: new Appointment
             {
                 StartTime = new DateTime(date, new TimeOnly(0, 0)),
                 EndTime = new DateTime(date, new TimeOnly(22, 45)),

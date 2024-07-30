@@ -5,14 +5,14 @@ using Moq;
 
 namespace Admin.Tests.Data.Events
 {
-    public class EventViewServiceTests
+    public class AppointmentViewServiceTests
     {
-        private readonly Mock<IEventBookingDataService> DataMock = new();
-        private EventViewService ViewService;
+        private readonly Mock<IAppointmentDataService> DataMock = new();
+        private AppointmentViewService ViewService;
 
-        public EventViewServiceTests()
+        public AppointmentViewServiceTests()
         {
-            ViewService = new EventViewService(DataMock.Object);
+            ViewService = new AppointmentViewService(DataMock.Object);
         }
 
 
@@ -27,7 +27,7 @@ namespace Admin.Tests.Data.Events
         {
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.EventBooking>
+            var mockList = new List<Core.Dto.Appointment>
                     {
 
                         new() {
@@ -70,7 +70,7 @@ namespace Admin.Tests.Data.Events
             // Ensure we have no clashes by checking all items set to EventLayoutConsts.EventsWidthPc% width
             foreach (var item in result)
             {
-                Assert.Equal(EventLayoutConsts.EventsWidthPc, item.WidthPc(date));
+                Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, item.WidthPc(date));
             }
         }
 
@@ -85,7 +85,7 @@ namespace Admin.Tests.Data.Events
 
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.EventBooking>
+            var mockList = new List<Core.Dto.Appointment>
                     {
                         new() {
                             Name = "Event #1",
@@ -148,7 +148,7 @@ namespace Admin.Tests.Data.Events
 
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.EventBooking>
+            var mockList = new List<Core.Dto.Appointment>
                     {
                         new() {
                             Name = "Event #1",
@@ -190,7 +190,7 @@ namespace Admin.Tests.Data.Events
             // Ensure we have no clashes by checking all items set to EventLayoutConsts.EventsWidthPc% width
             foreach (var item in result)
             {
-                Assert.Equal(EventLayoutConsts.EventsWidthPc, item.WidthPc(date));
+                Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, item.WidthPc(date));
                 Assert.Equal(0, item.LeftPc(date));
             }
         }
@@ -205,7 +205,7 @@ namespace Admin.Tests.Data.Events
 
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.EventBooking>
+            var mockList = new List<Core.Dto.Appointment>
                     {
                         new() {
                             Name = "Event #1",
@@ -246,7 +246,7 @@ namespace Admin.Tests.Data.Events
 
             var width = result[0].WidthPc(date);
             Assert.Equal(0, result[0].LeftPc(date));
-            Assert.NotEqual(EventLayoutConsts.EventsWidthPc, width);
+            Assert.NotEqual(AppointmentLayoutConsts.EventsWidthPc, width);
 
             Assert.NotEqual(0, result[1].LeftPc(date));
             Assert.Equal(width, result[1].WidthPc(date));
@@ -267,34 +267,34 @@ namespace Admin.Tests.Data.Events
 
             var day1 = new DateOnly(2020, 1, 1);
 
-            var mockList = new List<EventBooking>
+            var mockList = new List<Appointment>
             {
                 //region day1
-                new EventBooking
+                new Appointment
                 {
                     Name = "1",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "2",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "3",
                     StartTime = new DateTime(day1, new TimeOnly(1, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 0)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "4",
                     StartTime = new DateTime(day1, new TimeOnly(2, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 30)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "5",
                     StartTime = new DateTime(day1, new TimeOnly(4, 0)),
@@ -303,25 +303,25 @@ namespace Admin.Tests.Data.Events
                 //endregion day1
 
                 //day2
-                new EventBooking
+                new Appointment
                 {
                     Name = "6",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(9, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(12, 0)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "7",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(13, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(14, 30)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "8",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(13, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(14, 30)),
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "9",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(22, 0)),
@@ -329,7 +329,7 @@ namespace Admin.Tests.Data.Events
                     PaddingStart = TimeSpan.FromMinutes(180),
                     PaddingEnd = TimeSpan.FromMinutes(100)
                 },
-                new EventBooking
+                new Appointment
                 {
                     Name = "10",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(23, 0)),
@@ -337,7 +337,7 @@ namespace Admin.Tests.Data.Events
                 },
 
                 //day 3
-                new EventBooking
+                new Appointment
                 {
                     Name = "11",
                     StartTime = new DateTime(day1.AddDays(2), new TimeOnly(2, 45)),
@@ -357,7 +357,7 @@ namespace Admin.Tests.Data.Events
 
             //------- Check Widths -----------
             var widthThird = result[0].WidthPc(day1);
-            var widthHalf = (int)(EventLayoutConsts.EventsWidthPc / 2f);
+            var widthHalf = (int)(AppointmentLayoutConsts.EventsWidthPc / 2f);
             Assert.Equal(widthThird, result[1].WidthPc(day1));
             Assert.Equal(widthThird, result[2].WidthPc(day1));
 
@@ -365,10 +365,10 @@ namespace Admin.Tests.Data.Events
             Assert.Equal(widthHalf, result[3].WidthPc(day1));
             
             // Nothing stopping "5" filling max size.
-            Assert.Equal(EventLayoutConsts.EventsWidthPc, result[4].WidthPc(day1));
+            Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, result[4].WidthPc(day1));
 
             // Day 2
-            Assert.Equal(EventLayoutConsts.EventsWidthPc, result[5].WidthPc(day1.AddDays(1)));
+            Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, result[5].WidthPc(day1.AddDays(1)));
 
             Assert.Equal(widthHalf, result[6].WidthPc(day1.AddDays(1)));
             Assert.Equal(widthHalf, result[7].WidthPc(day1.AddDays(1)));
@@ -380,7 +380,7 @@ namespace Admin.Tests.Data.Events
             Assert.Equal(widthHalf, result[10].WidthPc(day1.AddDays(2)));
 
             // Day 4 - nothing in the way, should fill max
-            Assert.Equal(EventLayoutConsts.EventsWidthPc, result[10].WidthPc(day1.AddDays(3)));
+            Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, result[10].WidthPc(day1.AddDays(3)));
 
 
             // ----- Check Lefts -----

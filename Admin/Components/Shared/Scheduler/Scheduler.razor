@@ -2,9 +2,9 @@
 @using Admin.Data.Helpers
 @using MudBlazor.Extensions
 
-@inject EventViewService EventService
+@inject AppointmentViewService EventService
 
-<div class="scheduler-container" style="--scheduler-table-cell-height: @(EventLayoutConsts.CellHeight)px">
+<div class="scheduler-container" style="--scheduler-table-cell-height: @(AppointmentLayoutConsts.CellHeight)px">
     <SchedulerHeader Date="@Date" LayoutType="@CalendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
     @if (CalendarLayoutType == CalendarLayoutType.Month)
     {
@@ -30,7 +30,7 @@
 
     private Tuple<DateTime, DateTime> DateRange;
 
-    private List<PositionedEventBooking> Events = [];
+    private List<PositionedAppointment> Events = [];
 
     protected override async Task OnParametersSetAsync()
     {
@@ -49,6 +49,6 @@
         StateHasChanged();
     }
 
-    private async Task<List<PositionedEventBooking>> LoadEvents()
+    private async Task<List<PositionedAppointment>> LoadEvents()
         => await EventService.GetEvents(DateOnly.FromDateTime(DateRange.Item1), DateOnly.FromDateTime(DateRange.Item2));
 }

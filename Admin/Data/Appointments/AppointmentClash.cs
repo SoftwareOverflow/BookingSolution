@@ -3,7 +3,7 @@
     /// <summary>
     /// Holds information to help layout with clashing events.
     /// </summary>
-    public class EventClash
+    public class AppointmentClash
     {
         /// <summary>
         /// The Position (index) of this event
