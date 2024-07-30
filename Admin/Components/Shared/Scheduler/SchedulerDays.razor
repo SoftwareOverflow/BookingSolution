@@ -11,11 +11,21 @@
 
             while (date <= EndDate)
             {
+                var localDate = date; //Copy the date variable as it changes later.
                 var activeClass = date.Date == DateTime.Now.Date ? "active" : "";
-                <div class="day-date-header @activeClass">
-                    <div>@(date.ToString("ddd"))</div>
-                    <div>@(date.Day)</div>
-                </div>
+                if(StartDate.Date != EndDate.Date)
+                {
+                    <a class="day-date-header @activeClass" onclick="@(() => OnCalendarStateChange(CalendarLayoutType.Day, localDate))">
+                        <div>@(date.ToString("ddd"))</div>
+                        <div>@(date.Day)</div>
+                    </a>
+                } else
+                {
+                    <div class="day-date-header @activeClass">
+                        <div>@(date.ToString("ddd"))</div>
+                        <div>@(date.Day)</div>
+                    </div>
+                }
 
                 date = date.AddDays(1);
             }
@@ -53,30 +63,6 @@
                             }
                         </div>
                     </td>
-
-
-                    @*
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))" Events="@Events" />
-                    </td>
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today))" Events="@Events" />
-                    </td>
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(1)))" Events="@Events" />
-                    </td>
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(2)))" Events="@Events" />
-                    </td>
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(3)))" Events="@Events" />
-                    </td>
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(4)))" Events="@Events" />
-                    </td>
-                    <td>
-                    <SchedulerInnerDayTableContents Date="@(DateOnly.FromDateTime(DateTime.Today.AddDays(5)))" Events="@Events" />
-                    </td> *@
                 </tr>
             </tbody>
         </table>
@@ -94,4 +80,8 @@
 
     [Parameter, EditorRequired]
     public List<PositionedEventBooking> Events { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
+
 }

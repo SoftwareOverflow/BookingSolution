@@ -34,7 +34,7 @@ namespace Admin.Data.Helpers
             {
                 // The month layout will contain some days from prior months at the
                 // start or end. Adjust accordingly.
-                startDate = new DateTime(date.Year, date.Month, date.Day);
+                startDate = new DateTime(date.Year, date.Month, 1);
 
                 var startOfWeek = System.Threading.Thread.CurrentThread.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
                 while (startDate.DayOfWeek != startOfWeek)
@@ -51,6 +51,37 @@ namespace Admin.Data.Helpers
             }
 
             return new Tuple<DateTime, DateTime>(startDate.Date, endDate.Date);
+        }
+
+        public static DateTime JumpToNext(CalendarLayoutType layoutType, DateTime? date, bool forward)
+        {
+            if(date == null)
+            {
+                return DateTime.Now;
+            }
+
+            if(layoutType == CalendarLayoutType.Month)
+            {
+                return date.Value.AddMonths( forward ? 1 : -1);
+            }
+
+            var numDays = 1;
+
+            if(layoutType == CalendarLayoutType.Week)
+            {
+                numDays = 7;
+            }
+            else if(layoutType == CalendarLayoutType.WorkWeek)
+            {
+                numDays = 5;
+            }
+
+            if(!forward)
+            {
+                numDays *= -1;
+            }
+
+            return date.Value.AddDays(numDays);
         }
 
         public static string GetDateLabel(DateTime? date, CalendarLayoutType layout)

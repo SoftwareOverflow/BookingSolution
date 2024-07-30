@@ -18,10 +18,28 @@ namespace Core.Services
             var day1 = DateOnly.FromDateTime(DateTime.Today);
             var events = new List<EventBooking>
             {
+                //region previous
+                new EventBooking
+                {
+                    Name = "Very Old Event",
+                    Location = "Studio",
+                    StartTime = new DateTime(day1.AddDays(-7), new TimeOnly(1, 0)),
+                    EndTime = new DateTime(day1.AddDays(-7), new TimeOnly(2, 0)),
+                },
+
+                new EventBooking
+                {
+                    Name = "Less Old Event",
+                    StartTime = new DateTime(day1.AddDays(-5), new TimeOnly(9, 0)),
+                    EndTime = new DateTime(day1.AddDays(-5), new TimeOnly(10, 0)),
+                    PaddingStart = TimeSpan.FromMinutes(15),
+                    PaddingEnd = TimeSpan.FromMinutes(15)
+                },
+
                 //region day1
                 new EventBooking
                 {
-                    Name = "1, Atrosciously Long Name",
+                    Name = "1, Atrosciously Long Name which will have to overflow or wrap, depending on the layout required",
                     Location = "Studio",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),

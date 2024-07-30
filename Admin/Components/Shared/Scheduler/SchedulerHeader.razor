@@ -4,18 +4,18 @@
 <div class="flex-row-center scheduler-header">
     <div class="header-left">
         <div>
-            <button class="flex-row-center">
+            <button class="flex-row-center" onclick="@(() => JumpToNextDate(false))">
                 <span class="material-icons">keyboard_arrow_left</span>
             </button>
         </div>
         <div>
-            <button class="flex-row-center">
+            <button class="flex-row-center" onclick="@(() => JumpToNextDate(true))">
                 <span class="material-icons">keyboard_arrow_right</span>
             </button>
         </div>
         <div class="flex-row-center date-string-dropdown">
             <button class="date-button">
-                <MudDatePicker Mask="@(new DateMask(""))" @bind-Date="BackingDate" ShowToolbar="false" />
+                <MudDatePicker @ref="DatePicker" Mask="@(new DateMask(""))" @bind-Date="BackingDate" ShowToolbar="false" OpenTo="@(LayoutType == CalendarLayoutType.Month ? OpenTo.Month : OpenTo.Date)" />
                 <div class="overlay flex-column-center">
                     <span class="">@DateLabel</span>
                 </div>
@@ -70,6 +70,9 @@
         }
     }
 
+    /// <summary>
+    /// This is the parameter field and should NOT be set manually
+    /// </summary>
     [Parameter, EditorRequired]
     public DateTime? Date { get; set; } = default;
 
@@ -79,12 +82,19 @@
     [Parameter, EditorRequired]
     public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
 
+    private MudDatePicker DatePicker = default!;
+
 
     private string DateLabel => DateHelpers.GetDateLabel(Date, LayoutType);
 
+    private void JumpToNextDate(bool forward)
+    {
+        DatePicker.GoToDate(DateHelpers.JumpToNext(LayoutType, Date, forward));
+    }
+
     private void GoToToday()
     {
-
+        DatePicker.GoToDate(DateTime.Today);
     }
 
     // TODO write tests using bUnit.

@@ -1,13 +1,13 @@
 ﻿.top-bar {
     height: 100%;
     display: flex;
-    background-color: rebeccapurple;
+    background-color: rosybrown;
     padding: 10px;
     justify-content: left;
     align-items: center;
 }
 
-.top-bar .material-icons {
+.top-bar .material-symbols-outlined {
     font-size: 32px;
     flex-grow: 1;
 }

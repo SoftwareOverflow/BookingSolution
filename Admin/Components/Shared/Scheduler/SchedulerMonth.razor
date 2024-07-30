@@ -1,0 +1,87 @@
+﻿@using Admin.Data.Events
+@* <div class="scheduler-table-container"> *@
+<table class="scheduler-table-container">
+    <thead>
+        <tr>
+            @for (int i = 0; i < 7; i++)
+            {
+                <th class="inner-table-cell header">
+                    <span>
+                        @StartDate.AddDays(i).ToString("dddd")
+                    </span>
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var date = StartDate;
+            while (date.Date <= EndDate.Date)
+            {
+                <tr>
+                    @for (int i = 0; i < 7; i++)
+                    {
+                        <td class="inner-table-cell">
+                            <div class="cell-placeholder">
+                                <a class="heading">
+                                    @(date.Day == 1 ? date.ToString("MMM ") : "")@date.Day
+                                </a>
+
+                                @foreach (var item in Events.OrderBy(x => x.GetStartTime(DateOnly.FromDateTime(date), true)))
+                                {
+                                    var startTime = item.GetStartTime(DateOnly.FromDateTime(date), true);
+                                    var endTime = item.GetEndTime(DateOnly.FromDateTime(date), true);
+
+                                    if (startTime != endTime)
+                                    {
+                                        <div class="inner-event-details">
+                                            @if (item.GetStartDate(true) < DateOnly.FromDateTime(date))
+                                            {
+                                                <MudTooltip Text="Event starts on previous day" Class="material-icons-tooltip">
+                                                        <div class="icon-tooltip">
+                                                        <span class="material-symbols-outlined">
+                                                            line_start_circle
+                                                        </span>
+                                                        </div>
+                                                </MudTooltip>
+                                            }
+                                            <div class="event-time">@startTime.ToString("HH:mm")</div>
+                                            <div class="event-name">@item.Event.Name</div>
+                                            @if (item.GetEndDate(true) > DateOnly.FromDateTime(date))
+                                            {
+                                                <MudTooltip Text="Event ends on future day" Class="hello">
+                                                    <div class="icon-tooltip" >
+                                                        <span class="material-symbols-outlined">
+                                                            line_end_circle
+                                                        </span>
+                                                    </div>
+                                                </MudTooltip>
+                                            }
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        date = date.AddDays(1);
+                    }
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
+@* </div> *@
+
+@code {
+    [Parameter, EditorRequired]
+    public DateTime StartDate { get; set; } = default;
+
+    [Parameter, EditorRequired]
+    public DateTime EndDate { get; set; } = default;
+
+    [Parameter, EditorRequired]
+    public List<PositionedEventBooking> Events { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
+}

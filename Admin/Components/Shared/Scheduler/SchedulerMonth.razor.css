@@ -1,0 +1,65 @@
+﻿.scheduler-table-container {
+    width: 100%;
+    position: relative;
+    table-layout: fixed;
+}
+
+.inner-table-cell {
+    vertical-align: top;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+}
+
+    .inner-table-cell.header {
+        padding: 10px;
+    }
+
+    .inner-table-cell .heading {
+        margin: 5px;
+        cursor: pointer;
+    }
+
+        .inner-table-cell .heading:hover {
+            text-decoration: underline;
+        }
+
+.cell-placeholder {
+    min-height: 80px;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.inner-event-details {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background-color: forestgreen;
+    color: white;
+    margin: 2px 4px;
+    height: 26px;
+    cursor: default;
+}
+
+.event-time {
+    font-size: 11px;
+    font-family: Arial;
+    padding: 5px;
+}
+
+.event-name {
+    flex: auto;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.end-icon {
+    float: right;
+}
+
+::deep .mud-tooltip-root.mud-tooltip-inline {
+    display: inline-flex;
+    height: 24px;
+}

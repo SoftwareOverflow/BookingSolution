@@ -8,11 +8,11 @@
     <SchedulerHeader Date="@Date" LayoutType="@CalendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
     @if (CalendarLayoutType == CalendarLayoutType.Month)
     {
-        // TODO SchedulerMonth
+        <SchedulerMonth StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" />
     }
     else
     {
-        <SchedulerDays StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events"/>
+        <SchedulerDays StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" />
     }
 </div>
 
