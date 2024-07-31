@@ -1,1 +1,56 @@
-﻿
+﻿.service-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 40px;
+}
+
+
+@media(min-width: 751px) and (max-width: 999px) {
+    .service-type-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.service-type-container {
+    position: relative;
+    background-color: rgba(0, 148, 255, 0.5);
+    border-radius: 5px;
+}
+
+.color-left {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 5%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: rgb(0, 148, 255);
+}
+
+.edit-button {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 4px;
+    cursor: pointer;
+}
+    .edit-button.material-symbols-outlined {
+        font-size: 32px;
+    }
+
+.service-type-inner {
+    text-align: center;
+    vertical-align: middle;
+    padding: 4px 6% 4px 6%;
+}
+
+.service-type-name {
+    font-size: 20px;
+    text-decoration: underline;
+    text-decoration-color: rgb(0, 148, 255);
+}
+
+.service-type-description {
+    font-style: italic;
+}

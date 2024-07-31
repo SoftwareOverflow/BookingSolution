@@ -11,7 +11,7 @@ namespace Core.Services
         /// <param name="start">The start date of the range (inclusive)</param>
         /// <param name="end">The end date of the range (inclusive)</param>
         /// <returns>Any events which occur in whole or part within the specified range</returns>
-        public Task<List<Appointment>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
+        public async Task<List<Appointment>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
         {
 
 
@@ -119,7 +119,9 @@ namespace Core.Services
 
             // TODO filter these records
 
-            return Task.FromResult(events);
+            await Task.Delay(1000);
+
+            return events;
         }
 
         private DateTime PaddedStart(Appointment e) => e.StartTime.Subtract(e.PaddingStart); 

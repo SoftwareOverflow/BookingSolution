@@ -1,19 +1,19 @@
 ﻿@using Admin.Data.Events
 @using Admin.Data.Helpers
 
-<div class="flex-row-center scheduler-header">
+<div class="flex-row scheduler-header">
     <div class="header-left">
         <div>
-            <button class="flex-row-center" onclick="@(() => JumpToNextDate(false))">
+            <button class="flex-row" onclick="@(() => JumpToNextDate(false))">
                 <span class="material-icons">keyboard_arrow_left</span>
             </button>
         </div>
         <div>
-            <button class="flex-row-center" onclick="@(() => JumpToNextDate(true))">
+            <button class="flex-row" onclick="@(() => JumpToNextDate(true))">
                 <span class="material-icons">keyboard_arrow_right</span>
             </button>
         </div>
-        <div class="flex-row-center date-string-dropdown">
+        <div class="flex-row date-string-dropdown">
             <button class="date-button">
                 <MudDatePicker @ref="DatePicker" Mask="@(new DateMask(""))" @bind-Date="BackingDate" ShowToolbar="false" OpenTo="@(LayoutType == CalendarLayoutType.Month ? OpenTo.Month : OpenTo.Date)" />
                 <div class="overlay flex-column-center">

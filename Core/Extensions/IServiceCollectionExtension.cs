@@ -14,6 +14,7 @@ namespace Core.Extensions
             services.AddPersistanceLayer();
 
             services.AddTransient<IAppointmentDataService, AppointmentService>();
+            services.AddTransient<IServiceTypeService, ServiceTypeService>();
         }
     }
 }
