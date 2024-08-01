@@ -1,6 +1,12 @@
 ﻿@using Admin.Components.Shared
+@using Admin.Data.Helpers
 
 @inherits LayoutComponentBase
+
+@implements IDisposable
+
+@inject ISnackbar Snackbar
+@inject MessageManager MessageManager
 
 <header>
     <TopNavBar />
@@ -20,3 +26,21 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        MessageManager.OnMessage += OnMessage;
+    }
+
+    private void OnMessage(MessageBase message)
+    {
+        Snackbar.Add(message.Message, message.Severity);
+    }
+
+    public void Dispose()
+    {
+        MessageManager.OnMessage -= OnMessage;
+    }
+}

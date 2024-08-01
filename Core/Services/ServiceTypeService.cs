@@ -1,12 +1,14 @@
 ﻿using Core.Dto;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Http;
 using System.Drawing;
 
 namespace Core.Services
 {
     internal class ServiceTypeService : IServiceTypeService
     {
+        private List<ServiceType> ServiceTypesCache = new List<ServiceType>();
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -54,7 +56,27 @@ namespace Core.Services
 
             await Task.Delay(1500);
 
-            return results;
+            // Cache this information as we have transient service
+            ServiceTypesCache = results;
+
+            return results.OrderBy(x => x.Name).ToList();
+        }
+
+        public async Task<ServiceType?> GetServiceTypeByName(string? name)
+        {
+            //Attempt to load form the transient service cache.
+            try
+            {
+                var item = ServiceTypesCache.Single(x => x.Name == name);
+            } catch(InvalidOperationException)
+            {
+                return null;
+            }
+
+            // Attempt to load from the database in case the temporary cache is not right
+
+            //Invalid
+            return null;
         }
     }
 }

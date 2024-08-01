@@ -1,0 +1,7 @@
+﻿.input {
+    margin-bottom: 10px;
+}
+
+.title ::deep.mud-input-root {
+    text-align: center;
+}

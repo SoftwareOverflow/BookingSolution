@@ -1,0 +1,125 @@
+﻿@page "/services"
+
+@using Admin.Components.Shared.ServiceType
+@using Admin.Data.Helpers
+@using Core.Dto
+@using Core.Interfaces
+
+@inject NavigationManager NavigationManager
+@inject StateContainerSingle<ServiceType> StateContainer
+@inject IServiceTypeService ServiceTypeService
+
+<h3>Manage The Services You Offer</h3>
+<p>Saved changes will affect future bookings!</p>
+
+@*
+    TODO move this elsewhere
+    Either static variable class or some sort of pub-sub event notification
+    Or (preferred I think) some BaseAsyncLoadComponent which holds the Loading variable
+    defaulted to true, and then we make sure to call base.OnInitializedAsync or base.OnParametersSetAsync()
+    which reverts the loading icon.
+*@
+<MudOverlay Class="mud-loading-overlay" Visible="Loading" Absolute="true" DarkBackground="true">
+    <div class="d-flex flex-column align-center justify-center">
+        <MudProgressCircular Style="LoaderType.Circular" Indeterminate="true" />
+        <MudText>Loading...</MudText>
+    </div>
+</MudOverlay>
+
+<div class="service-type-grid">
+    @foreach (var item in ServiceTypes)
+    {
+        <div class="service-type-container">
+            <div class="color-left" />
+            <a class="edit-button" onclick="@(() => EditServiceType(item))">
+                <span class="material-symbols-outlined edit">stylus_note</span>
+            </a>
+            <div class="service-type-inner">
+                <div class="service-type-name">@item.Name</div>
+                <div class="service-type-description">
+                    @item.Description
+                </div>
+                <div style="flex-grow: 1" />
+                <div class="flex-row space-evenly">
+                    <div class="flex-row">
+                        <span class="material-symbols-outlined">pin_drop</span>
+                        @*TODO might move this kind of logic to an object for the UI which modifies the getter*@
+                        @(String.IsNullOrWhiteSpace(item.Location) ? "Not Set" : @item.Location)
+                    </div>
+                    <div class="flex-row">
+                        £@item.Price
+                    </div>
+                </div>
+
+                @*                     @{
+            var hiddenClass = ServiceTypeInEdit == item ? "" : "hidden";
+            }
+            <div class="flex-row edit-buttons @hiddenClass">
+            <div class="flex-row">
+            <span class="material-symbols-outlined">delete_forever</span>
+            Delete
+            </div>
+            <div class="flex-row">
+            <span class="material-symbols-outlined">verified</span>
+            Save Cahnges
+            </div>
+            </div>*@
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    private List<ServiceType> ServiceTypes = [];
+    private bool Loading = true;
+    // private ServiceType? ServiceTypeInEdit = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ServiceTypes = await ServiceTypeService.GetServiceTypes();
+        Loading = false;
+        StateHasChanged();
+    }
+
+    private void EditServiceType(ServiceType item)
+    {
+        StateContainer.SetItem(item);
+        NavigationManager.NavigateTo("/services/edit");
+    }
+
+    // private void SetEditMode(ServiceType service) => ServiceTypeInEdit = service;
+
+    // private bool IsSelected(ServiceType item)
+    // {
+    //     if(ServiceTypeInEdit == null)
+    //     {
+    //         return true;
+    //     }
+    //     else if (item == ServiceTypeInEdit)
+    //     {
+    //         return true;
+    //     }
+    //     else
+    //     {
+    //         return false;
+    //     }
+    // }
+
+    // private Task OpenEditDialogAsync(ServiceType serviceToEdit)
+    // {
+    //     var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = false, MaxWidth = MaxWidth.ExtraExtraLarge,};
+
+    //     var parameters = new DialogParameters<EditServiceTypeDialog>
+    //     {
+    //         { x => x.ServiceType, serviceToEdit }
+    //     };
+
+    //     return DialogService.ShowAsync<EditServiceTypeDialog>(null, parameters, options);
+    // }
+
+    // private void EditServiceType(ServiceType serviceToEdit)
+    // {
+    //     NavigationManager.NavigateTo($"/services/edit/{serviceToEdit.Name}");
+    // }
+}
