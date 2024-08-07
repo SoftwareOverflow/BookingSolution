@@ -4,8 +4,14 @@ namespace Admin.Data.Helpers
 {
     public class MessageBase
     {
-        public string Message { get; set; }
+        public string Message;
 
-        public Severity Severity { get; set; }
+        public Severity Severity;
+
+        public MessageBase(string message, Severity severity)
+        {
+            Message = message;
+            Severity = severity;
+        }
     }
 }

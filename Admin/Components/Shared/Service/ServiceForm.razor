@@ -154,11 +154,10 @@
         {
             // TODO delete from Server
 
-            MessageManager.AddMessage(new MessageBase
-                {
-                    Message = "Service deleted (NOT YET)",
-                    Severity = Severity.Info
-                });
+            MessageManager.AddMessage(new MessageBase(
+                    message: "Service deleted (NOT YET)",
+                    severity: Severity.Info
+            ));
 
             NavigationManager.NavigateTo("/services");
         }
@@ -183,11 +182,10 @@
         {
             // TODO Save changes
 
-            MessageManager.AddMessage(new MessageBase
-                {
-                    Message = "Changes Saved Successfully (NOT YET)",
-                    Severity = Severity.Info
-                });
+            MessageManager.AddMessage(new MessageBase(
+                   "Changes Saved Successfully (NOT YET)",
+                    Severity.Info
+            ));
 
             NavigationManager.NavigateTo("/services");
         }

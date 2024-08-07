@@ -1,16 +1,32 @@
-﻿using Core.Dto;
+﻿using Admin.Data.Helpers;
+using Core.Dto;
 using Core.Interfaces;
 
 namespace Admin.Data.Events
 {
-    public class AppointmentViewService(IAppointmentDataService dataService)
+    public class AppointmentViewService(IAppointmentDataService dataService, MessageManager messages) : ViewServiceBase(messages)
     {
         public async Task<List<PositionedAppointment>> GetEvents(DateOnly start, DateOnly end)
         {
-            // TODO error handling
-            var events = await dataService.GetBookingsBetweenDates(start, end);
+            // TODO error handling in more generic ways so that errors are always shown
+            var result = await base.HandleServiceRequest<List<Appointment>>(() =>
+                dataService.GetBookingsBetweenDates(start, end)
+                );
 
-            return events.GetPositionedEventBookings();
+            if(result == null)
+            {
+                return [];
+            } else
+            {
+                return result.GetPositionedEventBookings();
+            }
+        }
+
+        public async Task<List<Appointment>> GetEventsWithError()
+        {
+            var result = await HandleServiceRequest(dataService.GetErrors);
+
+            return [];
         }
     }
 }

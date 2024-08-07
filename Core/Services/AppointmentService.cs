@@ -11,7 +11,7 @@ namespace Core.Services
         /// <param name="start">The start date of the range (inclusive)</param>
         /// <param name="end">The end date of the range (inclusive)</param>
         /// <returns>Any events which occur in whole or part within the specified range</returns>
-        public async Task<List<Appointment>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
+        public async Task<ServiceResult<List<Appointment>>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
         {
 
 
@@ -121,7 +121,18 @@ namespace Core.Services
 
             await Task.Delay(1000);
 
-            return events;
+            return new ServiceResult<List<Appointment>>(events);
+        }
+
+        public async Task<ServiceResult<Appointment>> GetErrors()
+        {
+            await Task.Delay(1200);
+
+            var result = new ServiceResult<Appointment>(null, ResultType.ServerError);
+            result.Errors.Add("An Unkown error occurred");
+            result.Errors.Add("Another error happened - YIKES!");
+
+            return result;
         }
 
         private DateTime PaddedStart(Appointment e) => e.StartTime.Subtract(e.PaddingStart); 

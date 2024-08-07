@@ -21,8 +21,6 @@ namespace Core.Services
                 {
                     Name = "Pedicure",
                     Description = "Just Your Basic Pedi!",
-                    Location = "Studio",
-                    DisplayColor = Color.DarkOliveGreen,
                     Price = 29.99m
                 },
 
@@ -74,6 +72,7 @@ namespace Core.Services
             }
 
             // Attempt to load from the database in case the temporary cache is not right
+            await Task.Delay(100);
 
             //Invalid
             return null;

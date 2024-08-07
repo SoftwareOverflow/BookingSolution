@@ -16,6 +16,10 @@
     }
 </div>
 
+<div>
+    <button @onclick="TestErrors">Click Me For Errors!</button>
+</div>
+
 @code {
 
     private CalendarLayoutType CalendarLayoutType = CalendarLayoutType.Week;
@@ -51,4 +55,7 @@
 
     private async Task<List<PositionedAppointment>> LoadEvents()
         => await EventService.GetEvents(DateOnly.FromDateTime(DateRange.Item1), DateOnly.FromDateTime(DateRange.Item2));
+
+    private async void TestErrors() =>
+        await EventService.GetEventsWithError();
 }

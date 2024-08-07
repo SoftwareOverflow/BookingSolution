@@ -33,11 +33,10 @@
     {
         if (Service == null)
         {
-            MessageManager.AddMessage(new MessageBase
-                {
-                    Message = "Unable to locate service type to edit",
-                    Severity = Severity.Warning
-                });
+            MessageManager.AddMessage(new MessageBase(
+                    message: "Unable to locate service type to edit",
+                    severity: Severity.Warning
+            ));
 
             NavigateBack(true);
         }
