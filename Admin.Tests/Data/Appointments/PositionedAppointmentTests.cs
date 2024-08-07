@@ -251,8 +251,8 @@ namespace Admin.Tests.Data.Events
                     PaddingEnd = TimeSpan.FromMinutes(240),
                 });
 
-            // A full height day starts at 00:00 and ends at 23:59
-            var fullHeight = (int)((AppointmentLayoutConsts.CellHeight * 2) * new TimeOnly(23, 59).ToTimeSpan().TotalHours);
+            // A full height day starts at 00:00 and ends at 23:59:59
+            var fullHeight = (int)((AppointmentLayoutConsts.CellHeight * 2) * new TimeOnly(23, 59, 59).ToTimeSpan().TotalHours);
 
             Assert.Equal(fullHeight, booking.HeightPx(startDate, true));
             Assert.NotEqual(fullHeight, booking.HeightPx(startDate, false));

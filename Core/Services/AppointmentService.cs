@@ -13,8 +13,6 @@ namespace Core.Services
         /// <returns>Any events which occur in whole or part within the specified range</returns>
         public async Task<ServiceResult<List<Appointment>>> GetBookingsBetweenDates(DateOnly start, DateOnly end)
         {
-
-
             var day1 = DateOnly.FromDateTime(DateTime.Today);
             var events = new List<Appointment>
             {
@@ -22,7 +20,6 @@ namespace Core.Services
                 new Appointment
                 {
                     Name = "Very Old Event",
-                    Location = "Studio",
                     StartTime = new DateTime(day1.AddDays(-7), new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1.AddDays(-7), new TimeOnly(2, 0)),
                 },
@@ -40,7 +37,6 @@ namespace Core.Services
                 new Appointment
                 {
                     Name = "1, Atrosciously Long Name which will have to overflow or wrap, depending on the layout required",
-                    Location = "Studio",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
                 },

@@ -1,4 +1,6 @@
 ﻿using Admin.Data.Events;
+using Admin.Data.Helpers;
+using Core;
 using Core.Dto;
 using Core.Interfaces;
 using Moq;
@@ -8,11 +10,13 @@ namespace Admin.Tests.Data.Events
     public class AppointmentViewServiceTests
     {
         private readonly Mock<IAppointmentDataService> DataMock = new();
+        private readonly Mock<MessageManager> MessageMock = new();
         private AppointmentViewService ViewService;
 
         public AppointmentViewServiceTests()
         {
-            ViewService = new AppointmentViewService(DataMock.Object);
+
+            ViewService = new AppointmentViewService(DataMock.Object, MessageMock.Object);
         }
 
 
@@ -36,7 +40,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
@@ -44,7 +47,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(9, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
-                            Location = "Studio"
                         },
                         new() {
                             Name = "Event #1",
@@ -52,13 +54,12 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
-                            Location = "Home"
                         },
                     };
 
             DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(mockList)
+                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(date, date);
@@ -93,7 +94,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #2 - Example",
@@ -101,7 +101,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(5, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
@@ -109,14 +108,12 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(7, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
-                            Location = "Studio"
                         }
                     };
 
             DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(mockList)
-                );
+                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList)));
 
             var result = await ViewService.GetEvents(date, date);
 
@@ -156,7 +153,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(45),
                             PaddingStart = TimeSpan.FromMinutes(45),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #2 - Example",
@@ -164,7 +160,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(10, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(15),
                             PaddingStart = TimeSpan.FromMinutes(15),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
@@ -172,13 +167,12 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(18, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(180),
                             PaddingStart = TimeSpan.FromMinutes(60),
-                            Location = "Studio"
                         }
                     };
 
             DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(mockList)
+                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(date, date);
@@ -213,7 +207,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(45),
                             PaddingStart = TimeSpan.FromMinutes(45),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #2 - Example",
@@ -221,7 +214,6 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(5, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(15),
                             PaddingStart = TimeSpan.FromMinutes(30),
-                            Location = "Home"
                         },
                         new() {
                             Name = "Event #3 - Breakfast",
@@ -229,13 +221,12 @@ namespace Admin.Tests.Data.Events
                             EndTime = new DateTime(date, new TimeOnly(8, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(60),
                             PaddingStart = TimeSpan.FromMinutes(60),
-                            Location = "Studio"
                         }
                     };
 
             DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(mockList)
+                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(date, date);
@@ -348,7 +339,7 @@ namespace Admin.Tests.Data.Events
 
             DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(mockList)
+                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(day1, day1.AddDays(2));
@@ -363,7 +354,7 @@ namespace Admin.Tests.Data.Events
 
             // 1 clash for "4", so it should fill half the space
             Assert.Equal(widthHalf, result[3].WidthPc(day1));
-            
+
             // Nothing stopping "5" filling max size.
             Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, result[4].WidthPc(day1));
 

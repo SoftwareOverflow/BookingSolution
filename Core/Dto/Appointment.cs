@@ -1,10 +1,8 @@
 ﻿namespace Core.Dto
 {
-    public record class Appointment
+    public record Appointment : DtoBase
     {
         public string Name { get; set; }
-
-        public string? Location { get; set; }
 
         /// <summary>
         /// The StartTime of the booking, excluding any padding

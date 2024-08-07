@@ -1,4 +1,5 @@
 ﻿using Data.Context;
+using Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,8 @@ namespace Data.Extensions
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
+
+            services.AddTransient<IServiceContext, ApplicationDbContext>();
         }
     }
 }

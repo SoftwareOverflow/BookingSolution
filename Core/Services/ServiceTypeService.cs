@@ -1,13 +1,19 @@
 ﻿using Core.Dto;
 using Core.Interfaces;
+using Data.Interfaces;
 using System.Drawing;
 
 namespace Core.Services
 {
     internal class ServiceTypeService : IServiceTypeService
     {
+        private IServiceContext ServiceContext;
         private List<ServiceType> ServiceTypesCache = new List<ServiceType>();
 
+        public ServiceTypeService(IServiceContext serviceContext)
+        {
+            ServiceContext = serviceContext;
+        }
 
         /// <summary>
         /// 

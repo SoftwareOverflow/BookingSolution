@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace Core.Dto
 {
-    public class ServiceType
+    public record ServiceType : DtoBase
     {
         /// <summary>
         /// The name of the service selected by the user
