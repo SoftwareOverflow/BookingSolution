@@ -1,6 +1,5 @@
 ﻿@page "/services"
 
-@using Admin.Components.Shared.ServiceType
 @using Admin.Data.Helpers
 @using Core.Dto
 @using Core.Interfaces
@@ -26,6 +25,12 @@
     </div>
 </MudOverlay>
 
+<a class="flex-row" href="/services/new">
+    <button type="button" class="create-new-button">
+        <span class="material-symbols-outlined">data_saver_on</span>
+        Offer a New Service
+    </button>
+</a>
 <div class="service-type-grid">
     @foreach (var item in ServiceTypes)
     {
@@ -42,28 +47,9 @@
                 <div style="flex-grow: 1" />
                 <div class="flex-row space-evenly">
                     <div class="flex-row">
-                        <span class="material-symbols-outlined">pin_drop</span>
-                        @*TODO might move this kind of logic to an object for the UI which modifies the getter*@
-                        @(String.IsNullOrWhiteSpace(item.Location) ? "Not Set" : @item.Location)
-                    </div>
-                    <div class="flex-row">
                         £@item.Price
                     </div>
                 </div>
-
-                @*                     @{
-            var hiddenClass = ServiceTypeInEdit == item ? "" : "hidden";
-            }
-            <div class="flex-row edit-buttons @hiddenClass">
-            <div class="flex-row">
-            <span class="material-symbols-outlined">delete_forever</span>
-            Delete
-            </div>
-            <div class="flex-row">
-            <span class="material-symbols-outlined">verified</span>
-            Save Cahnges
-            </div>
-            </div>*@
             </div>
         </div>
     }

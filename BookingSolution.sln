@@ -5,11 +5,11 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "Data\Data.csproj", "{116A7FAE-8F48-4636-B6EC-7C19268F5BDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin", "Admin\Admin.csproj", "{FF2BD86B-D316-4E6D-98F0-D5817156643F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin", "Admin\Admin.csproj", "{FF2BD86B-D316-4E6D-98F0-D5817156643F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{C3E6BF84-95C2-45C6-B3D9-9664475B3205}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{C3E6BF84-95C2-45C6-B3D9-9664475B3205}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin.Tests", "Admin.Tests\Admin.Tests.csproj", "{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.Tests", "Admin.Tests\Admin.Tests.csproj", "{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

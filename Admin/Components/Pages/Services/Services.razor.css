@@ -1,4 +1,17 @@
-﻿.service-type-grid {
+﻿.create-new-button {
+    text-align: center;
+    width: 33%;
+    background-color: cornflowerblue;
+    border-radius: 5px;
+    margin-bottom: 40px;
+    font-size: 20px;
+}
+    .create-new-button .material-symbols-outlined {
+        font-size: 40px;
+        padding: 5px 10px;
+    }
+
+.service-type-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     column-gap: 40px;

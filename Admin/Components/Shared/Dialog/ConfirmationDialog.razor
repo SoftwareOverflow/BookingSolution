@@ -1,0 +1,32 @@
+﻿<MudDialog>
+    <TitleContent>
+        Are You Sure?
+    </TitleContent>
+    <DialogContent>
+        <div>@Content</div>
+
+        @if(Warning != "")
+        {
+            <MudAlert Severity="Severity.Error">This cannot be undone!</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">No, Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Yes</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string Content { get; set; } = "";
+
+    [Parameter]
+    public string Warning { get; set; } = "";
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+}

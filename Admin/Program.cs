@@ -32,6 +32,9 @@ builder.Services.AddMudServices(config =>
 if (builder.Environment.IsDevelopment())
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddRazorComponents(options =>
+    options.DetailedErrors = builder.Environment.IsDevelopment());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

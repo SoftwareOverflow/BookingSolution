@@ -1,0 +1,14 @@
+﻿@page "/services/new"
+
+@using Admin.Components.Shared.Service
+@using Core.Dto
+
+<h1>Create Your Service:</h1>
+
+<CascadingValue Value="Service">
+    <ServiceForm IsCreating="true" />
+</CascadingValue>
+
+@code {
+    private ServiceType Service = new ServiceType();
+}

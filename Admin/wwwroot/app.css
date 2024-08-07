@@ -104,3 +104,7 @@ h1:focus {
 .hidden {
     display: none;
 }
+
+.center-text {
+    text-align: center;
+}

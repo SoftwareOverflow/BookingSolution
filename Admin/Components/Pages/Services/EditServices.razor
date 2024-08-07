@@ -1,8 +1,10 @@
 ﻿@page "/services/edit"
 
+@using Admin.Components.Shared.Service
 @using Admin.Data.Helpers
 @using Core.Dto;
 @using Core.Interfaces
+@using System.Globalization
 
 @inject IServiceTypeService ServiceTypeService
 @inject MessageManager MessageManager
@@ -10,73 +12,40 @@
 @inject NavigationManager NavigationManager
 
 
-@if (ServiceType != null)
+@if (Service != null)
 {
-    <span>Edit Your Service: @ServiceType.Name</span>
-    <div class="modal-dialog-centered">
-        <MudForm Spacing="4" Model="ServiceType">
-            <div class="flex-row input title">
-                <MudTextField MaxLength="50" Label="Name" @bind-Value="ServiceType!.Name"></MudTextField>
-            </div>
-            <div class="flex-row input">
-                <MudTextField AutoGrow="true" Label="Description" @bind-Value="ServiceType!.Description"></MudTextField>
-            </div>
-            <div class="flex-row input">
-                <MudInputLabel>
-                    <div>
-                        Location:
-                        <div class="flex-row">
-                            Set by user when booking?
-                            <InputCheckbox @bind-Value="LocationSetByUser" />
-                        </div>
+    <h1>Manage Your Service:</h1>
 
-                        <MudTextField HelperText="@(LocationSetByUser ? "Set By User When Booking" : "Where the booking will occur")" Disabled="@LocationSetByUser" ReadOnly="@LocationSetByUser" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.MyLocation" @bind-Value="ServiceType!.Location"></MudTextField>
-                    </div>
-
-                </MudInputLabel>
-            </div>
-        </MudForm>
-    </div>
+    <CascadingValue Value="Service">
+        <ServiceForm IsCreating="false" />
+    </CascadingValue>
 }
 
-@*    </DialogContent>
-     <DialogActions>
-        <MudButton OnClick="Delete">
-            <span class="material-symbols-outlined">delete_forever</span>
-            Delete
-        </MudButton>
-        <div style="flex-grow: 1" />
-        <MudButton OnClick="SaveChangesAsync">
-            <span class="material-symbols-outlined">new_releases</span>
-            Save Changes
-        </MudButton>
-    </DialogActions>
-</MudDialog> *@
-
 @code {
-    private ServiceType? ServiceType;
-
-    private bool LocationSetByUser;
+    private ServiceType? Service;
 
     protected override void OnParametersSet()
     {
-        ServiceType = StateContainer.GetItem();
+        Service = StateContainer.GetItem();
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (ServiceType == null)
+        if (Service == null)
         {
             MessageManager.AddMessage(new MessageBase
                 {
                     Message = "Unable to locate service type to edit",
                     Severity = Severity.Warning
                 });
-            NavigationManager.NavigateTo("/services", new NavigationOptions
-                {
-                    ReplaceHistoryEntry = true,
-                });
+
+            NavigateBack(true);
         }
+    }
+
+    private void OnDateAvailabilityChange(DayOfWeek day, bool available)
+    {
+        Service!.DaysOffered[day] = available;
     }
 
     private void Delete()
@@ -87,5 +56,13 @@
     private void SaveChangesAsync()
     {
         // TODO open another Are You Sure dialog with warning
+    }
+
+    private void NavigateBack(bool replaceHistory = false)
+    {
+        NavigationManager.NavigateTo("/services", new NavigationOptions
+            {
+                ReplaceHistoryEntry = replaceHistory,
+            });
     }
 }
