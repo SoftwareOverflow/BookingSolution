@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Data.Entity
 {
@@ -43,6 +44,7 @@ namespace Data.Entity
         /// <summary>
         /// Cost to the appointment maker
         /// </summary>
+        [Column(TypeName = "decimal(19, 4)")]
         public decimal Price { get; set; }
 
 
