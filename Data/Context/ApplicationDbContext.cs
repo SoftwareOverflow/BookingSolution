@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Data.Entity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,16 @@ namespace Data.Context
                     builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
 
             base.OnConfiguring(options);
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<IdentityUser>(user =>
+            {
+                user.HasOne<BusinessUser>().WithOne(x => x.User);
+            });
         }
     }
 }
