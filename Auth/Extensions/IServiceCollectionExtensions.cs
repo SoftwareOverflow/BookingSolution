@@ -28,7 +28,6 @@ namespace Auth.Extensions
 
             services.AddAuthorization();
             services.AddAntiforgery();
-
         }
     }
 }

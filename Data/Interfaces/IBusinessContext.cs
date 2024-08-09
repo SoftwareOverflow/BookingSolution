@@ -5,7 +5,7 @@ namespace Data.Interfaces
 {
     public interface IBusinessContext
     {
-        public Task<bool> RegisterBusiness(Func<Task<ApplicationUser?>> registerUser, Business business);
+        public Task<bool> RegisterBusiness(string userId, Business business);
 
     }
 }

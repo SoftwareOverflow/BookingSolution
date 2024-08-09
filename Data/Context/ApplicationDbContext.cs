@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
+using System.Reflection.Metadata;
 
 namespace Data.Context
 {
@@ -17,14 +19,27 @@ namespace Data.Context
             base.OnConfiguring(options);
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        public override int SaveChanges()
         {
-            base.OnModelCreating(builder);
+            SetGuidsOnAdd();
 
-            /*builder.Entity<IdentityUser>(user =>
-            {
-                user.HasOne<BusinessUser>().WithOne(x => x.User);
-            });*/
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            SetGuidsOnAdd();
+
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        private void SetGuidsOnAdd()
+        {
+            ChangeTracker.Entries().Where(x => x.Entity is BaseEntity && x.State == EntityState.Added)
+                .Select(x => (BaseEntity)x.Entity).ToList()
+                .ForEach(item =>
+                    item.Guid = Guid.NewGuid()
+                );
         }
     }
 }

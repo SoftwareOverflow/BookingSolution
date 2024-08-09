@@ -16,14 +16,14 @@ namespace Core.Services
             Context = context;
             Mapper = mapper;
         }
-        public async Task<IdentityResult> RegisterBusiness(Func<Task<ApplicationUser?>> registerUser, BusinessDto dto)
+        public async Task<IdentityResult> RegisterBusiness(string userId, BusinessDto dto)
         {
             // TODO create the user, then create the business, then update the user with the business Id.
             // TODO we'd rather have orphaned people than businesses I think...
             try
             {
                 var entity = Mapper.Map<Business>(dto);
-                var result = await Context.RegisterBusiness(registerUser, entity);
+                var result = await Context.RegisterBusiness(userId, entity);
 
                 if (result)
                 {

@@ -6,6 +6,6 @@ namespace Core.Interfaces
 {
     public interface IBusinessService
     {
-        public Task<IdentityResult> RegisterBusiness(Func<Task<ApplicationUser?>> registerUser, BusinessDto dto);
+        public Task<IdentityResult> RegisterBusiness(string userId, BusinessDto dto);
     }
 }

@@ -26,7 +26,6 @@
         <div class="row">
             <ObjectGraphDataAnnotationsValidator />
             <div class="col-md-4">
-
                 <h2>Create Your Account.</h2>
                 <hr />
                 <div class="form-floating mb-3">
@@ -119,13 +118,10 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
     public async Task RegisterUser(EditContext editContext)
     {
-        identityErrors = [];
-
         var user = CreateUser();
 
         user.FirstName = Input.FirstName;
@@ -134,30 +130,11 @@
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-        var result = await BusinessService.RegisterBusiness(
-            registerUser: async () =>
-            {
-                var userResult = await UserManager.CreateAsync(user, Input.Password);
-                if (userResult.Succeeded)
-                {
-                    return user;
-                }
-                else
-                {
-                    identityErrors.ToList().AddRange(userResult.Errors);
-                    return null;
-                }
-            },
-            Input.Business
-        );
+        var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
         {
-            if(identityErrors.Count() == 0)
-            {
-                identityErrors = result.Errors;
-            }
+            identityErrors = result.Errors;
             return;
         }
 
@@ -171,6 +148,14 @@
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
 
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+        // Attempt to create the business for our new user. If this fails, the user will have to recreate it again later.
+        /*
+         * TODO can I make this a better user experience if this doesn't register correctly?
+         * Currently thinking of checking in the main UI if the user has a business, and redirecting them if not.
+         * However, this is all embedded in the form directly at the moment. WORK THIS OUT BEFORE RELEASE!
+         */
+        await BusinessService.RegisterBusiness(userId, Input.Business);
 
         if (UserManager.Options.SignIn.RequireConfirmedAccount)
         {

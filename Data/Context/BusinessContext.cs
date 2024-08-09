@@ -9,20 +9,20 @@ namespace Data.Context
     {
         private DbSet<Business> Businesses { get; set; }
 
-
-        public async Task<bool> RegisterBusiness(Func<Task<ApplicationUser?>> registerUser, Business business)
+        public async Task<bool> RegisterBusiness(string userId, Business business)
         {
             using var transaction = Database.BeginTransaction();
 
             try
             {
-                var user = await registerUser();
+                var user = await Users.SingleAsync(x => x.Id == userId);
 
                 if (user != null)
                 {
-                    business.Users.Add(user);
-
                     Businesses.Add(business);
+                    await SaveChangesAsync();
+
+                    user.BusinessId = business.Id;
                     await SaveChangesAsync();
 
                     transaction.Commit();
