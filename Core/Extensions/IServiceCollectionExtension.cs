@@ -1,7 +1,10 @@
-﻿using Core.Interfaces;
+﻿using AutoMapper;
+using Core.Dto;
+using Core.Interfaces;
+using Core.Mapping;
 using Core.Services;
+using Data.Entity;
 using Data.Extensions;
-using LocalNetCoreAuth.IndividualAccounts.Components.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Extensions
@@ -10,11 +13,13 @@ namespace Core.Extensions
     {
         public static void AddApplicationLayers(this IServiceCollection services)
         {
-            services.AddAuthenticationLayer();
             services.AddPersistanceLayer();
+
+            services.AddAutoMapper(typeof(AutoMapperConfig));
 
             services.AddTransient<IAppointmentDataService, AppointmentService>();
             services.AddTransient<IServiceTypeService, ServiceTypeService>();
+            services.AddTransient<IBusinessService, BusinessService>();
         }
     }
 }

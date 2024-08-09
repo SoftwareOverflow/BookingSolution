@@ -2,6 +2,6 @@
 {
     public record DtoBase
     {
-        public Guid Guid { get; set; }
+        public Guid Guid { get; set; } = Guid.NewGuid();
     }
 }

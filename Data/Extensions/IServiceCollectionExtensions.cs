@@ -1,4 +1,5 @@
 ﻿using Data.Context;
+using Data.Entity;
 using Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,13 +12,14 @@ namespace Data.Extensions
         {
             services.AddDbContext<ApplicationDbContext>();
 
-            services.AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false) // TODO change this in appSettings for debug, dev, int and prod.
+            services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false) // TODO change this in appSettings for debug, dev, int and prod.
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
 
             services.AddTransient<IServiceContext, ApplicationDbContext>();
+            services.AddTransient<IBusinessContext, ApplicationDbContext>();
         }
     }
 }

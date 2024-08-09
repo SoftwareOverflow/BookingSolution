@@ -9,12 +9,15 @@
         /// </summary>
         public string Url { get; set; }
 
+        
+        public int AddressId { get; set; }
+        
         // TODO might need some sort of API Key to check against, or could possibly use the guid property
 
         public virtual Address Address { get; set; }
 
-        public virtual ICollection<Service> Services { get; set; }
+        public virtual ICollection<Service> Services { get; set; } = [];
 
-        public virtual ICollection<BusinessUser> Users { get; set; }
+        public virtual ICollection<ApplicationUser> Users { get; set; } = [];
     }
 }

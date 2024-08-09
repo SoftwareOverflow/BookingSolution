@@ -1,6 +1,7 @@
 using Admin.Components;
 using Admin.Data.Events;
 using Admin.Data.Helpers;
+using Auth.Extensions;
 using Core.Dto;
 using Core.Extensions;
 using MudBlazor;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddAuthenticationLayer();
 builder.Services.AddApplicationLayers();
 builder.Services.AddSingleton<StateContainerSingle<ServiceType>>();
 builder.Services.AddSingleton<MessageManager>();
@@ -56,7 +58,7 @@ app.UseStaticFiles();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies(typeof(LocalNetCoreAuth.IndividualAccounts.Components.Account.Pages.Login).Assembly);
+    .AddAdditionalAssemblies(typeof(Auth.Components.Account.Pages.Login).Assembly);
 
 app.MapAdditionalIdentityEndpoints();
 

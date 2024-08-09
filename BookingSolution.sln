@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.Tests", "Admin.Tests\Admin.Tests.csproj", "{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Auth", "Auth\Auth.csproj", "{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

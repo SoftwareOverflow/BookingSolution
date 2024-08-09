@@ -11,7 +11,7 @@ namespace Data.Entity
         /// Unique GUID reference to abstract the Int primary key away
         /// for potential security reasons
         /// </summary>
-        public Guid Guid { get; set; }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         public BaseEntity()
         {

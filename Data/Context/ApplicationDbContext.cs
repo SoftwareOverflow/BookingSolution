@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Context
 {
-    internal partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<IdentityUser>(options)
+    internal partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         private const string connectionString = "Server=(localdb)\\mssqllocaldb;Database=BookingSolutions;Trusted_Connection=True;";
 
@@ -21,10 +21,10 @@ namespace Data.Context
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityUser>(user =>
+            /*builder.Entity<IdentityUser>(user =>
             {
                 user.HasOne<BusinessUser>().WithOne(x => x.User);
-            });
+            });*/
         }
     }
 }
