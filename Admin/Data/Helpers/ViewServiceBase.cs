@@ -1,13 +1,14 @@
 ﻿using Core;
-using MudBlazor;
+using Core.Dto;
+using Core.Interfaces;
 
 namespace Admin.Data.Helpers
 {
     public class ViewServiceBase
     {
-        private MessageManager Messages;
+        private IMessageService Messages;
 
-        public ViewServiceBase(MessageManager messageManager)
+        public ViewServiceBase(IMessageService messageManager)
         {
             Messages = messageManager;
         }
@@ -23,7 +24,7 @@ namespace Admin.Data.Helpers
             {
                 foreach (var error in result.Errors)
                 {
-                    Messages.AddMessage(new MessageBase(error, Severity.Error));
+                    Messages.AddMessage(new MessageBase(error, MessageBase.MessageType.Error));
                 }
             }
 

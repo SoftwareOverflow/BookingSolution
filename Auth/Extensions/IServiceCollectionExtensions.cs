@@ -1,8 +1,11 @@
 ﻿using Auth.Components.Account;
-using Data.Entity;
-using Data.Interfaces;
+using Auth.Context;
+using Auth.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Auth.Extensions
@@ -14,8 +17,7 @@ namespace Auth.Extensions
             services.AddCascadingAuthenticationState();
             services.AddScoped<IdentityUserAccessor>();
             services.AddScoped<IdentityRedirectManager>();
-            services.AddScoped<IUserResolverService, IdentityRevalidatingAuthenticationStateProvider>();
-            services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<IUserResolverService>().GetAuthenticationStateProvider());
+            services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
             services.AddAuthentication(options =>
             {
@@ -24,10 +26,19 @@ namespace Auth.Extensions
             })
                 .AddIdentityCookies();
 
-            services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            services.AddDbContext<AuthenticationContext>();
 
-            services.AddAuthorization();
-            services.AddAntiforgery();
+            services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false) // TODO change this to use environment settings
+            .AddEntityFrameworkStores<AuthenticationContext>()
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
+
+            services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+        }
+
+        public static void AddAuthenticationLayer(this WebApplication app)
+        {
+            app.MapAdditionalIdentityEndpoints();
         }
     }
 }

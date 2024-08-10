@@ -1,8 +1,7 @@
 ﻿@page "/Account/Manage/ResetAuthenticator"
 
-@using Data.Entity
 @using Microsoft.AspNetCore.Identity
-
+@using Auth.Data
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -12,7 +11,7 @@
 
 <PageTitle>Reset authenticator key</PageTitle>
 
-<StatusMessage />
+@* <StatusMessage /> *@
 <h3>Reset authenticator key</h3>
 <div class="alert alert-warning" role="alert">
     <p>

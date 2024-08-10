@@ -1,7 +1,6 @@
 using Admin.Components;
 using Admin.Data.Events;
 using Admin.Data.Helpers;
-using Auth.Extensions;
 using Core.Dto;
 using Core.Extensions;
 using MudBlazor;
@@ -13,10 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddAuthenticationLayer();
 builder.Services.AddApplicationLayers();
 builder.Services.AddSingleton<StateContainerSingle<ServiceType>>();
-builder.Services.AddSingleton<MessageManager>();
 builder.Services.AddScoped<AppointmentViewService>();
 
 builder.Services.AddMudServices(config =>
@@ -58,9 +55,9 @@ app.UseStaticFiles();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies(typeof(Auth.Components.Account.Pages.Login).Assembly);
+    .AddApplicationAssemblies();
 
-app.MapAdditionalIdentityEndpoints();
+app.AddApplicationLayers();
 
 app.UseAntiforgery();
 

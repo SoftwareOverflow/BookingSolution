@@ -1,5 +1,4 @@
 ﻿using Admin.Data.Events;
-using Admin.Data.Helpers;
 using Core;
 using Core.Dto;
 using Core.Interfaces;
@@ -10,7 +9,7 @@ namespace Admin.Tests.Data.Events
     public class AppointmentViewServiceTests
     {
         private readonly Mock<IAppointmentDataService> DataMock = new();
-        private readonly Mock<MessageManager> MessageMock = new();
+        private readonly Mock<IMessageService> MessageMock = new();
         private AppointmentViewService ViewService;
 
         public AppointmentViewServiceTests()

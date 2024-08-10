@@ -1,3 +1,5 @@
+﻿using Auth.Data;
+using Auth.Components.Account.Pages.Manage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -11,12 +13,10 @@ using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 using System.Text.Json;
 using Auth.Components.Account.Pages;
-using Auth.Components.Account.Pages.Manage;
-using Data.Entity;
 
 namespace Microsoft.AspNetCore.Routing
 {
-    public static class IdentityComponentsEndpointRouteBuilderExtensions
+    internal static class IdentityComponentsEndpointRouteBuilderExtensions
     {
         // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
         public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)

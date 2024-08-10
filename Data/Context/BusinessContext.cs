@@ -15,7 +15,7 @@ namespace Data.Context
 
             try
             {
-                var user = await Users.SingleAsync(x => x.Id == userId);
+                /*var user = await Users.SingleAsync(x => x.Id == userId);
 
                 if (user != null)
                 {
@@ -28,7 +28,7 @@ namespace Data.Context
                     transaction.Commit();
 
                     return true;
-                }
+                }*/
 
                 return false;
             }

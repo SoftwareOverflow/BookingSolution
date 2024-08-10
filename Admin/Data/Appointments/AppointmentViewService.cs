@@ -4,7 +4,7 @@ using Core.Interfaces;
 
 namespace Admin.Data.Events
 {
-    public class AppointmentViewService(IAppointmentDataService dataService, MessageManager messages) : ViewServiceBase(messages)
+    public class AppointmentViewService(IAppointmentDataService dataService, IMessageService messages) : ViewServiceBase(messages)
     {
         public async Task<List<PositionedAppointment>> GetEvents(DateOnly start, DateOnly end)
         {

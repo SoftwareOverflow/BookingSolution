@@ -6,7 +6,7 @@
 
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
-@inject MessageManager MessageManager
+@inject IMessageService MessageService
 
 <div class="service-form">
     <EditForm @ref="Form" Spacing="4" Model="Service">
@@ -154,9 +154,9 @@
         {
             // TODO delete from Server
 
-            MessageManager.AddMessage(new MessageBase(
+            MessageService.AddMessage(new MessageBase(
                     message: "Service deleted (NOT YET)",
-                    severity: Severity.Info
+                    severity: MessageBase.MessageType.Normal
             ));
 
             NavigationManager.NavigateTo("/services");
@@ -182,10 +182,10 @@
         {
             // TODO Save changes
 
-            MessageManager.AddMessage(new MessageBase(
+            MessageService.AddMessage(new MessageBase(
                    "Changes Saved Successfully (NOT YET)",
-                    Severity.Info
-            ));
+                    MessageBase.MessageType.Normal
+        ));
 
             NavigationManager.NavigateTo("/services");
         }

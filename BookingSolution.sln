@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.Tests", "Admin.Tests\Admin.Tests.csproj", "{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Auth", "Auth\Auth.csproj", "{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "Auth\Auth.csproj", "{D6150700-E9CE-44A9-B8CB-B5901C7D7014}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A43597E1-556A-4DD1-AADC-AED81C278855}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,13 +37,16 @@ Global
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A3D23931-1D30-4538-88F3-9C6FCD29C5FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B} = {A43597E1-556A-4DD1-AADC-AED81C278855}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9FDC013-3612-408A-BA49-3BC8A0951C01}

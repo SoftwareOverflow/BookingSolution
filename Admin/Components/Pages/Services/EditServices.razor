@@ -7,7 +7,7 @@
 @using System.Globalization
 
 @inject IServiceTypeService ServiceTypeService
-@inject MessageManager MessageManager
+@inject IMessageService MessageService
 @inject StateContainerSingle<ServiceType> StateContainer
 @inject NavigationManager NavigationManager
 
@@ -33,9 +33,9 @@
     {
         if (Service == null)
         {
-            MessageManager.AddMessage(new MessageBase(
+            MessageService.AddMessage(new MessageBase(
                     message: "Unable to locate service type to edit",
-                    severity: Severity.Warning
+                    severity: MessageBase.MessageType.Warning
             ));
 
             NavigateBack(true);

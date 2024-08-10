@@ -18,6 +18,6 @@
 
         public virtual ICollection<Service> Services { get; set; } = [];
 
-        public virtual ICollection<ApplicationUser> Users { get; set; } = [];
+        public virtual ICollection<BusinessUser> Users { get; set; } = [];
     }
 }

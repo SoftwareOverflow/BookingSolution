@@ -1,4 +1,4 @@
-using Data.Entity;
+﻿using Auth.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 

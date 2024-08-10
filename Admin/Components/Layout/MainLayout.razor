@@ -1,12 +1,14 @@
 ﻿@using Admin.Components.Shared
 @using Admin.Data.Helpers
+@using Core.Dto
+@using Core.Interfaces
 
 @inherits LayoutComponentBase
 
 @implements IDisposable
 
 @inject ISnackbar Snackbar
-@inject MessageManager MessageManager
+@inject IMessageService MessageService
 
 <header>
     <TopNavBar />
@@ -31,16 +33,33 @@
 
     protected override void OnInitialized()
     {
-        MessageManager.OnMessage += OnMessage;
+        MessageService.AddMessageListener(OnMessage);
     }
 
     private void OnMessage(MessageBase message)
     {
-        Snackbar.Add(message.Message, message.Severity);
+        var severity = Severity.Normal;
+        switch (message.Severity)
+        {
+            case MessageBase.MessageType.Success:
+                severity = Severity.Success;
+                break;
+            case MessageBase.MessageType.Normal:
+                severity = Severity.Normal;
+                break;
+            case MessageBase.MessageType.Warning:
+                severity = Severity.Warning;
+                break;
+            case MessageBase.MessageType.Error:
+                severity = Severity.Error;
+                break;
+        }
+
+        Snackbar.Add(message.Message, severity);
     }
 
     public void Dispose()
     {
-        MessageManager.OnMessage -= OnMessage;
+        //MessageService.RemoveMessageListener(OnMessage);
     }
 }
