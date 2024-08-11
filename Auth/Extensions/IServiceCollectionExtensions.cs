@@ -1,11 +1,12 @@
 ﻿using Auth.Components.Account;
 using Auth.Context;
 using Auth.Data;
+using Auth.Interfaces;
+using Auth.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Auth.Extensions
@@ -34,6 +35,11 @@ namespace Auth.Extensions
             .AddDefaultTokenProviders();
 
             services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+
+            services.AddScoped<UserService>();
+            services.AddScoped<IUserServiceInternal>(sp => sp.GetRequiredService<UserService>());
+            services.AddScoped<IUserService>(sp => sp.GetRequiredService<UserService>());
         }
 
         public static void AddAuthenticationLayer(this WebApplication app)

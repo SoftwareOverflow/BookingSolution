@@ -1,9 +1,11 @@
 ﻿@page "/Account/LoginWith2fa"
 
 @using System.ComponentModel.DataAnnotations
+@using Auth.Interfaces
 @using Microsoft.AspNetCore.Identity
 @using Auth.Data
 
+@inject IUserServiceInternal UserServiceInternal
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
@@ -74,6 +76,8 @@
         {
             Logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", userId);
             RedirectManager.RedirectTo(ReturnUrl);
+
+            UserServiceInternal.NotifyUserEvent(UserEvent.SignIn, userId);
         }
         else if (result.IsLockedOut)
         {

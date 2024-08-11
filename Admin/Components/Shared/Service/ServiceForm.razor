@@ -139,7 +139,7 @@
         NavigationManager.NavigateTo("/services");
     }
 
-    private async void Delete()
+    private async Task<bool> Delete()
     {
         var parameters = new DialogParameters<ConfirmationDialog>
         {
@@ -160,14 +160,17 @@
             ));
 
             NavigationManager.NavigateTo("/services");
+            return true;
         }
+
+        return false;
     }
 
-    private async void SaveChangesAsync()
+    private async Task<bool> SaveChangesAsync()
     {
         if (!Form!.EditContext!.Validate())
         {
-            return;
+            return false;
         }
 
         var parameters = new DialogParameters<ConfirmationDialog>
@@ -184,14 +187,16 @@
 
             MessageService.AddMessage(new MessageBase(
                    "Changes Saved Successfully (NOT YET)",
-                    MessageBase.MessageType.Normal
-        ));
+                    MessageBase.MessageType.Normal));
 
             NavigationManager.NavigateTo("/services");
+            return true;
         }
+
+        return false;
     }
 
-    private async void ShowUnsavedChangesDialog()
+    private async Task ShowUnsavedChangesDialog()
     {
         var dialog = await DialogService.ShowAsync<UnsavedChangesDialog>();
         var result = await dialog.Result;

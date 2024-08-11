@@ -56,6 +56,6 @@
     private async Task<List<PositionedAppointment>> LoadEvents()
         => await EventService.GetEvents(DateOnly.FromDateTime(DateRange.Item1), DateOnly.FromDateTime(DateRange.Item2));
 
-    private async void TestErrors() =>
+    private async Task TestErrors() =>
         await EventService.GetEventsWithError();
 }

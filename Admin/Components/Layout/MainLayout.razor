@@ -1,12 +1,17 @@
 ﻿@using Admin.Components.Shared
 @using Admin.Data.Helpers
+@using Auth.Components.Account.Shared
 @using Core.Dto
 @using Core.Interfaces
+@using Core.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inherits LayoutComponentBase
 
 @implements IDisposable
 
+@inject IUserStateManager UserStateManager
+@inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject IMessageService MessageService
 
@@ -16,6 +21,15 @@
 
 <main>
     @Body
+
+    <div>
+        @authMessage
+        @userMessage
+    </div>
+
+    <button @onclick="SignOut">
+        LogOut?
+    </button>
 
     <MudThemeProvider />
     <MudPopoverProvider />
@@ -31,9 +45,46 @@
 
 @code {
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private string authMessage = "The user is NOT authenticated.";
+    private string? userName = null;
+    private string userMessage => (userName == null) ? "Hello, unknown" : $"Hello, {userName}" ;
+
+    protected override Task OnParametersSetAsync()
+    {
+        return base.OnParametersSetAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                authMessage = $"{user.Identity.Name} is authenticated";
+            }
+        }
+
+
+        UserStateManager.OnUserChange += OnUserChange;
+
+        await UserStateManager.Load();
+
+    }
+
     protected override void OnInitialized()
     {
         MessageService.AddMessageListener(OnMessage);
+    }
+
+    private void OnUserChange(string _userName){
+        userName = _userName;
+        StateHasChanged();
     }
 
     private void OnMessage(MessageBase message)
@@ -58,8 +109,14 @@
         Snackbar.Add(message.Message, severity);
     }
 
+    private void SignOut()
+    {
+        NavigationManager.NavigateTo(UserStateManager.GetSignOutPage(), true);
+    }
+
     public void Dispose()
     {
-        //MessageService.RemoveMessageListener(OnMessage);
+        MessageService.RemoveMessageListener(OnMessage);
+        UserStateManager.OnUserChange -= OnUserChange;
     }
 }

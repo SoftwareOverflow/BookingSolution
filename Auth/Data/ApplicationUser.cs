@@ -2,7 +2,7 @@
 
 namespace Auth.Data
 {
-    public class ApplicationUser : IdentityUser
+    internal class ApplicationUser : IdentityUser
     {
         public string FirstName { get; set; } = "";
 

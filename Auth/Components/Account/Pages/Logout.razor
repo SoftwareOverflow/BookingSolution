@@ -1,0 +1,34 @@
+﻿@page "/Account/Logout"
+
+@using Auth.Data
+@using Auth.Interfaces
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+@inject IUserServiceInternal UserServiceInternal
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Signing you out...</h3>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await SignInManager.SignOutAsync();
+
+
+        RedirectManager.RedirectTo(null);
+
+        UserServiceInternal.NotifyUserEvent(UserEvent.SignOut, "");
+    }
+}

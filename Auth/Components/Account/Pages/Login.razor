@@ -1,10 +1,12 @@
 ﻿@page "/Account/Login"
 
 @using System.ComponentModel.DataAnnotations
+@using Auth.Interfaces
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using Auth.Data
 
+@inject IUserServiceInternal UserServiceInternal
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
@@ -92,7 +94,13 @@
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
+
             Logger.LogInformation("User logged in.");
+
+            var user = await SignInManager.UserManager.FindByEmailAsync(Input.Email);
+            Logger.LogInformation("\n\nLogin page calling UserService -> LOGIN SUCCEEDED!\n\n");
+            UserServiceInternal.NotifyUserEvent(UserEvent.SignIn, user?.Id ?? "");
+
             RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)
