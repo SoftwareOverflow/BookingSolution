@@ -48,13 +48,23 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
+    [CascadingParameter]
+    private bool IsStaticRoute { get; set; }
+
     private string authMessage = "The user is NOT authenticated.";
     private string? userName = null;
-    private string userMessage => (userName == null) ? "Hello, unknown" : $"Hello, {userName}" ;
+    private string userMessage => $"Hello, {userName ?? "unknown alien"}";
 
-    protected override Task OnParametersSetAsync()
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        return base.OnParametersSetAsync();
+        UserStateManager.OnUserChange += OnUserChange;
+
+        if (!IsStaticRoute)
+        {
+            MessageService.AddMessageListener(OnMessage);
+        }
+
+        return base.OnAfterRenderAsync(firstRender);
     }
 
     protected override async Task OnInitializedAsync()
@@ -69,20 +79,10 @@
                 authMessage = $"{user.Identity.Name} is authenticated";
             }
         }
-
-
-        UserStateManager.OnUserChange += OnUserChange;
-
-        await UserStateManager.Load();
-
     }
 
-    protected override void OnInitialized()
+    private void OnUserChange(string? _userName)
     {
-        MessageService.AddMessageListener(OnMessage);
-    }
-
-    private void OnUserChange(string _userName){
         userName = _userName;
         StateHasChanged();
     }

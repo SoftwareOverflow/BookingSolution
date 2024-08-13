@@ -20,14 +20,14 @@ namespace Core.Services
         /// <summary>
         /// Unique reference to the user
         /// </summary>
-        internal string UserId { get; private set; } = "";
+        internal string? UserId { get; private set; } = null;
 
         /// <summary>
         /// The first name of the user, usable for a personalized experience when greeting the user for example
         /// </summary>
-        public string UserFirstName { get; private set; } = "";
+        public string? UserFirstName { get; private set; } = null;
 
-        public event Action<string>? OnUserChange;
+        public event Action<string?>? OnUserChange;
 
         public UserStateManager(IUserService userService, IMessageService messageService)
         {
@@ -58,18 +58,22 @@ namespace Core.Services
                 UserId = userId;
                 UserFirstName = await UserService.GetUserNameFromId(userId);
 
+                MessageService.AddMessage(new MessageBase("User Signed In", MessageBase.MessageType.Success));
+
                 // TODO logging
             } else if(userEvent == UserEvent.SignOut)
             {
                 Console.WriteLine("\n\n\nUser Signed Out\n\n\n");
 
-                UserId = string.Empty;
-                UserFirstName = string.Empty;
+                UserId = null;
+                UserFirstName = null;
 
 
                 MessageService.AddMessage(new MessageBase("Signed Out Successfully", MessageBase.MessageType.Success));
                 // TODO logging
             }
+
+            NullifyEmptyIds();
 
             OnUserChange?.Invoke(UserFirstName);
 
@@ -91,12 +95,25 @@ namespace Core.Services
                 UserFirstName = await UserService.GetUserNameFromId(UserId);
             } else
             {
-                UserFirstName = string.Empty;
+                UserFirstName = null;
             }
 
+            NullifyEmptyIds();
             OnUserChange?.Invoke(UserFirstName);
 
             IsUpToDate = true;
+        }
+
+        private void NullifyEmptyIds()
+        {
+            if (UserId == string.Empty)
+            {
+                UserId = null;
+            }
+            if (UserFirstName == string.Empty)
+            {
+                UserFirstName = null;
+            }
         }
 
         public void Dispose()

@@ -14,7 +14,6 @@ namespace Auth.Services
         SignInManager<ApplicationUser> SignInManager,
         IHttpContextAccessor contextAccessor,
         UserManager<ApplicationUser> UserManager,
-        HttpClient HttpClient,
         IdentityRedirectManager RedirectManager) : IUserServiceInternal, IUserService
     {
 

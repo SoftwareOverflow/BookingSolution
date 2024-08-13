@@ -26,9 +26,7 @@
     {
         await SignInManager.SignOutAsync();
 
-
-        RedirectManager.RedirectTo(null);
-
         UserServiceInternal.NotifyUserEvent(UserEvent.SignOut, "");
+        RedirectManager.RedirectTo("");
     }
 }
