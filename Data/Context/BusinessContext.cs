@@ -1,7 +1,7 @@
 ﻿using Data.Entity;
 using Data.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Data.Context
 {
@@ -9,34 +9,46 @@ namespace Data.Context
     {
         private DbSet<Business> Businesses { get; set; }
 
+        private DbSet<BusinessUser> BusinessUsers { get; set; }
+
+        public async Task<Business?> GetBusinessForUser(string userId)
+        {
+            var result =  await BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId);
+
+            if(result == null)
+            {
+                // TODO logging
+                return null;
+            }
+
+            return result.Business;
+        }
+
         public async Task<bool> RegisterBusiness(string userId, Business business)
         {
             using var transaction = Database.BeginTransaction();
 
-            try
+            // We should never try and register a business if the user already has a business.
+            if (BusinessUsers.Any(x => x.UserId == userId))
             {
-                /*var user = await Users.SingleAsync(x => x.Id == userId);
-
-                if (user != null)
-                {
-                    Businesses.Add(business);
-                    await SaveChangesAsync();
-
-                    user.BusinessId = business.Id;
-                    await SaveChangesAsync();
-
-                    transaction.Commit();
-
-                    return true;
-                }*/
-
-                return false;
+                throw new InvalidOperationException("Existing business found");
             }
-            catch (Exception ex)
+
+            Businesses.Add(business);
+            await SaveChangesAsync();
+
+            var businessUser = new BusinessUser()
             {
-                // TODO logging
-                return false;
-            }
+                UserId = userId,
+                BusinessId = business.Id,
+            };
+
+            BusinessUsers.Add(businessUser);
+            await SaveChangesAsync();
+
+            transaction.Commit();
+
+            return true;
         }
     }
 }

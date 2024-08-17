@@ -1,21 +1,14 @@
-﻿/*using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Data.Entity
 {
     public class BusinessUser
     {
-        [Key, ForeignKey("AspNetUsers")]
+        [Key]
         public string UserId { get; set; }
 
         public int BusinessId { get; set; }
 
-        public virtual ApplicationUser User { get; set; }
-
         public virtual Business Business { get; set; }
-
-
     }
 }
-*/

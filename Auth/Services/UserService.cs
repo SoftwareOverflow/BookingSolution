@@ -25,7 +25,6 @@ namespace Auth.Services
         public void AddUserListener(IUserObserver observer)
         {
             Observers.Add(observer);
-            Logger.LogInformation("Observer added:" + observer.GetHashCode());
         }
 
         public async Task<string> GetCurrentUserId()
@@ -59,7 +58,6 @@ namespace Auth.Services
 
         public void NotifyUserEvent(UserEvent userEvent, string userId)
         {
-            Logger.LogInformation($"ATTEMPTING NOTIFY observers ({Observers.Count}): {this.GetHashCode()}");
             Observers.ForEach(x =>
             {
                 x.OnUserEvent(userEvent, userId);
@@ -69,7 +67,6 @@ namespace Auth.Services
         public void RemoveUserListener(IUserObserver observer)
         {
             Observers.Remove(observer);
-            Logger.LogInformation("Observer removed:" + observer.GetHashCode());
         }
 
         public string GetSignOutPage() => "/Account/Logout";

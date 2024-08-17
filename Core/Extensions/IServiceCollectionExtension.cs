@@ -19,7 +19,8 @@ namespace Core.Extensions
             services.AddTransient<IServiceTypeService, ServiceTypeService>();
             services.AddTransient<IBusinessService, BusinessService>();
             services.AddScoped<IMessageService, MessageService>();
-            services.AddScoped<IUserStateManager, UserStateManager>();
+            services.AddScoped<UserStateManager>();
+            services.AddScoped<IUserService, UserService>();
         }
     }
 }

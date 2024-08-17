@@ -13,6 +13,8 @@
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+
 
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 
@@ -26,7 +28,7 @@
 </head>
 
 <body>
-    <CascadingValue Value="IsStaticRoute">
+    <CascadingValue Value="IsAccountRoute">
         <Routes @rendermode="RenderModeForPage" />
     </CascadingValue>
     <script src="_framework/blazor.web.js"></script>
@@ -41,13 +43,13 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [CascadingParameter]
-    private bool IsStaticRoute { get; set; } = false;
+    private bool IsAccountRoute { get; set; } = false;
 
     protected override void OnParametersSet()
     {
-        IsStaticRoute = HttpContext.Request.Path.StartsWithSegments("/Account");
+        IsAccountRoute = HttpContext.Request.Path.StartsWithSegments("/Account");
 
-        if (IsStaticRoute && HttpContext is null)
+        if (IsAccountRoute && HttpContext is null)
         {
             // If this code runs, we're currently rendering in interactive mode, so there is no HttpContext.
             // The identity pages need to set cookies, so they require an HttpContext. To achieve this we
@@ -57,5 +59,5 @@
     }
 
     private IComponentRenderMode? RenderModeForPage =>
-            IsStaticRoute ? null : InteractiveServer;
+            IsAccountRoute ? null : InteractiveServer;
 }

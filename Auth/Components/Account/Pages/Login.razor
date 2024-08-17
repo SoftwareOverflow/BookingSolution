@@ -98,7 +98,6 @@
             Logger.LogInformation("User logged in.");
 
             var user = await SignInManager.UserManager.FindByEmailAsync(Input.Email);
-            Logger.LogInformation("\n\nLogin page calling UserService -> LOGIN SUCCEEDED!\n\n");
             UserServiceInternal.NotifyUserEvent(UserEvent.SignIn, user?.Id ?? "");
 
             RedirectManager.RedirectTo(ReturnUrl);

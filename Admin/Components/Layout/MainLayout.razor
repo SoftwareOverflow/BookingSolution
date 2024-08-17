@@ -1,5 +1,7 @@
 ﻿@using Admin.Components.Shared
+@using Admin.Components.Shared.Business
 @using Admin.Data.Helpers
+@using Admin.Routing
 @using Auth.Components.Account.Shared
 @using Core.Dto
 @using Core.Interfaces
@@ -10,7 +12,7 @@
 
 @implements IDisposable
 
-@inject IUserStateManager UserStateManager
+@inject IUserService UserStateManager
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject IMessageService MessageService
@@ -20,7 +22,19 @@
 </header>
 
 <main>
-    @Body
+    @if (IsAccountRoute)
+    {
+        @Body
+    } else
+    {
+        @* <RequireBusinessView>
+            <ChildComponent>
+                @Body
+            </ChildComponent>
+        </RequireBusinessView> *@
+
+        @Body
+    }
 
     <div>
         @authMessage
@@ -49,22 +63,18 @@
     private Task<AuthenticationState>? authenticationState { get; set; }
 
     [CascadingParameter]
-    private bool IsStaticRoute { get; set; }
+    protected bool IsAccountRoute { get; set; }
 
     private string authMessage = "The user is NOT authenticated.";
     private string? userName = null;
     private string userMessage => $"Hello, {userName ?? "unknown alien"}";
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
-        UserStateManager.OnUserChange += OnUserChange;
-
-        if (!IsStaticRoute)
+        if (!IsAccountRoute)
         {
             MessageService.AddMessageListener(OnMessage);
         }
-
-        return base.OnAfterRenderAsync(firstRender);
     }
 
     protected override async Task OnInitializedAsync()
@@ -79,6 +89,14 @@
                 authMessage = $"{user.Identity.Name} is authenticated";
             }
         }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        UserStateManager.OnUserChange += OnUserChange;
+        await UserStateManager.Load();
+
+        await base.OnParametersSetAsync();
     }
 
     private void OnUserChange(string? _userName)

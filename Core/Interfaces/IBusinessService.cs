@@ -1,11 +1,23 @@
 ﻿using Core.Dto;
-using Data.Entity;
-using Microsoft.AspNetCore.Identity;
+using Core.Responses;
 
 namespace Core.Interfaces
 {
     public interface IBusinessService
     {
-        public Task<IdentityResult> RegisterBusiness(string userId, BusinessDto dto);
+        /// <summary>
+        /// Register a new business, owned by the provided userId
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user</param>
+        /// <param name="dto">The id of the business to link this user to, or null if the user is new</param>
+        /// <returns><see cref="ServiceResult{BusinessDto}"/> with the registered business</returns>
+        public Task<ServiceResult<BusinessDto>> RegisterBusiness(string userId, BusinessDto dto);
+
+        /// <summary>
+        /// Gets the business assosciated with this user account.
+        /// </summary>
+        /// <param name="userId">Unique identifier for the user</param>
+        /// <returns><see cref="ServiceResult{BusinessDto}"/> with the business</returns>
+        public Task<ServiceResult<BusinessDto>> GetBusinessForUser();
     }
 }

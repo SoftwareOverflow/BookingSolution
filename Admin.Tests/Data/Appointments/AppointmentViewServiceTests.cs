@@ -2,6 +2,7 @@
 using Core;
 using Core.Dto;
 using Core.Interfaces;
+using Core.Responses;
 using Moq;
 
 namespace Admin.Tests.Data.Events

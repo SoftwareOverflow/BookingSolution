@@ -1,4 +1,5 @@
 ﻿using Core.Dto;
+using Core.Responses;
 
 namespace Core.Interfaces
 {

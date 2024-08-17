@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Core.Dto;
 using Core.Interfaces;
+using Core.Responses;
 using Data.Entity;
 using Data.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Data;
 
 namespace Core.Services
 {
@@ -11,32 +13,72 @@ namespace Core.Services
     {
         private readonly IBusinessContext Context;
         private readonly IMapper Mapper;
-        public BusinessService(IBusinessContext context, IMapper mapper)
+        private readonly UserStateManager UserStateManager;
+        public BusinessService(IBusinessContext context, IMapper mapper, UserStateManager userStateManager)
         {
             Context = context;
             Mapper = mapper;
+            UserStateManager = userStateManager;
+
+            Console.WriteLine($"\n\nBusinessService UserStateManager {UserStateManager.GetHashCode()}\n\n");
         }
-        public async Task<IdentityResult> RegisterBusiness(string userId, BusinessDto dto)
+
+        public async Task<ServiceResult<BusinessDto>> GetBusinessForUser()
         {
-            // TODO create the user, then create the business, then update the user with the business Id.
-            // TODO we'd rather have orphaned people than businesses I think...
+            try
+            {
+                var userId = UserStateManager.UserId;
+                if (userId.IsNullOrEmpty())
+                {
+                    return new ServiceResult<BusinessDto>(null, ResultType.ClientError, ["Unable to identify user. Please try again."]);
+                }
+
+                var entity = await Context.GetBusinessForUser(userId!);
+                if (entity == null)
+                {
+                    // It's possible the user has no business (e.g. for new users)
+                    // We can still assume this is a successful request
+                    return new ServiceResult<BusinessDto>(null, ResultType.Success);
+                }
+
+                var dto = Mapper.Map<BusinessDto>(entity);
+
+                return new ServiceResult<BusinessDto>(dto);
+
+            }
+            catch (Exception ex)
+            {
+                // TODO logging
+            }
+
+            return ServiceResult<BusinessDto>.DefaultServerFailure();
+
+        }
+
+        public async Task<ServiceResult<BusinessDto>> RegisterBusiness(string userId, BusinessDto dto)
+        {
             try
             {
                 var entity = Mapper.Map<Business>(dto);
                 var result = await Context.RegisterBusiness(userId, entity);
 
+
                 if (result)
                 {
-                    return IdentityResult.Success;
+                    return new ServiceResult<BusinessDto>(dto);
                 }
+            }
+            catch (InvalidOperationException ex)
+            {
+                // TODO logging
+                // This would still be a server error as the client should not be able to call this if they have an existing business
             }
             catch (Exception ex)
             {
                 // TODO log properly
-
             }
 
-            return IdentityResult.Failed(new IdentityError { Description = "Internal Server Error" });
+            return ServiceResult<BusinessDto>.DefaultServerFailure();
         }
     }
 }

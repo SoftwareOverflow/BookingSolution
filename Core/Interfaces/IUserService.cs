@@ -1,6 +1,6 @@
 ﻿namespace Core.Interfaces
 {
-    public interface IUserStateManager
+    public interface IUserService
     {
         public event Action<string?>? OnUserChange;
 

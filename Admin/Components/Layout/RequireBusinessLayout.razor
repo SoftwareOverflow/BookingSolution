@@ -1,0 +1,37 @@
+﻿@using Admin.Routing
+@using Core.Dto
+@using Core.Interfaces
+
+@inherits LayoutComponentBase
+@layout MainLayout
+
+@inject IBusinessService BusinessService
+@inject NavigationManager NavigationManager
+@inject IMessageService MessageService
+
+<RequireBusinessView>
+    <ChildComponent>
+        @Body
+    </ChildComponent>
+</RequireBusinessView>
+
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await BusinessService.GetBusinessForUser();
+
+            if (!result.IsSuccess)
+            {
+                MessageService.AddMessage(new MessageBase("An error occured whilst loading.", MessageBase.MessageType.Error));
+            }
+            else if (result.Result == null)
+            {
+                NavigationManager.NavigateTo("/Business/Create");
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+﻿@using Core.Dto
+
+
+<EditForm Model="Business" OnValidSubmit="OnValidSubmit">
+
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public BusinessDto Business { get; set; }
+
+
+    private async Task OnValidSubmit()
+    {
+        
+    }
+}
