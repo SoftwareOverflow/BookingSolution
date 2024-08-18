@@ -13,7 +13,7 @@ namespace Data.Context
 
         public async Task<Business?> GetBusinessForUser(string userId)
         {
-            var result =  await BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId);
+            var result =  await BusinessUsers.Include(u => u.Business).SingleOrDefaultAsync(x => x.UserId == userId);
 
             if(result == null)
             {

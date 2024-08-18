@@ -123,10 +123,12 @@ namespace Core.Services
 
         public async Task<ServiceResult<Appointment>> GetErrors()
         {
-            await Task.Delay(1200);
+            await Task.Delay(500);
 
             var result = new ServiceResult<Appointment>(null, ResultType.ServerError);
             result.Errors.Add("An Unkown error occurred");
+
+            await Task.Delay(500);
             result.Errors.Add("Another error happened - YIKES!");
 
             return result;

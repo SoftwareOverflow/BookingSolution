@@ -1,17 +1,91 @@
 ﻿@using Core.Dto
-
+@using System.ComponentModel.DataAnnotations
+@using Core.Interfaces
 
 <EditForm Model="Business" OnValidSubmit="OnValidSubmit">
+    <ObjectGraphDataAnnotationsValidator />
+    <div class="row justify-content-center w-lg-60">
+        <div class="mb-4 mt-5 input-group">
+            <span class="input-group-text">
+                <span class="material-symbols-outlined">storefront</span>
+            </span>
+            <div class="form-floating flex-grow-1">
+                <InputText @bind-Value="Business.Name" class="form-control" autocomplete="organization" aria-required="true" placeholder="Business Name" />
+                <label for="name">Business Name</label>
+                <ValidationMessage For="() => Business.Name" class="text-danger" />
+            </div>
+        </div>
 
+        <div class="mb-4 mt-5 input-group">
+            <span class="input-group-text">
+                <span class="material-symbols-outlined">travel_explore</span>
+            </span>
+            <div class="form-floating flex-grow-1">
+                <InputText @bind-Value="Business.Url" class="form-control" aria-required="true" placeholder="Website" />
+                <label for="url">Business Website</label>
+                <ValidationMessage For="() => Business.Url" class="text-danger" />
+            </div>
+        </div>
+
+        <!-- #region Address -->
+        <div>
+            <div class="mb-0 mt-5 input-group">
+                <span class="input-group-text">
+                    <span class="material-symbols-outlined">home_pin</span>
+                </span>
+                <input class="form-control" value="Your Business Address" readonly="true" />
+            </div>
+            <div class="form-floating mb-1 mt-1">
+                <InputText @bind-Value="Business.Address.Address1" class="form-control" autocomplete="address-line1" aria-required="true" placeholder="Building Name / Number" />
+                <label for="address-name">Buidling Name</label>
+                <ValidationMessage For="() => Business.Address.Address1" class="text-danger" />
+            </div>
+            <div class="form-floating mb-1 mt-1">
+                <InputText @bind-Value="Business.Address.Address2" class="form-control" autocomplete="address-line2" aria-required="true" placeholder="Address Line 2..." />
+                <label for="address-line2">Street</label>
+                <ValidationMessage For="() => Business.Address.Address2" class="text-danger" />
+            </div>
+            <div class="form-floating mb-1 mt-1">
+                <InputText @bind-Value="Business.Address.Address3" class="form-control" autocomplete="address-line3" aria-required="true" placeholder="Address Line 3..." />
+                <label for="address-level2">Address Line 3</label>
+                <ValidationMessage For="() => Business.Address.Address3" class="text-danger" />
+            </div>
+            <div class="form-floating mb-1 mt-1">
+                <InputText @bind-Value="Business.Address.City" class="form-control" autocomplete="address-level2" aria-required="true" placeholder="City..." />
+                <label for="address-level2">City</label>
+                <ValidationMessage For="() => Business.Address.City" class="text-danger" />
+            </div>
+            <div class="form-floating mb-1 mt-1">
+                <InputText @bind-Value="Business.Address.State" class="form-control" autocomplete="address-level1" aria-required="true" placeholder="County..." />
+                <label for="address-level1">County</label>
+                <ValidationMessage For="() => Business.Address.State" class="text-danger" />
+            </div>
+            <div class="form-floating mb-1 mt-1">
+                <InputText @bind-Value="Business.Address.PostalCode" class="form-control" autocomplete="postal-code" aria-required="true" placeholder="password" />
+                <label for="postal-code">Postal Code</label>
+                <ValidationMessage For="() => Business.Address.PostalCode" class="text-danger" />
+            </div>
+        </div>
+        <!-- #endregion -->
+            <button type="submit" class="btn btn-lg btn-primary mt-4 float-end w-50">@(IsNewBusiness ?  "Register Business" : "Save Changes")</button>
+    </div>
 </EditForm>
 
 @code {
     [Parameter, EditorRequired]
     public BusinessDto Business { get; set; }
 
+    [Parameter]
+    public bool IsNewBusiness { get; set; } = false;
+
+    [Parameter, EditorRequired]
+    public Func<BusinessDto, Task> OnValidFormSubmittedAsync { get; set; }
 
     private async Task OnValidSubmit()
     {
-        
+        if(OnValidFormSubmittedAsync != null)
+        {
+            await OnValidFormSubmittedAsync(Business);
+        }
     }
 }

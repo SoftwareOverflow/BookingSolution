@@ -1,0 +1,30 @@
+﻿<!-- TODO ensure user sets up billing after their business registering -->
+
+<div class="container">
+    <div class="text-center">
+        <h4>Pricing Plans</h4>
+        <p class="lead text-muted">Choose how you want to pay</p>
+    </div>
+
+    <p class="lead">
+        Payment is based on the size of your business, and how many events are booked.
+        Reduced rates available for small businesses (&lt;£100,000 gross revenue).
+    </p>
+    <p class="lead">
+        Pay per user.
+        The first User comes with 10 events included every month.
+        Additional events are priced at £2 for 10 event bookings.
+    </p>
+
+    <div class="row justify-content-center align-items-center g-0">
+        <p class="col-5 lead text-end my-0">Pay Monthly</p>
+        <div style="width: fit-content">
+            <MudSwitch Class="mx-0" LabelPosition="LabelPosition.Start" @bind-Value="PayYearly" Color="Color.Info" aria-labelledby="pay-yearly-label" />
+        </div>
+        <p class="lead col-5 my-0" id="pay-yearly-label">Pay Yearly & Save!</p>
+    </div>
+</div>
+
+@code {
+    private bool PayYearly = true;
+}

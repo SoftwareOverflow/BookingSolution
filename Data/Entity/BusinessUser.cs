@@ -9,6 +9,6 @@ namespace Data.Entity
 
         public int BusinessId { get; set; }
 
-        public virtual Business Business { get; set; }
+        public Business Business { get; set; }
     }
 }

@@ -23,8 +23,6 @@
             UserId = id;
             UserFirstName = firstName;
 
-            Console.WriteLine($"\n\nUserStateManagedUpdated: {id}\n\n");
-
             NullifyEmptyIds();
         }
 

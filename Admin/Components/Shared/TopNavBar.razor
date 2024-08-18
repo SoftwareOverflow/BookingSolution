@@ -1,39 +1,53 @@
-﻿<div class="top-bar">
-    <img class="logo" src="icons/logo.png" />
+﻿<div class="navbar navbar-expand-sm bg-light">
+    <img class="navbar-brand logo" src="icons/logo.png" />
 
-    <NavLink class="nav-link" href="/">
-        <div class="flex-column-center">
-            <i class="material-symbols-outlined">calendar_month</i>
-            <span>Calendar View</span>
-        </div>
-    </NavLink>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav"
+            aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="material-symbols-outlined navbar-toggler-icon">menu</span>
+    </button>
 
-    <NavLink class="nav-link" href="/services">
-        <div class="flex-column-center">
-            <span class="material-symbols-outlined">
-                design_services
-            </span>
-            <span>My Services</span>
-        </div>
-    </NavLink>
+    <div class="collapse navbar-collapse justify-content-start align-center navbar-dark" id="main-nav">
 
-    <NavLink class="nav-link" href="/manage-users">
-        <div class="flex-column-center">
-            <span class="material-symbols-outlined">
-                manage_accounts
-            </span>
-            <span>Manage Users</span>
-        </div>
-    </NavLink>
+        <NavLink class="nav-link" href="/">
+            <div class="flex-column-center">
+                <i class="material-symbols-outlined">calendar_month</i>
+                <span>Calendar View</span>
+            </div>
+        </NavLink>
 
-    <div style="flex-grow: 1" />
+        <NavLink class="nav-link" href="/services">
+            <div class="flex-column-center">
+                <span class="material-symbols-outlined">
+                    design_services
+                </span>
+                <span>My Services</span>
+            </div>
+        </NavLink>
 
-    <NavLink class="nav-link" href="/Account/Manage">
-        <div class="flex-column-center">
-            <span class="material-symbols-outlined">
-                person
-            </span>
-            <span>My Account</span>
-        </div>
-    </NavLink>
+        <NavLink class="nav-link" href="/manage-users">
+            <div class="flex-column-center">
+                <span class="material-symbols-outlined">
+                    storefront
+                </span>
+                <span>My Business</span>
+            </div>
+        </NavLink>
+
+        <div style="flex-grow: 1" />
+
+        <NavLink class="nav-link" href="/Account/Manage">
+            <div class="dropdown">
+                <div class="flex-column-center" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-symbols-outlined">
+                        person
+                    </span>
+                    <span>My Account</span>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/Account/Manage">Manage Account</a></li>
+                    <li><a class="dropdown-item" href="#">Sign Out</a></li>
+                </ul>
+            </div>
+        </NavLink>
+    </div>
 </div>

@@ -8,8 +8,8 @@ namespace Core.Mapping
     {
         public AutoMapperConfig()
         {
-            CreateMap<BusinessDto, Business>();
-            CreateMap<AddressDto, Address>();
+            CreateMap<BusinessDto, Business>().ReverseMap();
+            CreateMap<AddressDto, Address>().ReverseMap();
         }
     }
 }

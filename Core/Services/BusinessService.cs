@@ -55,13 +55,21 @@ namespace Core.Services
 
         }
 
-        public async Task<ServiceResult<BusinessDto>> RegisterBusiness(string userId, BusinessDto dto)
+        public async Task<ServiceResult<BusinessDto>> RegisterBusiness(BusinessDto dto)
         {
             try
             {
-                var entity = Mapper.Map<Business>(dto);
-                var result = await Context.RegisterBusiness(userId, entity);
+                var userId = UserStateManager?.UserId;
+                if (userId.IsNullOrEmpty())
+                {
+                    // TODO could this ever be a client error?
+                    var failure = ServiceResult<BusinessDto>.DefaultServerFailure();
+                    failure.Errors.Add("Unable to find current user");
+                    return failure;
+                }
 
+                var entity = Mapper.Map<Business>(dto);
+                var result = await Context.RegisterBusiness(userId!, entity);
 
                 if (result)
                 {
