@@ -1,5 +1,7 @@
 ﻿@page "/services"
 
+@inherits LoadingPage
+
 @using Admin.Data.Helpers
 @using Core.Dto
 @using Core.Interfaces
@@ -9,50 +11,38 @@
 @inject IServiceTypeService ServiceTypeService
 
 <h3>Manage The Services You Offer</h3>
-<p>Saved changes will affect future bookings!</p>
+<p class="lead text-muted">Saved changes will affect future bookings!</p>
 
-@*
-    TODO move this elsewhere
-    Either static variable class or some sort of pub-sub event notification
-    Or (preferred I think) some BaseAsyncLoadComponent which holds the Loading variable
-    defaulted to true, and then we make sure to call base.OnInitializedAsync or base.OnParametersSetAsync()
-    which reverts the loading icon.
-*@
-<MudOverlay Class="mud-loading-overlay" Visible="Loading" Absolute="true" DarkBackground="true">
-    <div class="d-flex flex-column align-center justify-center">
-        <MudProgressCircular Style="LoaderType.Circular" Indeterminate="true" />
-        <MudText>Loading...</MudText>
+<div class="container-md g-2">
+    <div class="row justify-content-center">
+        <button type="button" class="btn btn-outline-primary btn-lg col-md-3 col-sm-6">
+            <span class="material-symbols-outlined">data_saver_on</span>
+            Offer a New Service
+        </button>
     </div>
-</MudOverlay>
-
-<a class="flex-row" href="/services/new">
-    <button type="button" class="create-new-button">
-        <span class="material-symbols-outlined">data_saver_on</span>
-        Offer a New Service
-    </button>
-</a>
-<div class="service-type-grid">
-    @foreach (var item in ServiceTypes)
-    {
-        <div class="service-type-container">
-            <div class="color-left" />
-            <a class="edit-button" onclick="@(() => EditServiceType(item))">
-                <span class="material-symbols-outlined edit">stylus_note</span>
-            </a>
-            <div class="service-type-inner">
-                <div class="service-type-name">@item.Name</div>
-                <div class="service-type-description">
-                    @item.Description
-                </div>
-                <div style="flex-grow: 1" />
-                <div class="flex-row space-evenly">
-                    <div class="flex-row">
-                        £@item.Price
+    <div class="row g-2 justify-content-start">
+        @foreach (var item in ServiceTypes)
+        {
+            <div class="col col-md-4 col-sm-6">
+                <div class="card m-2 position-relative h-100 text-center">
+                    <div class="card-header bg-primary">
+                        <button @onclick=@(() => EditServiceType(item))>
+                            <h6 class="px-5 text-decoration-underline fw-bold">
+                                @item.Name
+                            </h6>
+                        </button>
+                    </div>
+                    <div class="card-body bg-primary d-flex flex-column">
+                        <p class="text-muted fst-italic">
+                            @item.Description
+                        </p>
+                        <div class="flex-grow-1" />
+                        <p class="lead">£@item.Price</p>
                     </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 
