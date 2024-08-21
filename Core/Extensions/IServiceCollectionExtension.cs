@@ -15,9 +15,11 @@ namespace Core.Extensions
             services.AddAuthenticationLayer();
 
             services.AddAutoMapper(typeof(AutoMapperConfig));
+            
             services.AddTransient<IAppointmentDataService, AppointmentService>();
             services.AddTransient<IServiceTypeService, ServiceTypeService>();
             services.AddTransient<IBusinessService, BusinessService>();
+
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<UserStateManager>();
             services.AddScoped<IUserService, UserService>();

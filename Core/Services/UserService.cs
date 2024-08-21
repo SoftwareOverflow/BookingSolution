@@ -75,7 +75,7 @@ namespace Core.Services
 
         public string GetSignOutPage() => AuthUserService.GetSignOutPage();
 
-        public async Task Load()
+        private async Task Load()
         {
             if (IsUpToDate)
             {
@@ -94,6 +94,16 @@ namespace Core.Services
             OnUserChange?.Invoke(UserStateManager.UserFirstName);
 
             IsUpToDate = true;
+        }
+
+        public async Task<string?> GetUserName()
+        {
+            if (UserStateManager.UserFirstName.IsNullOrEmpty())
+            {
+                await Load();
+            }
+
+            return UserStateManager.UserFirstName;
         }
 
         public void Dispose()

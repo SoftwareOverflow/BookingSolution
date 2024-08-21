@@ -1,4 +1,7 @@
-﻿<MudDialog>
+﻿
+<ConfirmationDialog Id="@Id" Warning="Any Unsaved Changes Will Be Lost!" />
+
+@* <MudDialog>
     <TitleContent>
         Unsaved Changes will be lost
     </TitleContent>
@@ -9,11 +12,14 @@
         <MudButton OnClick="Cancel">Cancel</MudButton>
         <MudButton Color="Color.Primary" OnClick="Submit">Continue</MudButton>
     </DialogActions>
-</MudDialog>
+</MudDialog> *@
 
 @code {
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = default!;
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(true));
 

@@ -4,7 +4,7 @@
 @inject AppointmentViewService EventService
 
 <div class="scheduler-outer-container">
-    <div class="flex-row header-row">
+    <div class="flex-row-center header-row">
         <div class="left-indent" />
         @{
             var date = StartDate;
@@ -52,7 +52,7 @@
                     </td>
 
                     <td>
-                        <div class="flex-row">
+                        <div class="flex-row-center">
                             @{
                                 date = StartDate;
                                 while (date <= EndDate)
@@ -82,6 +82,6 @@
     public List<PositionedAppointment> Events { get; set; } = [];
 
     [Parameter, EditorRequired]
-    public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
+    public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
 
 }

@@ -4,8 +4,8 @@ namespace Core.Interfaces
 {
     public interface IServiceTypeService
     {
-        public Task<List<ServiceType>> GetServiceTypes();
+        public Task<List<ServiceTypeDto>> GetServiceTypes();
 
-        public Task<ServiceType?> GetServiceTypeByName(string? name);
+        public Task<ServiceTypeDto?> GetServiceTypeByName(string? name);
     }
 }

@@ -4,7 +4,8 @@
     {
         public event Action<string?>? OnUserChange;
 
-        public Task Load();
         public string GetSignOutPage();
+
+        public Task<string?> GetUserName();
     }
 }

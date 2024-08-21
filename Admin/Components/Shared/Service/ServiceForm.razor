@@ -1,137 +1,147 @@
 ﻿@using Admin.Components.Shared.Dialog
 @using Admin.Data.Helpers
+@using Admin.Data.ServiceTypes
 @using Core.Dto;
 @using Core.Interfaces
 @using System.Globalization
+@using System.ComponentModel.DataAnnotations
 
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject IMessageService MessageService
 
-<div class="service-form">
-    <EditForm @ref="Form" Spacing="4" Model="Service">
-        <DataAnnotationsValidator />
-        <div class="service-form">
-            <div class="flex-row">
-                <div class="flex-row input-text">
-                    <MudTextField For="(() => Service.Name)" MaxLength="50" Label="Service Name" @bind-Value="Service!.Name"></MudTextField>
-                </div>
+<div class="mx-3 col-md-6">
+    <EditForm class="bg-light" @ref="Form" Spacing="4" Model="ServiceModel">
+        <ObjectGraphDataAnnotationsValidator />
+        <div class="flex-row-center">
+            <div class="form-floating w-50">
+                <InputText @bind-Value="ServiceModel.Service.Name" class="form-control bg-light border-top-0 border-start-0 border-end-0 rounded-0" aria-required="true" placeholder="Name" />
+                <label for="name">Service Name</label>
+                <ValidationMessage For="() => ServiceModel.Service.Name" class="text-danger" />
             </div>
-            <div class="flex-row">
-                <div class="flex-row input-text">
-                    <MudTextField For="(() => Service.Description)" AutoGrow="true" Label="Service Description" @bind-Value="Service!.Description"></MudTextField>
-                </div>
+        </div>
+        <div class="flex-row-center my-1">
+            <div class="form-floating w-50">
+                <InputTextArea @bind-Value="ServiceModel.Service.Description" class="form-control bg-light border-top-0 border-start-0 border-end-0 rounded-0" aria-required="true" placeholder="Description" />
+                <label for="description">Description</label>
+                <ValidationMessage For="() => ServiceModel.Service.Description" class="text-danger" />
             </div>
-            <div class="form-section">
-                <h5 class="form-header">
-                    Choose When Your Service Is Available:
-                </h5>
-                <div>
-                    <div class="flex-row">
-                        <div class="flex-column days-container">
-                            <h6 class="form-sub-header">Days:</h6>
-                            @* @foreach (var dayOfWeek in Enum.GetValues(typeof(DayOfWeek))
-                            .OfType<DayOfWeek>()
-                            .OrderBy(day => day < DayOfWeek.Monday))
-                            { *@
-                            <div class="flex-row">
-                                @foreach (var day in Service.DaysOffered.Keys)
-                                {
-                                    string[] names = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames;
-                                    var isChecked = Service.DaysOffered[day];
-                                    <span>
-                                        <MudCheckBox Value="isChecked" ValueExpression="@(() => isChecked)" ValueChanged="@((bool x) => Service.DaysOffered[day] = x)">
-                                            @names[(int)day]
-                                        </MudCheckBox>
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div class="times-container">
-                        <div class="flex-row">
-                            <div>
-                                <h6 class="form-sub-header">Slots Offered:</h6>
-                                <div>
-                                    <MudRadioGroup @bind-Value="Service!.BookingFrequencyMins">
-                                        <label>
-                                            <MudRadio Value="15">Every 15 mins</MudRadio>
-                                        </label>
-
-                                        <label>
-                                            <MudRadio Value="30">Every 30 mins</MudRadio>
-                                        </label>
-
-                                        <label>
-                                            <MudRadio Value="60">Every hour</MudRadio>
-                                        </label>
-                                    </MudRadioGroup>
-                                </div>
-                                <div>
-                                    <h6 class="form-sub-header">Between:</h6>
-                                </div>
-                                <div class="flex-row">
-                                    <span class="material-symbols-outlined">schedule</span>
-                                    <MudTimePicker MinuteSelectionStep="15" @bind-Time="Service.EarliestTime" Adornment="Adornment.None" ShowToolbar="false" />
-                                    <span>&#x2014;</span>
-                                    <MudTimePicker MinuteSelectionStep="15" @bind-Time="Service.LatestTime"
-                                                   ShowToolbar="false"
-                                                   Adornment="Adornment.None" />
-                                </div>
-                            </div>
+        </div>
+        <div class="mt-5 pt-5">
+            <h5 class="text-center">
+                Choose When Your Service Is Available:
+            </h5>
+            <div>
+                <div class="flex-row-center">
+                    <div>
+                        <div class="flex-row-center">
+                            <h6 class="lead my-0 mx-3">Days:</h6>
+                            @foreach (var day in ServiceModel.Service.DaysOffered.Keys)
+                            {
+                                string[] names = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames;
+                                var isChecked = ServiceModel.Service.DaysOffered[day];
+                                <span class="mx-2">
+                                    <MudCheckBox Value="isChecked" ValueExpression="@(() => isChecked)" ValueChanged="@((bool x) => ServiceModel.Service.DaysOffered[day] = x)">
+                                        @names[(int)day]
+                                    </MudCheckBox>
+                                </span>
+                            }
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-section">
-                <h5 class="form-header">Service Price:</h5>
-                <div class="flex-row">
-                    <MudTooltip Placement="Placement.Right" Text="This is the price the user pays. You may receive less than this.">
-                        <span class="material-symbols-outlined">info</span>
-                    </MudTooltip>
-                    Price: £<MudNumericField For="(() => Service.Price)" InputId="price-input" HideSpinButtons="true" Class="price-field" @bind-Value=Service!.Price Format="N2" />
+                <div class="flex-row-center">
+                    <h6 class="lead my-0 mx-3">Slots Offered:</h6>
+                    <MudRadioGroup @bind-Value="ServiceModel.Service!.BookingFrequencyMins">
+                        <label>
+                            <MudRadio Value="15">Every 15 mins</MudRadio>
+                        </label>
+
+                        <label>
+                            <MudRadio Value="30">Every 30 mins</MudRadio>
+                        </label>
+
+                        <label>
+                            <MudRadio Value="60">Every hour</MudRadio>
+                        </label>
+                    </MudRadioGroup>
+                </div>
+                <div class="flex-row-center">
+                    <h6 class="lead mx-3 my-0">Between:</h6>
+                    <span class="material-symbols-outlined">schedule</span>
+                    <MudTimePicker MinuteSelectionStep="15" @bind-Time="ServiceModel.Service.EarliestTime" Adornment="Adornment.None" ShowToolbar="false" />
+                    <span>&#x2014;</span>
+                    <MudTimePicker MinuteSelectionStep="15" @bind-Time="ServiceModel.Service.LatestTime"
+                                   ShowToolbar="false"
+                                   Adornment="Adornment.None" />
                 </div>
             </div>
-            <div class="form-section">
-                <h5 class="form-header">Booking Duration:</h5>
-                @*REGEX @"^[0-5]?(?:\d(?::(?:[0-5]?\d)?)?)?$" *@
+        </div>
+        <div class="mt-5 pt-5">
+            <h5 class="text-center">Service Price:</h5>
+            <div class="flex-row-center">
+                <MudTooltip Placement="Placement.Right" Text="This is the price the user pays. You may receive less than this if you take payment online.">
+                    <span class="material-symbols-outlined">info</span>
+                </MudTooltip>
+                Price: £<MudNumericField For="(() => ServiceModel.Service.Price)" InputId="price-input" HideSpinButtons="true" Class="price-field" @bind-Value=ServiceModel.Service!.Price Format="N2" />
+            </div>
+        </div>
+        <div class="mt-5 pt-5">
+            <h5 class="text-center">Booking Duration (hh:mm):</h5>
+            <div class="flex-row-center">
+                <div class="d-flex flex-row justify-content-end">
+                    <MudNumericField Class="d-flex w-fit-content" Error="@(ServiceModel.Service.Duration.TotalMinutes == 0)" @bind-Value="@ServiceModel.DurationHours" Min="0" Step="1" />
+                </div>
+                <span class="d-6 fw-bolder lead mx-4">&colon;</span>
+                <div class="d-flex flex-row justify-content-end">
+                    <MudNumericField Class="d-flex w-fit-content" Error="@(ServiceModel.Service.Duration.TotalMinutes == 0)" @bind-Value="@ServiceModel.DurationMinutes" Min="0" Step="15" />
+                </div>
+            </div>
+            <div class="flex-row-center">
+                <ValidationMessage For="@(() => ServiceModel.Service.Duration)" class="text-danger" />
+            </div>
+        </div>
+
+        <div class="flex-row-center my-5 py-5">
+            <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" data-toggle="modal" data-target="#unsaved-changes-modal" @onclick="ShowUnsavedChangesDialog">
+                <span class="mx-2 material-symbols-outlined">cancel</span>
+                Cancel
+            </button>
+
+            <div style="@(IsCreating ? "display: none;" : "")">
+                <button class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
+                    <span class="mx-2 material-symbols-outlined">delete</span>
+                    Delete Service
+                </button>
             </div>
 
-            @* TODO add a duration section. Default duration added after booking. *@
+            <button class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5" @onclick="SaveChangesAsync">
+                <span class="mx-2 material-symbols-outlined">save</span>
+                Save Changes
+            </button>
         </div>
     </EditForm>
-    <div class="flex-row space-evenly button-footer">
-        <MudButton Color="Color.Default" OnClick="ShowUnsavedChangesDialog">
-            <span class="material-symbols-outlined">cancel</span>
-            Cancel
-        </MudButton>
-
-        <div style="@(IsCreating ? "display: none;" : "")">
-            <MudButton Color="Color.Error" OnClick="Delete">
-                <span class="material-symbols-outlined">delete</span>
-                Delete Service
-            </MudButton>
-        </div>
-
-        <MudButton Color="Color.Success" OnClick="SaveChangesAsync">
-            <span class="material-symbols-outlined">save</span>
-            Save Changes
-        </MudButton>
-    </div>
 </div>
 
 @code {
-    [CascadingParameter]
-    private ServiceType Service { get; set; } = new ServiceType();
+    [Parameter, EditorRequired]
+    public ServiceTypeDto Dto { get; set; } = default!;
+
+    public ServiceTypeInputable ServiceModel { get; set; } = default!;
 
     [Parameter, EditorRequired]
     public bool IsCreating { get; set; }
 
     private EditForm Form;
 
+    protected override void OnParametersSet()
+    {
+        ServiceModel = new ServiceTypeInputable(Dto ?? new ServiceTypeDto());
+    }
+
+
     private void OnDateAvailabilityChange(DayOfWeek day, bool available)
     {
-        Service.DaysOffered[day] = available;
+        ServiceModel.Service.DaysOffered[day] = available;
     }
 
     private void GoBack()
@@ -150,7 +160,7 @@
         var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (!result?.Canceled ?? false)
         {
             // TODO delete from Server
 
@@ -173,23 +183,40 @@
             return false;
         }
 
-        var parameters = new DialogParameters<ConfirmationDialog>
+        IDialogReference? dialog = null;
+        @if (IsCreating)
         {
-            { x => x.Content, "Any future bookings for this service will be affected" },
-        };
+            dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, new DialogOptions()
+                {
+                    NoHeader = true
+                });
+        }
+        else
+        {
+            var parameters = new DialogParameters<ConfirmationDialog> {
+                { x => x.Content, "Any future bookings for this service will be affected" },
+                { x => x.Id, "hello"},
+            };
 
-        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters);
+            dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters, new()
+                {
+                    NoHeader = true
+                });
+        }
+
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (!result?.Canceled ?? false)
         {
             // TODO Save changes
 
-            MessageService.AddMessage(new MessageBase(
-                   "Changes Saved Successfully (NOT YET)",
-                    MessageBase.MessageType.Normal));
+            var message = IsCreating ? "New Service Created" : "Changes Saved Succesfully";
 
-            NavigationManager.NavigateTo("/services");
+            MessageService.AddMessage(new MessageBase(
+                   message,
+                    MessageBase.MessageType.Success));
+
+            NavigationManager.NavigateTo("/Services");
             return true;
         }
 
@@ -198,10 +225,14 @@
 
     private async Task ShowUnsavedChangesDialog()
     {
-        var dialog = await DialogService.ShowAsync<UnsavedChangesDialog>();
+        var dialog = await DialogService.ShowAsync<UnsavedChangesDialog>(null, new DialogOptions()
+            {
+                NoHeader = true,
+            });
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+
+        if (!result?.Canceled ?? false)
         {
             GoBack();
         }

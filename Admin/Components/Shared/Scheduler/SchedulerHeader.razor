@@ -1,7 +1,7 @@
 ﻿@using Admin.Data.Events
 @using Admin.Data.Helpers
 
-<div class="flex-row scheduler-header">
+<div class="flex-row-center scheduler-header">
     <div class="header-left">
         <div>
             <button class="flex-row" onclick="@(() => JumpToNextDate(false))">
@@ -36,19 +36,6 @@
                 @layoutType.Name
             </button>
         }
-
-        @*         <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.Day ? "active" : "")">
-        Day
-        </button>
-        <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.Week ? "active" : "")">
-        Week
-        </button>
-        <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.WorkWeek ? "active" : "")">
-        Work Week
-        </button>
-        <button class="scheduler-view-button @(LayoutType == CalendarLayoutType.Month ? "active" : "")">
-        Month
-        </button> *@
     </div>
 </div>
 
@@ -80,7 +67,7 @@
     public CalendarLayoutType LayoutType { get; set; } = CalendarLayoutType.Week;
 
     [Parameter, EditorRequired]
-    public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
+    public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
 
     private MudDatePicker DatePicker = default!;
 

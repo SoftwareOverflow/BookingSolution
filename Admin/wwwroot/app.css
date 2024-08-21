@@ -13,6 +13,10 @@ body {
         padding: 10px 20px;
     }
 
+.w-fit-content {
+    width: fit-content;
+}
+
 .active {
     color: dodgerblue;
 }
@@ -54,7 +58,7 @@ h1:focus {
     align-items: center;
 }
 
-.flex-row {
+.flex-row-center {
     display: flex;
     flex-direction: row;
     justify-content: center;

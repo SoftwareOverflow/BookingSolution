@@ -5,18 +5,22 @@
 @using Admin.Data.Helpers
 @using Core.Dto
 @using Core.Interfaces
+@using Microsoft.AspNetCore.Components.Rendering
 
 @inject NavigationManager NavigationManager
-@inject StateContainerSingle<ServiceType> StateContainer
+@inject StateContainerSingle<ServiceTypeDto> StateContainer
 @inject IServiceTypeService ServiceTypeService
+
+<!-- Build the inherited RenderTree -->
+@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
 
 <h3>Manage The Services You Offer</h3>
 <p class="lead text-muted">Saved changes will affect future bookings!</p>
 
-<div class="container-md g-2">
-    <div class="row justify-content-center">
-        <button type="button" class="btn btn-outline-primary btn-lg col-md-3 col-sm-6">
-            <span class="material-symbols-outlined">data_saver_on</span>
+<div class="container-md">
+    <div class="row justify-content-center mb-2">
+        <button type="button" class="btn btn-outline-primary btn-lg col-md-3 col-sm-6 d-flex" @onclick="CreateNewService">
+            <span class="material-symbols-outlined px-2">data_saver_on</span>
             Offer a New Service
         </button>
     </div>
@@ -47,21 +51,25 @@
 
 
 @code {
-    private List<ServiceType> ServiceTypes = [];
-    private bool Loading = true;
-    // private ServiceType? ServiceTypeInEdit = null;
+    private List<ServiceTypeDto> ServiceTypes = [];
 
     protected override async Task OnInitializedAsync()
     {
+        Loading = true;
+
         ServiceTypes = await ServiceTypeService.GetServiceTypes();
         Loading = false;
-        StateHasChanged();
     }
 
-    private void EditServiceType(ServiceType item)
+    private void EditServiceType(ServiceTypeDto item)
     {
         StateContainer.SetItem(item);
-        NavigationManager.NavigateTo("/services/edit");
+        NavigationManager.NavigateTo("/Services/Edit");
+    }
+
+    private void CreateNewService()
+    {
+        NavigationManager.NavigateTo("/Services/Create");
     }
 
     // private void SetEditMode(ServiceType service) => ServiceTypeInEdit = service;

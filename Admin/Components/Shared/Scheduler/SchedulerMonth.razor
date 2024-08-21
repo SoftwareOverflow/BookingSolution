@@ -1,5 +1,5 @@
 ﻿@using Admin.Data.Events
-@* <div class="scheduler-table-container"> *@
+
 <table class="scheduler-table-container">
     <thead>
         <tr>
@@ -70,7 +70,6 @@
 
     </tbody>
 </table>
-@* </div> *@
 
 @code {
     [Parameter, EditorRequired]
@@ -83,5 +82,5 @@
     public List<PositionedAppointment> Events { get; set; } = [];
 
     [Parameter, EditorRequired]
-    public Action<CalendarLayoutType, DateTime> OnCalendarStateChange { get; set; } = default!;
+    public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
 }

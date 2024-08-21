@@ -1,8 +1,15 @@
-﻿@using Admin.Data.Events
+﻿@using Admin.Components.Pages
+@using Admin.Data.Events
 @using Admin.Data.Helpers
+@using Microsoft.AspNetCore.Components.Rendering
 @using MudBlazor.Extensions
 
+@inherits LoadingPage
+
 @inject AppointmentViewService EventService
+
+<!-- Build the inherited RenderTree -->
+@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
 
 <div class="scheduler-container" style="--scheduler-table-cell-height: @(AppointmentLayoutConsts.CellHeight)px">
     <SchedulerHeader Date="@Date" LayoutType="@CalendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
@@ -14,10 +21,6 @@
     {
         <SchedulerDays StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" />
     }
-</div>
-
-<div>
-    <button @onclick="TestErrors">Click Me For Errors!</button>
 </div>
 
 @code {
@@ -32,17 +35,18 @@
             System.Threading.Thread.CurrentThread.CurrentCulture.DateTimeFormat.FirstDayOfWeek
         );
 
-    private Tuple<DateTime, DateTime> DateRange;
+    private Tuple<DateTime, DateTime> DateRange = default!;
 
     private List<PositionedAppointment> Events = [];
 
-    protected override async Task OnParametersSetAsync()
+
+    protected override async Task OnInitializedAsync()
     {
         DateRange = DateHelpers.GetDateRange(CalendarLayoutType, Date);
         Events = await LoadEvents();
     }
 
-    private async void OnCalendarStateChange(CalendarLayoutType layoutType, DateTime date)
+    private async Task OnCalendarStateChange(CalendarLayoutType layoutType, DateTime date)
     {
         CalendarLayoutType = layoutType;
         Date = date;
@@ -54,7 +58,15 @@
     }
 
     private async Task<List<PositionedAppointment>> LoadEvents()
-        => await EventService.GetEvents(DateOnly.FromDateTime(DateRange.Item1), DateOnly.FromDateTime(DateRange.Item2));
+    {
+        Loading = true;
+        StateHasChanged();
+        var result = await EventService.GetEvents(DateOnly.FromDateTime(DateRange.Item1), DateOnly.FromDateTime(DateRange.Item2));
+        Loading = false;
+        StateHasChanged();
+
+        return result;
+    }
 
     private async Task TestErrors() =>
         await EventService.GetEventsWithError();

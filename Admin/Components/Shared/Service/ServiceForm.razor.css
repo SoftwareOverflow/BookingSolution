@@ -1,36 +1,11 @@
-﻿.service-form {
-    padding: 0px 30px;
-    max-width: 50%;
-    width: fit-content;
-    display: grid;
-    grid-template-columns: 1fr;
-}
-
-.input-text {
-    width: 100%;
-}
-
-::deep .mud-input-root-text {
+﻿::deep .mud-input-root-text {
     text-align: center !important;
-}
-
-.form-section {
-    margin-top: 30px;
-}
-
-.form-header {
-    margin-top: 24px;
-    text-align: center;
-}
-
-.form-sub-header {
-    margin-top: 10px;
-}
-
-.button-footer {
-    margin-top: 10px;
 }
 
 ::deep .price-field {
     max-width: 20%;
+}
+
+::deep .mud-picker-inline {
+    max-width: 25%;
 }

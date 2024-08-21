@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+<MudOverlay Class="mud-loading-overlay" Visible="Loading" Absolute="false" DarkBackground="true">
+    <div class="d-flex flex-column align-center justify-center">
+        <MudProgressCircular Style="LoaderType.Circular" Indeterminate="true" />
+        <MudText>Loading...</MudText>
+    </div>
+</MudOverlay>
+
+@code {
+    protected bool Loading { get; set; } = true;
+}

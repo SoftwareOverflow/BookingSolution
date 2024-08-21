@@ -1,0 +1,13 @@
+﻿@page "/services/create"
+
+@using Admin.Components.Shared.Service
+@using Admin.Data.ServiceTypes
+@using Core.Dto
+
+<h1>Create Your Service:</h1>
+
+<ServiceForm Dto="Service" IsCreating="true" />
+
+@code {
+    private ServiceTypeDto Service = new ServiceTypeDto();
+}

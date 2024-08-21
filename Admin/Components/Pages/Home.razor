@@ -1,14 +1,32 @@
 ﻿@page "/"
 @using Admin.Components.Shared.Scheduler
+@using Core.Interfaces
 
-@inject IJSRuntime IJSRuntime
+@inject IUserService UserService
 
-<PageTitle>Home</PageTitle>
-<h1>Your bookings</h1>
+<PageTitle>Bookings</PageTitle>
+@if (!String.IsNullOrEmpty(Username))
+{
+    <h3>Hi @Username</h3>
+    <p class="lead">
+        Check Out Your Bookings:
+    </p>
+}
+else
+{
+    <h1>
+        Your bookings
+    </h1>
+}
 
 <Scheduler />
 
 
 @code {
+    private string? Username = null;
 
+    protected override async Task OnInitializedAsync()
+    {
+        Username = await UserService.GetUserName();
+    }
 }

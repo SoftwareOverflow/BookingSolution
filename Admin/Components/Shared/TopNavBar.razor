@@ -1,4 +1,5 @@
-﻿<div class="navbar navbar-expand-sm bg-light">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+<div class="navbar navbar-expand-sm bg-light">
     <img class="navbar-brand logo" src="icons/logo.png" />
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav"
@@ -8,14 +9,14 @@
 
     <div class="collapse navbar-collapse justify-content-start align-center navbar-dark" id="main-nav">
 
-        <NavLink class="nav-link" href="/">
+        <NavLink class="@NavLinkClass" href="/">
             <div class="flex-column-center">
                 <i class="material-symbols-outlined">calendar_month</i>
                 <span>Calendar View</span>
             </div>
         </NavLink>
 
-        <NavLink class="nav-link" href="/services">
+        <NavLink class="@NavLinkClass" href="/services">
             <div class="flex-column-center">
                 <span class="material-symbols-outlined">
                     design_services
@@ -24,7 +25,7 @@
             </div>
         </NavLink>
 
-        <NavLink class="nav-link" href="/manage-users">
+        <NavLink class="@NavLinkClass" href="/manage-users">
             <div class="flex-column-center">
                 <span class="material-symbols-outlined">
                     storefront
@@ -35,19 +36,67 @@
 
         <div style="flex-grow: 1" />
 
-        <NavLink class="nav-link" href="/Account/Manage">
-            <div class="dropdown">
+        @if (Authorized)
+        {
+            <NavLink class="@NavLinkClass" href="/Account/Manage">
+                <div class="dropdown">
+                    <div class="flex-column-center" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="material-symbols-outlined">
+                            person
+                        </span>
+                        <span>My Account</span>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/Account/Manage">Manage Account</a></li>
+                        <li><a class="dropdown-item" href="#" @onclick="SignOut">Sign Out</a></li>
+                    </ul>
+                </div>
+            </NavLink>
+        }
+        else
+        {
+            <NavLink class="@NavLinkClass" href="#">
                 <div class="flex-column-center" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="material-symbols-outlined">
                         person
                     </span>
                     <span>My Account</span>
                 </div>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/Account/Manage">Manage Account</a></li>
-                    <li><a class="dropdown-item" href="#">Sign Out</a></li>
-                </ul>
-            </div>
-        </NavLink>
+            </NavLink>
+        }
     </div>
 </div>
+
+@code {
+    [Parameter]
+    public Action? OnSignOutClick { get; set; } = default!;
+
+    [Parameter]
+    public bool Authorized { get; set; } = true;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private bool IsAuthenticated = false;
+
+    private string NavLinkClass => $"nav-link {(Authorized ? "": "disabled" )}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                IsAuthenticated = true;
+            }
+        }
+    }
+
+    private void SignOut()
+    {
+        OnSignOutClick?.Invoke();
+    }
+}

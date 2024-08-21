@@ -2,13 +2,14 @@
 
 @using Admin.Components.Shared.Service
 @using Admin.Data.Helpers
+@using Admin.Data.ServiceTypes
 @using Core.Dto;
 @using Core.Interfaces
 @using System.Globalization
 
 @inject IServiceTypeService ServiceTypeService
 @inject IMessageService MessageService
-@inject StateContainerSingle<ServiceType> StateContainer
+@inject StateContainerSingle<ServiceTypeDto> StateContainer
 @inject NavigationManager NavigationManager
 
 
@@ -16,21 +17,16 @@
 {
     <h1>Manage Your Service:</h1>
 
-    <CascadingValue Value="Service">
-        <ServiceForm IsCreating="false" />
-    </CascadingValue>
+    <ServiceForm Dto="Service" IsCreating="false" />
 }
 
 @code {
-    private ServiceType? Service;
+    private ServiceTypeDto Service = default!;
 
     protected override void OnParametersSet()
     {
         Service = StateContainer.GetItem();
-    }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
         if (Service == null)
         {
             MessageService.AddMessage(new MessageBase(
@@ -42,20 +38,15 @@
         }
     }
 
-    private void OnDateAvailabilityChange(DayOfWeek day, bool available)
-    {
-        Service!.DaysOffered[day] = available;
-    }
+    // private void Delete()
+    // {
+    //     // TODO open another Are You Sure dialog
+    // }
 
-    private void Delete()
-    {
-        // TODO open another Are You Sure dialog
-    }
-
-    private void SaveChangesAsync()
-    {
-        // TODO open another Are You Sure dialog with warning
-    }
+    // private void SaveChangesAsync()
+    // {
+    //     // TODO open another Are You Sure dialog with warning
+    // }
 
     private void NavigateBack(bool replaceHistory = false)
     {

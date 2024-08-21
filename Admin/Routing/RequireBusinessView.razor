@@ -8,26 +8,23 @@
 @ChildComponent
 
 
-<h1>OnAfterRender: @s</h1>
-
 @code {
     [Parameter, EditorRequired]
     public RenderFragment ChildComponent { get; set; }
 
     private BusinessDto? BusinessDto;
     private bool shouldRedirect = false;
-    private string s = "";
-    protected override async Task OnInitializedAsync()
-    {
-        var result = await BusinessService.GetBusinessForUser();
-        BusinessDto = result.Result;
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var result = await BusinessService.GetBusinessForUser();
+    //     BusinessDto = result.Result;
+    // }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (shouldRedirect && BusinessDto == null)
-        {
-            NavigationManager.NavigateTo("/Business/Create");
-        }
-    }
+    // protected override void OnAfterRender(bool firstRender)
+    // {
+    //     if (shouldRedirect && BusinessDto == null)
+    //     {
+    //         NavigationManager.NavigateTo("/Business/Create");
+    //     }
+    // }
 }

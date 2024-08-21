@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Dto.Validation;
+using System.ComponentModel.DataAnnotations;
+using System.Configuration;
 using System.Drawing;
 
 namespace Core.Dto
 {
-    public record ServiceType : DtoBase
+    public record ServiceTypeDto : DtoBase
     {
         /// <summary>
         /// The name of the service selected by the user
@@ -69,6 +71,7 @@ namespace Core.Dto
         /// <summary>
         /// The Duration Of the Booking
         /// </summary>
+        [RequireMinDuration(1, "Duration is required")]
         public TimeSpan Duration { get; set; } = TimeSpan.FromMinutes(30);
 
         /// <summary>
@@ -84,8 +87,7 @@ namespace Core.Dto
         /// <summary>
         /// The price of the provided service
         /// </summary>
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Enter valid price")]
+        [Range(0.00, double.MaxValue, ErrorMessage = "Enter valid price")]
         public decimal Price { get; set; }
     }
 }
