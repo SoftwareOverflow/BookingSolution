@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Auth", "Auth\Auth.csproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A43597E1-556A-4DD1-AADC-AED81C278855}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{7A8BA5BC-9D45-4F58-9BDB-92B6AED199FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,12 +43,17 @@ Global
 		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6150700-E9CE-44A9-B8CB-B5901C7D7014}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A8BA5BC-9D45-4F58-9BDB-92B6AED199FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A8BA5BC-9D45-4F58-9BDB-92B6AED199FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A8BA5BC-9D45-4F58-9BDB-92B6AED199FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A8BA5BC-9D45-4F58-9BDB-92B6AED199FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EE60EDFD-CE2F-4ABF-B47F-697F073AA37B} = {A43597E1-556A-4DD1-AADC-AED81C278855}
+		{7A8BA5BC-9D45-4F58-9BDB-92B6AED199FF} = {A43597E1-556A-4DD1-AADC-AED81C278855}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9FDC013-3612-408A-BA49-3BC8A0951C01}

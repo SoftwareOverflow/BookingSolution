@@ -19,8 +19,6 @@ namespace Core.Services
             Context = context;
             Mapper = mapper;
             UserStateManager = userStateManager;
-
-            Console.WriteLine($"\n\nBusinessService UserStateManager {UserStateManager.GetHashCode()}\n\n");
         }
 
         public async Task<ServiceResult<BusinessDto>> GetBusinessForUser()
@@ -46,7 +44,7 @@ namespace Core.Services
                 return new ServiceResult<BusinessDto>(dto);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TODO logging
             }

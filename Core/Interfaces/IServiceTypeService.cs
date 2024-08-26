@@ -1,4 +1,5 @@
 ﻿using Core.Dto;
+using Core.Responses;
 
 namespace Core.Interfaces
 {
@@ -6,6 +7,6 @@ namespace Core.Interfaces
     {
         public Task<List<ServiceTypeDto>> GetServiceTypes();
 
-        public Task<ServiceTypeDto?> GetServiceTypeByName(string? name);
+        public Task<ServiceResult<ServiceTypeDto>> CreateOrUpdateServiceType(ServiceTypeDto dto);
     }
 }

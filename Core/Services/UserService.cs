@@ -65,7 +65,6 @@ namespace Core.Services
                 // TODO logging
             }
 
-            Console.WriteLine($"\n\nUserService pushing updates to UserStateManager {UserStateManager.GetHashCode()}\n\n");
             UserStateManager.UpdateUser(userId, name);
             
             OnUserChange?.Invoke(UserStateManager.UserFirstName);

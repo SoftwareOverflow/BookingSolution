@@ -6,7 +6,7 @@ namespace Admin.Data.Helpers
 {
     public static class DateHelpers
     {
-        private static DateTime StartOfWeek(DateTime date)
+        public static DateTime StartOfWeek(DateTime date)
         {
             return date.StartOfWeek(
                 System.Threading.Thread.CurrentThread.CurrentCulture.DateTimeFormat.FirstDayOfWeek

@@ -4,7 +4,11 @@
     {
         private T? Item = default;
 
-        public void SetItem(T item) => Item = item;
+        public void SetItem(T item)
+        {
+            Item = item;
+            NotifyChangeListeners();
+        }
 
         public void RemoveItem() => Item = default;
 
@@ -12,8 +16,10 @@
 
         // TODO make some sort of object to contain the change data.
         // Especially for the normal events of cancel, save, delete etc.
-        public event Action? OnChange;
+        public event Action<T?>? OnChange;
 
-        public void NotifyChangeListeners() => OnChange?.Invoke();
+        private void NotifyChangeListeners() => OnChange?.Invoke(Item);
+
+        public void ForceNotify() => NotifyChangeListeners();
     }
 }

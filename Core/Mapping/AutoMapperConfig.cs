@@ -10,6 +10,8 @@ namespace Core.Mapping
         {
             CreateMap<BusinessDto, Business>().ReverseMap();
             CreateMap<AddressDto, Address>().ReverseMap();
+
+            CreateMap<ServiceTypeDto, Service>().ReverseMap();
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿@using Admin.Data.Events
+@using Admin.Data.Helpers
+
+@inherits ClientDateComponent
 
 <table class="scheduler-table-container">
     <thead>
@@ -21,9 +24,12 @@
                 <tr>
                     @for (int i = 0; i < 7; i++)
                     {
+                        var activeClass = date.Date == ClientDate ? "active" : "";
+                        var currentDate = date;
+
                         <td class="inner-table-cell">
                             <div class="cell-placeholder">
-                                <a class="heading">
+                                <a class="heading @activeClass" @onclick=@(() => OnCalendarStateChange(CalendarLayoutType.Day, currentDate))>
                                     @(date.Day == 1 ? date.ToString("MMM ") : "")@date.Day
                                 </a>
 
@@ -38,11 +44,11 @@
                                             @if (item.GetStartDate(true) < DateOnly.FromDateTime(date))
                                             {
                                                 <MudTooltip Text="Event starts on previous day" Class="material-icons-tooltip">
-                                                        <div class="icon-tooltip">
+                                                    <div class="icon-tooltip">
                                                         <span class="material-symbols-outlined">
                                                             line_start_circle
                                                         </span>
-                                                        </div>
+                                                    </div>
                                                 </MudTooltip>
                                             }
                                             <div class="event-time">@startTime.ToString("HH:mm")</div>
@@ -50,7 +56,7 @@
                                             @if (item.GetEndDate(true) > DateOnly.FromDateTime(date))
                                             {
                                                 <MudTooltip Text="Event ends on future day" Class="hello">
-                                                    <div class="icon-tooltip" >
+                                                    <div class="icon-tooltip">
                                                         <span class="material-symbols-outlined">
                                                             line_end_circle
                                                         </span>

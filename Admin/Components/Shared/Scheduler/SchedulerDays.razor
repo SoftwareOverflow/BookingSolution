@@ -1,7 +1,10 @@
 ﻿@using Admin.Data.Events
 @using Admin.Data.Helpers
 
+@inherits ClientDateComponent
+
 @inject AppointmentViewService EventService
+
 
 <div class="scheduler-outer-container">
     <div class="flex-row-center header-row">
@@ -12,7 +15,7 @@
             while (date <= EndDate)
             {
                 var localDate = date; //Copy the date variable as it changes later.
-                var activeClass = date.Date == DateTime.Now.Date ? "active" : "";
+                var activeClass = date.Date == ClientDate ? "active" : "";
                 if(StartDate.Date != EndDate.Date)
                 {
                     <a class="day-date-header @activeClass" onclick="@(() => OnCalendarStateChange(CalendarLayoutType.Day, localDate))">
@@ -83,5 +86,4 @@
 
     [Parameter, EditorRequired]
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
-
 }

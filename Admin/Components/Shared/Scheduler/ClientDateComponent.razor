@@ -1,0 +1,29 @@
+﻿@using Admin.Data.Helpers
+
+@inject StateContainerSingle<DateTime> ClientDateContainer
+
+@code {
+    public DateTime ClientDate { get; private set; } = DateTime.Now;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ClientDateContainer.OnChange -= OnClientDateChange;
+            ClientDateContainer.OnChange += OnClientDateChange;
+            ClientDateContainer.ForceNotify();
+        }
+    }
+
+    private void OnClientDateChange(DateTime clientDate)
+    {
+        ClientDate = clientDate;
+        StateHasChanged();
+    }
+
+
+    public void Dispose()
+    {
+        ClientDateContainer.OnChange -= OnClientDateChange;
+    }
+}

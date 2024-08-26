@@ -7,6 +7,8 @@
 @inherits LoadingPage
 
 @inject AppointmentViewService EventService
+@inject IJSRuntime JsInterop
+@inject StateContainerSingle<DateTime> ClientDateContainer
 
 <!-- Build the inherited RenderTree -->
 @((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
@@ -29,21 +31,47 @@
 
     /// <summary>
     /// The selected date.
+    /// Defaults to the server date as we're running on the server.
     /// </summary>
-    private DateTime Date =
-        DateTime.Now.StartOfWeek(
-            System.Threading.Thread.CurrentThread.CurrentCulture.DateTimeFormat.FirstDayOfWeek
-        );
+    private DateTime Date = DateTime.Now;
 
     private Tuple<DateTime, DateTime> DateRange = default!;
 
     private List<PositionedAppointment> Events = [];
 
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
         DateRange = DateHelpers.GetDateRange(CalendarLayoutType, Date);
-        Events = await LoadEvents();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var dateStr = await JsInterop.InvokeAsync<string>("getLocalDate");
+                bool readLocalDate = DateTime.TryParse(dateStr, out var localDate);
+                if (readLocalDate)
+                {
+                    Date = localDate;
+                    ClientDateContainer.SetItem(localDate.Date);
+                }
+                else
+                {
+                    // TODO logging.
+                }
+            }
+            catch (Exception)
+            {
+                // TODO logging.
+            }
+
+
+            // Load data in any case, defaulting to server
+            await OnCalendarStateChange(CalendarLayoutType, Date);
+            StateHasChanged();
+        }
     }
 
     private async Task OnCalendarStateChange(CalendarLayoutType layoutType, DateTime date)

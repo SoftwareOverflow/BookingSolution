@@ -1,12 +1,10 @@
 ﻿using Admin.Data.Events;
 using Core.Dto;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Admin.Tests.Data.Events
 {
     public class PositionedAppointmentTests
     {
-
         [Fact]
         public void Event_NoPadding_ReturnsFalse()
         {

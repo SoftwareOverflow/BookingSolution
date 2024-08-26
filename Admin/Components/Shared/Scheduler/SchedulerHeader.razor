@@ -1,6 +1,9 @@
 ﻿@using Admin.Data.Events
 @using Admin.Data.Helpers
 
+@inject StateContainerSingle<DateTime> ClientDateContainer
+@inherits ClientDateComponent
+
 <div class="flex-row-center scheduler-header">
     <div class="header-left">
         <div>
@@ -71,7 +74,6 @@
 
     private MudDatePicker DatePicker = default!;
 
-
     private string DateLabel => DateHelpers.GetDateLabel(Date, LayoutType);
 
     private void JumpToNextDate(bool forward)
@@ -81,7 +83,7 @@
 
     private void GoToToday()
     {
-        DatePicker.GoToDate(DateTime.Today);
+        DatePicker.GoToDate(ClientDate);
     }
 
     // TODO write tests using bUnit.

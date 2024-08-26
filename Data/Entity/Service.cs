@@ -10,6 +10,12 @@ namespace Data.Entity
         public string Name { get; set; }
 
         /// <summary>
+        /// When the service is available for booking
+        /// </summary>
+        [Required]
+        public DateOnly StartDate { get; set; }
+
+        /// <summary>
         /// The earliest time of day this can be booked
         /// </summary>
         public TimeOnly EarliestTime { get; set; }
@@ -22,7 +28,7 @@ namespace Data.Entity
         /// <summary>
         /// The time between available slots e.g.
         /// 15 -> service would be available to book every 15 mins
-        /// from <see cref="EarliestTime"/> up to <see cref="LatestTime"/>
+        /// from <see cref="EarliestTime"/> such that it completes (<see cref="DurationMins") by /> <see cref="LatestTime"/>
         /// </summary>
         public int BookingFrequencyMins { get; set; }
 
@@ -37,7 +43,7 @@ namespace Data.Entity
         public int PaddingStartMins { get; set; }
 
         /// <summary>
-        /// Additional time blocked dout post event, for clearup etc
+        /// Additional time blocked out post event, for clearup etc
         /// </summary>
         public int PaddingEndMins { get; set; }
 
@@ -47,42 +53,14 @@ namespace Data.Entity
         [Column(TypeName = "decimal(19, 4)")]
         public decimal Price { get; set; }
 
-
-        #region AvailableDays 
         /// <summary>
-        /// If the service is available on Monday
+        /// RepeatType for this Service
         /// </summary>
-        public bool AvailableMonday { get; set; }
+        public ServiceRepeatType RepeatType { get; set; }
 
         /// <summary>
-        /// If the service is available on Tuesday
+        /// All the Repeats for this Service
         /// </summary>
-        public bool AvailableTuesday { get; set; }
-
-        /// <summary>
-        /// If the service is available on Wednesday
-        /// </summary>
-        public bool AvailableWednesday { get; set; }
-
-        /// <summary>
-        /// If the service is available on Thursday
-        /// </summary>
-        public bool AvailableThursday { get; set; }
-
-        /// <summary>
-        /// If the service is available on Friday
-        /// </summary>
-        public bool AvailableFriday { get; set; }
-
-        /// <summary>
-        /// If the service is available on Saturday
-        /// </summary>
-        public bool AvailableSaturday { get; set; }
-
-        /// <summary>
-        /// If the service is available on Sunday
-        /// </summary>
-        public bool AvailableSunday { get; set; }
-        #endregion
+        public virtual ICollection<ServiceRepeater> Repeats { get; set; } = [];
     }
 }

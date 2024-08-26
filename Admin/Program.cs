@@ -13,7 +13,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddApplicationLayers();
-builder.Services.AddSingleton<StateContainerSingle<ServiceTypeDto>>();
+builder.Services.AddScoped<StateContainerSingle<ServiceTypeDto>>();
+builder.Services.AddScoped<StateContainerSingle<DateTime>>();
 builder.Services.AddTransient<AppointmentViewService>();
 
 builder.Services.AddMudServices(config =>

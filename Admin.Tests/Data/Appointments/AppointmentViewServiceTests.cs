@@ -1,5 +1,4 @@
 ﻿using Admin.Data.Events;
-using Core;
 using Core.Dto;
 using Core.Interfaces;
 using Core.Responses;

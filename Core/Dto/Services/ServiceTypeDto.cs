@@ -1,7 +1,6 @@
-﻿using Core.Dto.Validation;
+﻿using Core.Dto.Services;
+using Core.Dto.Validation;
 using System.ComponentModel.DataAnnotations;
-using System.Configuration;
-using System.Drawing;
 
 namespace Core.Dto
 {
@@ -14,25 +13,12 @@ namespace Core.Dto
         [StringLength(50)]
         public string Name { get; set; }
 
-        /// <summary>
-        /// A description of the offered service
-        /// </summary>
-        [StringLength(250)]
-        public string Description { get; set; }
 
         /// <summary>
-        /// Which days of the week this service is available
+        /// The Service will be available to book from this date.
         /// </summary>
-        public Dictionary<DayOfWeek, bool> DaysOffered { get; set; } = new Dictionary<DayOfWeek, bool>
-        {
-            {DayOfWeek.Monday, true },
-            {DayOfWeek.Tuesday, true },
-            {DayOfWeek.Wednesday, true },
-            {DayOfWeek.Thursday, true },
-            {DayOfWeek.Friday, true },
-            {DayOfWeek.Saturday, false },
-            {DayOfWeek.Sunday, false }
-        };
+        [Required]
+        public DateTime? StartDate { get; set; } = DateTime.Today;
 
         /// <summary>
         /// The earliest available booking time
@@ -89,5 +75,9 @@ namespace Core.Dto
         /// </summary>
         [Range(0.00, double.MaxValue, ErrorMessage = "Enter valid price")]
         public decimal Price { get; set; }
+
+        public ServiceRepeaterTypeDto RepeatType { get; set; } = ServiceRepeaterTypeDto.Weekly;
+
+        public ICollection<ServiceRepeaterDto> Repeats { get; set; } = [];
     }
 }

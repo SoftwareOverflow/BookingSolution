@@ -1,19 +1,82 @@
-﻿using Core.Dto;
+﻿using AutoMapper;
+using Core.Dto;
 using Core.Interfaces;
+using Core.Responses;
+using Data.Entity;
 using Data.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Core.Services
 {
     internal class ServiceTypeService : IServiceTypeService
     {
         private IServiceContext ServiceContext;
+        private IBusinessContext BusinessContext;
+
         private UserStateManager UserStateManager;
+
+        private IMapper Mapper;
+
         private List<ServiceTypeDto> ServiceTypesCache = new List<ServiceTypeDto>();
 
-        public ServiceTypeService(IServiceContext serviceContext, UserStateManager userStateManager)
+        public ServiceTypeService(IServiceContext serviceContext, IBusinessContext businessContext, UserStateManager userStateManager, IMapper mapper)
         {
-            UserStateManager = userStateManager;
             ServiceContext = serviceContext;
+            BusinessContext = businessContext;
+
+            UserStateManager = userStateManager;
+
+            Mapper = mapper;
+        }
+
+        public async Task<ServiceResult<ServiceTypeDto>> CreateOrUpdateServiceType(ServiceTypeDto serviceType)
+        {
+            try
+            {
+                var userId = UserStateManager.UserId ?? "";
+
+                if (userId.IsNullOrEmpty())
+                {
+                    return new ServiceResult<ServiceTypeDto>(null, ResultType.ClientError, ["Unable to find userId. Ensure you are logged in."]);
+                }
+
+                var business = await BusinessContext.GetBusinessForUser(userId!);
+                if (business == null)
+                {
+                    return new ServiceResult<ServiceTypeDto>(null, ResultType.ClientError, ["No business found for user. Ensure you have a registered business first."]);
+                }
+
+                var entity = Mapper.Map<Service>(serviceType);
+                entity.BusinessId = business.Id;
+
+
+                bool result = false;
+                if (serviceType.Guid == Guid.Empty)
+                {
+                    result = await ServiceContext.Create(userId, entity);
+                }
+                else
+                {
+                    result = await ServiceContext.Update(userId, entity);
+                }
+
+                if (result)
+                {
+                    serviceType = Mapper.Map<ServiceTypeDto>(entity);
+
+                    return new ServiceResult<ServiceTypeDto>(serviceType, ResultType.Success);
+                }
+                else
+                {
+                    return ServiceResult<ServiceTypeDto>.DefaultServerFailure();
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO loggin
+            }
+
+            return ServiceResult<ServiceTypeDto>.DefaultServerFailure();
         }
 
         /// <summary>
@@ -24,43 +87,36 @@ namespace Core.Services
         {
             var results = new List<ServiceTypeDto>
             {
-                new ServiceTypeDto
-                {
+                new() {
                     Name = "Pedicure",
-                    Description = "Just Your Basic Pedi!",
                     Price = 29.99m
                 },
 
-                new ServiceTypeDto
-                {
+                new() {
                     Name = "Manicure",
                     Price = 32.99m
                 },
 
-                new ServiceTypeDto
-                {
+                new() {
                     Name = "Arcyllic Nails (Colours)",
-                    Description = "Choose from a selection of colours",
                     Price = 18.99m
                 },
 
-                new ServiceTypeDto
-                {
+                new() {
                     Name = "Acryllic Nails (Designs)",
-                    Description = "Choose from a wider selection of designs",
                     Price = 35.99m
                 },
 
-                new ServiceTypeDto
-                {
+                new() {
                     Name = "Wedding Nails",
-                    Description = "Make your nails as special as the big day! Includes a free glass of prosecco ;) Now I'm writing stuff to make the description much longer to see what happens with overlaps etc",
                     Price = 59.99m
                 }
             };
 
             await Task.Delay(1500);
 
+
+            // TODO remove cache or keep? Potentially change the edit service page to accept a guid and load from the guid (maybe from cache frist)
             // Cache this information as we have transient service
             ServiceTypesCache = results;
 
@@ -73,7 +129,8 @@ namespace Core.Services
             try
             {
                 var item = ServiceTypesCache.Single(x => x.Name == name);
-            } catch(InvalidOperationException)
+            }
+            catch (InvalidOperationException)
             {
                 return null;
             }
