@@ -11,8 +11,8 @@ namespace Core.Extensions
     {
         public static void AddApplicationLayers(this IServiceCollection services)
         {
-            services.AddPersistanceLayer();
             services.AddAuthenticationLayer();
+            services.AddPersistanceLayer();
 
             services.AddAutoMapper(typeof(AutoMapperConfig));
             
@@ -21,8 +21,10 @@ namespace Core.Extensions
             services.AddTransient<IBusinessService, BusinessService>();
 
             services.AddScoped<IMessageService, MessageService>();
-            services.AddScoped<UserStateManager>();
-            services.AddScoped<IUserService, UserService>();
+
+            // Create UserService for both internal and external use
+            services.AddScoped<IUserServiceInternal, UserService>();
+            services.AddScoped<IUserService>(x => x.GetRequiredService<IUserServiceInternal>());
         }
     }
 }

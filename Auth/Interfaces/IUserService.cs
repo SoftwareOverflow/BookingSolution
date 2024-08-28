@@ -7,7 +7,9 @@
 
         public  Task<string> GetUserNameFromId(string userId);
 
-        public Task<string> GetCurrentUserId();
+        public Task<string> GetCurrentUserIdAsync();
+
+        public string GetCurrentUserId();
 
         public string GetSignOutPage();
     }

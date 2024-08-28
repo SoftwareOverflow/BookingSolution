@@ -1,9 +1,9 @@
 ﻿using Auth.Components.Account;
 using Auth.Data;
 using Auth.Interfaces;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
@@ -27,17 +27,27 @@ namespace Auth.Services
             Observers.Add(observer);
         }
 
-        public async Task<string> GetCurrentUserId()
+        public string GetCurrentUserId()
         {
-            if(User != null)
+            if (User != null)
+            {
+                return UserManager.GetUserId(User) ?? string.Empty;
+            }
+
+            return string.Empty;
+        }
+
+        public async Task<string> GetCurrentUserIdAsync()
+        {
+            if (User != null)
             {
                 var result = await UserManager.GetUserAsync(User);
                 return result?.Id ?? string.Empty;
             }
 
             return string.Empty;
-            
-            
+
+
         }
 
         public async Task<string> GetUserNameFromId(string userId)

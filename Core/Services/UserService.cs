@@ -5,13 +5,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Core.Services
 {
-    internal class UserService : IUserObserver, IDisposable, Interfaces.IUserService
+    internal class UserService : IUserObserver, IDisposable, Interfaces.IUserService, IUserServiceInternal
     {
         private Auth.Interfaces.IUserService AuthUserService { get; set; }
 
         private IMessageService MessageService { get; set; }
-
-        private UserStateManager UserStateManager { get; set; }
 
         /// <summary>
         /// Determines if the UserStateManager has up to date information.
@@ -19,18 +17,16 @@ namespace Core.Services
         /// </summary>
         public bool IsUpToDate { get; private set; } = false;
 
-        /// <summary>
-        /// Notifies with the current users first name whenever the current user changes, or null if the user is logged out.
-        /// </summary>
-        public event Action<string?>? OnUserChange;
+        private string UserId = "";
 
-        public UserService(Auth.Interfaces.IUserService userService, IMessageService messageService, UserStateManager userStateManager)
+        private string UserName = "";
+
+        public UserService(Auth.Interfaces.IUserService userService, IMessageService messageService)
         {
             AuthUserService = userService;
             AuthUserService.AddUserListener(this);
 
             MessageService = messageService;
-            UserStateManager = userStateManager;
         }
 
         public async void OnUserEvent(UserEvent userEvent, string userId)
@@ -43,7 +39,7 @@ namespace Core.Services
 
             if (userEvent == UserEvent.Created)
             {
-                
+
                 name = await AuthUserService.GetUserNameFromId(userId);
 
                 // TODO create BusinessUser in db
@@ -57,7 +53,8 @@ namespace Core.Services
                 MessageService.AddMessage(new MessageBase("User Signed In", MessageBase.MessageType.Success));
 
                 // TODO logging
-            } else if(userEvent == UserEvent.SignOut)
+            }
+            else if (userEvent == UserEvent.SignOut)
             {
                 userId = string.Empty;
 
@@ -65,9 +62,8 @@ namespace Core.Services
                 // TODO logging
             }
 
-            UserStateManager.UpdateUser(userId, name);
-            
-            OnUserChange?.Invoke(UserStateManager.UserFirstName);
+            UserId = userId;
+            UserName = name;
 
             IsUpToDate = true;
         }
@@ -81,28 +77,37 @@ namespace Core.Services
                 return;
             }
 
-            var id = await AuthUserService.GetCurrentUserId();
+            var id = await AuthUserService.GetCurrentUserIdAsync();
             var name = string.Empty;
-            if(!id.IsNullOrEmpty())
+            if (!id.IsNullOrEmpty())
             {
                 name = await AuthUserService.GetUserNameFromId(id);
             }
 
-            UserStateManager.UpdateUser(id, name);
-
-            OnUserChange?.Invoke(UserStateManager.UserFirstName);
+            UserId = id;
+            UserName = name;
 
             IsUpToDate = true;
         }
 
-        public async Task<string?> GetUserName()
+        public async Task<string?> GetUserNameAsync()
         {
-            if (UserStateManager.UserFirstName.IsNullOrEmpty())
+            if (!IsUpToDate)
             {
                 await Load();
             }
 
-            return UserStateManager.UserFirstName;
+            return UserName;
+        }
+
+        public async Task<string> GetUserIdAsync()
+        {
+            if(!IsUpToDate)
+            {
+                await Load();
+            }
+
+            return UserId;
         }
 
         public void Dispose()

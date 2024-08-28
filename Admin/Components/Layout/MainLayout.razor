@@ -55,14 +55,12 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
-    private string? Username { get; set; } = null;
-
     [CascadingParameter]
     protected bool IsAccountRoute { get; set; }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!IsAccountRoute)
+        if (!IsAccountRoute && firstRender)
         {
             MessageService.AddMessageListener(OnMessage);
         }

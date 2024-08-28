@@ -13,19 +13,19 @@ namespace Core.Services
     {
         private readonly IBusinessContext Context;
         private readonly IMapper Mapper;
-        private readonly UserStateManager UserStateManager;
-        public BusinessService(IBusinessContext context, IMapper mapper, UserStateManager userStateManager)
+        private readonly IUserServiceInternal UserService;
+        public BusinessService(IBusinessContext context, IMapper mapper, IUserServiceInternal userService)
         {
             Context = context;
             Mapper = mapper;
-            UserStateManager = userStateManager;
+            UserService = userService;
         }
 
         public async Task<ServiceResult<BusinessDto>> GetBusinessForUser()
         {
             try
             {
-                var userId = UserStateManager.UserId;
+                var userId = await UserService.GetUserIdAsync();
                 if (userId.IsNullOrEmpty())
                 {
                     return new ServiceResult<BusinessDto>(null, ResultType.ClientError, ["Unable to identify user. Please try again."]);
@@ -57,7 +57,7 @@ namespace Core.Services
         {
             try
             {
-                var userId = UserStateManager?.UserId;
+                var userId = await UserService.GetUserIdAsync();
                 if (userId.IsNullOrEmpty())
                 {
                     // TODO could this ever be a client error?

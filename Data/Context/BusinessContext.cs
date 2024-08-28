@@ -1,7 +1,6 @@
 ﻿using Data.Entity;
 using Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace Data.Context
 {

@@ -27,6 +27,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Username = await UserService.GetUserName();
+        Username = await UserService.GetUserNameAsync();
     }
 }

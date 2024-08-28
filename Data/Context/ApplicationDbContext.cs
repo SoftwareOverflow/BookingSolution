@@ -1,22 +1,20 @@
-﻿using Data.Entity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Auth.Interfaces;
+using Data.Entity;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
-using System.Reflection.Metadata;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
 
 namespace Data.Context
 {
-    internal partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    internal partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUserService userService) : DbContext(options)
     {
-        private const string connectionString = "Server=(localdb)\\mssqllocaldb;Database=BookingSolutions;Trusted_Connection=True;";
+        private readonly IUserService UserService = userService;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            options.UseSqlServer(connectionString,
-                    builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+            LimitBusinessControlledResults(modelBuilder);
 
-            base.OnConfiguring(options);
+            base.OnModelCreating(modelBuilder);
         }
 
         public override int SaveChanges()
@@ -38,8 +36,31 @@ namespace Data.Context
             ChangeTracker.Entries().Where(x => x.Entity is BaseEntity && x.State == EntityState.Added)
                 .Select(x => (BaseEntity)x.Entity).ToList()
                 .ForEach(item =>
-                    item.Guid = Guid.NewGuid()
+                item.Guid = Guid.NewGuid()
                 );
+        }
+
+        private void LimitBusinessControlledResults(ModelBuilder modelBuilder)
+        {
+            // Slightly hard to read - cannot use null propogating operator in Expression.
+            // Require that we have a businessUser, with a valid & matching BusinessId. Only return items related to the current business
+            Expression<Func<BusinessControlledEntity, bool>> filterExpr =
+                bce => bce.BusinessId == ((BusinessUsers.SingleOrDefault((x => x.UserId == UserService.GetCurrentUserId())) != null ? BusinessUsers.Single(x => x.UserId == UserService.GetCurrentUserId()).BusinessId : int.MinValue));
+
+            foreach (var mutableEntityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // check if current entity type is child of BaseModel
+                if (mutableEntityType.ClrType.IsAssignableTo(typeof(BusinessControlledEntity)))
+                {
+                    // modify expression to handle correct child type
+                    var parameter = Expression.Parameter(mutableEntityType.ClrType);
+                    var body = ReplacingExpressionVisitor.Replace(filterExpr.Parameters.First(), parameter, filterExpr.Body);
+                    var lambdaExpression = Expression.Lambda(body, parameter);
+
+                    // set filter
+                    mutableEntityType.SetQueryFilter(lambdaExpression);
+                }
+            }
         }
     }
 }

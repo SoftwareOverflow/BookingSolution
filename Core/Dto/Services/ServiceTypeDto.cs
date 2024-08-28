@@ -79,5 +79,25 @@ namespace Core.Dto
         public ServiceRepeaterTypeDto RepeatType { get; set; } = ServiceRepeaterTypeDto.Weekly;
 
         public ICollection<ServiceRepeaterDto> Repeats { get; set; } = [];
+
+        //region mappings
+        public int PaddingStartMins
+        {
+            get => (int)PaddingStart.TotalMinutes;
+            set => PaddingStart = TimeSpan.FromMinutes(value);
+        }
+
+        public int PaddingEndMins
+        {
+            get => (int)PaddingEnd.TotalMinutes;
+            set => PaddingEnd = TimeSpan.FromMinutes(value);
+        }
+
+        public int DurationMins
+        {
+            get => (int)Duration.TotalMinutes;
+            set => Duration = TimeSpan.FromMinutes(value);
+        }
+        //endregion
     }
 }

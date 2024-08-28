@@ -41,7 +41,7 @@
                     @item.Description
                     </p> *@
                         <div class="flex-grow-1" />
-                        <p class="lead">£@item.Price</p>
+                        <p class="lead">@item.Price.ToString("C")</p>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,15 @@
     {
         Loading = true;
 
-        ServiceTypes = await ServiceTypeService.GetServiceTypes();
+        var result = await ServiceTypeService.GetServiceTypes();
+        if(result.IsSuccess)
+        {
+            ServiceTypes = result.Result!;
+        } else
+        {
+            // TODO show error messages..
+        }
+
         Loading = false;
     }
 

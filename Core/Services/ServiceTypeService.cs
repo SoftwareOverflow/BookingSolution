@@ -10,21 +10,21 @@ namespace Core.Services
 {
     internal class ServiceTypeService : IServiceTypeService
     {
-        private IServiceContext ServiceContext;
-        private IBusinessContext BusinessContext;
+        private readonly IServiceContext ServiceContext;
+        private readonly IBusinessContext BusinessContext;
 
-        private UserStateManager UserStateManager;
+        private readonly IUserServiceInternal UserService;
 
-        private IMapper Mapper;
+        private readonly IMapper Mapper;
 
         private List<ServiceTypeDto> ServiceTypesCache = new List<ServiceTypeDto>();
 
-        public ServiceTypeService(IServiceContext serviceContext, IBusinessContext businessContext, UserStateManager userStateManager, IMapper mapper)
+        public ServiceTypeService(IServiceContext serviceContext, IBusinessContext businessContext, IUserServiceInternal userService, IMapper mapper)
         {
             ServiceContext = serviceContext;
             BusinessContext = businessContext;
 
-            UserStateManager = userStateManager;
+            UserService = userService;
 
             Mapper = mapper;
         }
@@ -33,22 +33,20 @@ namespace Core.Services
         {
             try
             {
-                var userId = UserStateManager.UserId ?? "";
-
+                var userId = await UserService.GetUserIdAsync();
                 if (userId.IsNullOrEmpty())
                 {
-                    return new ServiceResult<ServiceTypeDto>(null, ResultType.ClientError, ["Unable to find userId. Ensure you are logged in."]);
+                    return new ServiceResult<ServiceTypeDto>(null, ResultType.ClientError, ["Unable to find id for user. Ensure you are logged in."]);
                 }
 
-                var business = await BusinessContext.GetBusinessForUser(userId!);
+                var business = await BusinessContext.GetBusinessForUser(userId);
                 if (business == null)
                 {
-                    return new ServiceResult<ServiceTypeDto>(null, ResultType.ClientError, ["No business found for user. Ensure you have a registered business first."]);
+                    return new ServiceResult<ServiceTypeDto>(null, ResultType.ClientError, ["Unable to find business for user. Ensure you have a registered business first."]);
                 }
 
                 var entity = Mapper.Map<Service>(serviceType);
                 entity.BusinessId = business.Id;
-
 
                 bool result = false;
                 if (serviceType.Guid == Guid.Empty)
@@ -71,75 +69,69 @@ namespace Core.Services
                     return ServiceResult<ServiceTypeDto>.DefaultServerFailure();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // TODO loggin
+                // TODO logging
             }
 
             return ServiceResult<ServiceTypeDto>.DefaultServerFailure();
         }
 
         /// <summary>
-        /// 
+        /// Gets all available service types for the business assosciated with this user
         /// </summary>
         /// <returns>The assosciated Services</returns>
-        public async Task<List<ServiceTypeDto>> GetServiceTypes()
+        public async Task<ServiceResult<List<ServiceTypeDto>>> GetServiceTypes()
         {
-            var results = new List<ServiceTypeDto>
-            {
-                new() {
-                    Name = "Pedicure",
-                    Price = 29.99m
-                },
-
-                new() {
-                    Name = "Manicure",
-                    Price = 32.99m
-                },
-
-                new() {
-                    Name = "Arcyllic Nails (Colours)",
-                    Price = 18.99m
-                },
-
-                new() {
-                    Name = "Acryllic Nails (Designs)",
-                    Price = 35.99m
-                },
-
-                new() {
-                    Name = "Wedding Nails",
-                    Price = 59.99m
-                }
-            };
-
-            await Task.Delay(1500);
-
-
-            // TODO remove cache or keep? Potentially change the edit service page to accept a guid and load from the guid (maybe from cache frist)
-            // Cache this information as we have transient service
-            ServiceTypesCache = results;
-
-            return results.OrderBy(x => x.Name).ToList();
-        }
-
-        public async Task<ServiceTypeDto?> GetServiceTypeByName(string? name)
-        {
-            //Attempt to load form the transient service cache.
             try
             {
-                var item = ServiceTypesCache.Single(x => x.Name == name);
+                var userId = await UserService.GetUserIdAsync();
+                if (userId.IsNullOrEmpty())
+                {
+                    return new ServiceResult<List<ServiceTypeDto>>(null, ResultType.ClientError, ["Unable to find id for user. Ensure you are logged in."]);
+                }
+
+                var business = await BusinessContext.GetBusinessForUser(userId);
+                if (business == null)
+                {
+                    return new ServiceResult<List<ServiceTypeDto>>(null, ResultType.ClientError, ["Unable to find business for user. Ensure you have a registered business first."]);
+                }
+
+                var entities = await ServiceContext.GetAllServicesForUser();
+                var dtos = Mapper.Map<List<ServiceTypeDto>>(entities);
+
+                // TODO remove cache or keep? Potentially change the edit service page to accept a guid and load from the guid (maybe from cache frist)
+                // Cache this information as we have transient service
+                ServiceTypesCache = dtos;
+
+                return new ServiceResult<List<ServiceTypeDto>>(dtos, ResultType.Success);
+
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return ServiceResult<List<ServiceTypeDto>>.DefaultServerFailure();
+        }
+
+        public async Task<ServiceResult<bool>> DeleteById(Guid id)
+        {
+            try
+            {
+                await ServiceContext.Delete(id);
+                return new ServiceResult<bool>(true, ResultType.Success);
             }
             catch (InvalidOperationException)
             {
-                return null;
+                return new ServiceResult<bool>(false, ResultType.ClientError);
+            }
+            catch (Exception)
+            {
+                // TODO logging
             }
 
-            // Attempt to load from the database in case the temporary cache is not right
-            await Task.Delay(100);
-
-            //Invalid
-            return null;
+            return ServiceResult<bool>.DefaultServerFailure();
         }
     }
 }

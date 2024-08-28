@@ -22,6 +22,7 @@ namespace Core.Services
 
         public void AddMessageListener(Action<MessageBase> listener)
         {
+            OnMessage -= listener;
             OnMessage += listener;
 
             // Send any unactioned messages

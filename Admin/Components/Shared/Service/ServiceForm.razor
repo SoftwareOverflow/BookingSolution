@@ -13,6 +13,7 @@
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject IMessageService MessageService
+@inject IServiceTypeService ServiceTypeService
 
 <div class="mx-3 col-md-6">
     <EditForm class="bg-light" @ref="Form" Spacing="4" Model="ServiceModel">
@@ -400,10 +401,10 @@
 
         if (!result?.Canceled ?? false)
         {
-            // TODO delete from Server
+            var deleteResult = await ServiceTypeService.DeleteById(ServiceModel.Service.Guid);
 
             MessageService.AddMessage(new MessageBase(
-                    message: "Service deleted (NOT YET)",
+                    message: "Service deleted succesfully",
                     severity: MessageBase.MessageType.Normal
             ));
 
@@ -447,18 +448,27 @@
         if (!result?.Canceled ?? false)
         {
             // TODO Save changes
-            ServiceModel.MapToDto();
+            var dto = ServiceModel.MapToDto();
+            var saveResult = await ServiceTypeService.CreateOrUpdateServiceType(dto);
 
+            if(saveResult.IsSuccess)
+            {
+                var message = IsCreating ? "New Service Created" : "Changes Saved Succesfully";
 
+                MessageService.AddMessage(new MessageBase(
+                       message,
+                        MessageBase.MessageType.Success));
 
-            var message = IsCreating ? "New Service Created" : "Changes Saved Succesfully";
+                NavigationManager.NavigateTo("/Services");
+                return true;
+            } else
+            {
+                // TODO logging
+                MessageService.AddMessage(new MessageBase("Failed to save service", MessageBase.MessageType.Warning));
+                saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
 
-            MessageService.AddMessage(new MessageBase(
-                   message,
-                    MessageBase.MessageType.Success));
-
-            NavigationManager.NavigateTo("/Services");
-            return true;
+                return false;
+            }
         }
 
         return false;
