@@ -4,11 +4,11 @@ namespace Admin.Data.Events
 {
     internal static class AppointmentMapper
     {
-        internal static List<PositionedAppointment> GetPositionedEventBookings(this List<Appointment> events)
+        internal static List<PositionedAppointment> GetPositionedEventBookings(this List<AppointmentDto> events)
         {
             var result = new List<PositionedAppointment>();
 
-            var positionedEvents = events.OrderBy(x => x.StartTime.Subtract(x.PaddingStart)).Select(x => new PositionedAppointment(x)).ToList();
+            var positionedEvents = events.OrderBy(x => x.StartTimePadded).Select(x => new PositionedAppointment(x)).ToList();
 
             var minDate = positionedEvents.Min(x => x.GetStartDate(true));
             var maxDate = positionedEvents.Max(x => x.GetEndDate(true));
@@ -47,7 +47,7 @@ namespace Admin.Data.Events
                         //totalClashes += clashes.Count;
                         if (clashes.Count != 0)
                         {
-                            for (int j = 0; j < clashes.Count(); j++)
+                            for (int j = 0; j < clashes.Count; j++)
                             {
                                 clashes[j].AddClash(currDate);
                             }
@@ -69,33 +69,6 @@ namespace Admin.Data.Events
             }
 
             return positionedEvents;
-        }
-
-        private static Dictionary<DateOnly, Appointment> SplitEventsByDate(PositionedAppointment booking)
-        {
-            var result = new Dictionary<DateOnly, Appointment>();
-
-            var paddedStart = booking.Event.StartTime.Subtract(booking.Event.PaddingStart);
-            var paddedEnd = booking.Event.EndTime.Add(booking.Event.PaddingEnd);
-
-            var startDate = DateOnly.FromDateTime(paddedStart);
-            var endDate = DateOnly.FromDateTime(paddedEnd);
-
-            var currDate = startDate;
-            while (currDate <= endDate)
-            {
-                result[currDate] = booking.Event with
-                {
-                    StartTime = new DateTime(currDate, booking.GetStartTime(currDate, true)),
-                    EndTime = new DateTime(currDate, booking.GetEndTime(currDate, true)),
-                    PaddingEnd = TimeSpan.Zero,
-                    PaddingStart = TimeSpan.Zero,
-                };
-
-                currDate = currDate.AddDays(1);
-            }
-
-            return result;
         }
     }
 }

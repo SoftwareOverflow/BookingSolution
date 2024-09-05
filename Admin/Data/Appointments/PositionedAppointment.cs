@@ -4,7 +4,7 @@ namespace Admin.Data.Events
 {
     public class PositionedAppointment
     {
-        public Appointment Event { get; set; }
+        public AppointmentDto Event { get; set; }
 
         /// <summary>
         /// Contains clash information for each date of the event.
@@ -13,74 +13,34 @@ namespace Admin.Data.Events
         /// </summary>
         private Dictionary<DateOnly, AppointmentClash> ClashDict = [];
 
-        public PositionedAppointment(Appointment booking)
+        public PositionedAppointment(AppointmentDto booking)
         {
             Event = booking;
         }
 
         public DateOnly GetStartDate(bool padded = false)
         {
-            var startDate = padded ? Event.StartTime.Subtract(Event.PaddingStart) : Event.StartTime;
+            var startDate = padded ? Event.StartTimePadded : Event.StartTime;
             return DateOnly.FromDateTime(startDate);
         }
 
         public DateOnly GetEndDate(bool padded = false)
         {
-            var end = padded ? Event.EndTime.Add(Event.PaddingEnd) : Event.EndTime;
+            var end = padded ? Event.EndTimePadded : Event.EndTime;
             return DateOnly.FromDateTime(end);
-        }
-
-        protected internal TimeOnly GetStartTime(DateOnly date, bool padded)
-        {
-            var start = padded ? Event.StartTime.Subtract(Event.PaddingStart) : Event.StartTime;
-            var startDate = DateOnly.FromDateTime(start);
-
-
-            if (startDate == date)
-            {
-                return TimeOnly.FromDateTime(start);
-            }
-            else
-            {
-                // This includes both days within the event and outside the event
-                return new TimeOnly(0, 0);
-            }
-        }
-
-        protected internal TimeOnly GetEndTime(DateOnly date, bool padded)
-        {
-            var end = padded ? Event.EndTime.Add(Event.PaddingEnd) : Event.EndTime;
-            var endDate = DateOnly.FromDateTime(end);
-
-            var start = padded ? Event.StartTime.Subtract(Event.PaddingStart) : Event.StartTime;
-            var startDate = DateOnly.FromDateTime(start);
-
-            if (date == endDate)
-            {
-                return TimeOnly.FromDateTime(end);
-            }
-            else if (date < startDate || date > endDate)
-            {
-
-                return new TimeOnly(0, 0);
-            }
-            else
-            {
-                return new TimeOnly(23, 59, 59);
-            }
         }
 
         private double GetDurationMins(DateOnly date, bool padded)
         {
-            var start = GetStartTime(date, padded).ToTimeSpan();
-            var end = GetEndTime(date, padded).ToTimeSpan();
+            var start = Event.GetStartTime(date, padded).ToTimeSpan();
+            var end = Event.GetEndTime(date, padded).ToTimeSpan();
 
             return end.Subtract(start).TotalMinutes;
         }
 
         public int TopPx(DateOnly date, bool padded = false)
         {
-            var start = GetStartTime(date, padded);
+            var start = Event.GetStartTime(date, padded);
 
             int top = (int)(start.ToTimeSpan().TotalMinutes * AppointmentLayoutConsts.CellHeightMin);
 
@@ -165,7 +125,7 @@ namespace Admin.Data.Events
         /// <returns></returns>
         public int GetRelativeHeightPc(DateOnly date){
 
-            if(GetEndTime(date, false) >= new TimeOnly(23, 59))
+            if(Event.GetEndTime(date, false) >= new TimeOnly(23, 59))
             {
                 return 100;
             }
@@ -175,5 +135,8 @@ namespace Admin.Data.Events
 
             return (int)((unpadded * 100f / (totalHeight * 100f)) * 100f);
         }
+
+        public TimeOnly GetStartTime(DateOnly date, bool padded) => Event.GetStartTime(date, padded);
+        public TimeOnly GetEndTime(DateOnly date, bool padded) => Event.GetEndTime(date, padded);
     }
 }

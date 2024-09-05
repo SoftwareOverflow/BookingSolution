@@ -1,0 +1,17 @@
+﻿::deep .mud-day.mud-current {
+    color: unset !important;
+    border: none;
+}
+
+::deep .mud-day.mud-current:hover {
+    color: unset !important;
+    border: none;
+}
+
+::deep .mud-button-root.red-important:disabled {
+    color: red !important;
+}
+
+.unavailable {
+    text-decoration: line-through;
+}

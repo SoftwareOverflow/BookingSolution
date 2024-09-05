@@ -1,0 +1,270 @@
+﻿@using Admin.Components.Pages
+@using Admin.Data.Booking
+@using Admin.Data.Helpers
+@using Core.Dto.BookingRequest
+@using Core.Interfaces
+@using Microsoft.AspNetCore.Components.Rendering
+@using System.Text
+
+@attribute [AllowAnonymous]
+
+@rendermode RenderMode.InteractiveServer
+
+@inherits LoadingPage
+
+@inject IBookingService BookingService
+@inject IJSRuntime JsInterop
+
+<!-- Build the inherited RenderTree -->
+@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
+
+@* TODO show error for Availability being null *@
+
+<div class="container">
+    <EditForm Model="Model" OnValidSubmit="SaveBookingRequest">
+        <ObjectGraphDataAnnotationsValidator />
+        <div class="flex-row-center mt-2">
+            <h1 class="text-muted">@Model.BookingRequest.Service.Name</h1>
+        </div>
+        <div class="flex-row-center justify-content-evenly mb-2">
+            <h3 class="text-muted">@($"{Model.BookingRequest.Service.Duration.Hours}h {Model.BookingRequest.Service.Duration.Minutes}m")</h3>
+            <h3 class="text-muted fst-italic">@Model.BookingRequest.Service.Price.ToString("C")</h3>
+        </div>
+
+        <div class="row">
+            <div class="col col-xl-6 text-center">
+                <MudDatePicker PickerVariant="PickerVariant.Static"
+                               Label="Select Date"
+                               Date="Model.SelectedDateTime"
+                               Orientation="Orientation.Landscape"
+                               IsDateDisabledFunc="IsDateDisabled"
+                               DateChanged="OnDateChange"
+                               PickerMonthChanged="OnMonthChange"
+                               Class="flex-row-center"
+                               MinDate="Today"
+                               AdditionalDateClassesFunc="GetDateStyle">
+                </MudDatePicker>
+
+                <div class="container mt-4">
+
+                    @if (TimesByDate(Model.BookingRequest.SelectedDate) is var times && times.Any())
+                    {
+                        if(times.All(x => x.State == AvailabilityState.AlreadyBooked))
+                        {
+                            <div class="flex-row-center">
+                                <p class="lead text-muted">Fully Booked!</p>
+                            </div>
+                        }
+
+                        <div class="btn-group" role="group" aria-label="Select Time">
+                            <div class="row">
+                                @foreach (var timeAvail in times)
+                                {
+                                    var disabled = timeAvail.State != AvailabilityState.Available;
+                                    var disabledClass = disabled ? "unavailable" : "";
+
+                                    var time = timeAvail.Time;
+                                    var timeString = time.ToString("HH:mm");
+                                    var buttonId = $"time-select-{timeString}";
+
+                                    <input type="radio" class="btn-check" name="btn-repeat-type" id="@buttonId" autocomplete="off" checked="@(Model.BookingRequest.SelectedTime == time)" @onchange="@(() => Model.BookingRequest.SelectedTime = time)" disabled="@disabled" />
+                                    <label class="btn btn-outline-primary col col-4 col-md-3 col-lg-2 m-2" for="@buttonId">
+                                        @if (disabled)
+                                        {
+                                            <small class="@disabledClass">@timeString</small>
+                                        }
+                                        else
+                                        {
+                                            <span>@timeString</span>
+                                        }
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex-row-center">
+                            <p class="lead text-muted">No Availability Found...</p>
+                        </div>
+                    }
+                    <ValidationMessage For="() => Model.BookingRequest.SelectedTime" class="text-danger" />
+
+                </div>
+            </div>
+
+            <div class="col col-xl-6 text-center">
+                <div class="row">
+                    <div class="col col-lg-6">
+                        <div class="form-floating mx-1 mb-3">
+                            <InputText @bind-Value="Model.BookingRequest.Person.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="Name" />
+                            <label for="name">First Name</label>
+                            <ValidationMessage For="() => Model.BookingRequest.Person.FirstName" class="text-danger" />
+                        </div>
+                    </div>
+                    <div class="col col-lg-6">
+                        <div class="form-floating mx-1 mb-3">
+                            <InputText @bind-Value="Model.BookingRequest.Person.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Name" />
+                            <label for="name">Last Name</label>
+                            <ValidationMessage For="() => Model.BookingRequest.Person.LastName" class="text-danger" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-lg-6">
+                        <div class="form-floating mx-1 mb-3">
+                            <InputText @bind-Value="Model.BookingRequest.Person.EmailAddress" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <label for="email" class="form-label">Email</label>
+                            <ValidationMessage For="() => Model.BookingRequest.Person.EmailAddress" class="text-danger" />
+                        </div>
+                    </div>
+
+                    <div class="col col-lg-6">
+                        <div class="form-floating mx-1 mb-3">
+                            <InputText @bind-Value="Model.BookingRequest.Person.PhoneNumber" class="form-control" autocomplete="phone" aria-required="true" placeholder="name@example.com" />
+                            <label for="email" class="form-label">Phone</label>
+                            <ValidationMessage For="() => Model.BookingRequest.Person.PhoneNumber" class="text-danger" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row m-5">
+                    <button class="btn btn-outline-secondary btn-lg" type="submit">Send Booking Request</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public BookingRequestModel Model { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool IsDemo { get; set; }
+
+    public AvailabilityDto? TimesDto = null;
+
+    private DateTime Today = DateTime.Now;
+
+    private List<TimeAvailability> TimesByDate(DateOnly? date) => TimesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times ?? [];
+
+    /*
+    Potential performance improvements:
+        - Split method to get the available days and available times
+        - Get available days the whole month on month change.
+        - Load selected date, then start loading (with cancellation token) each day in the month in background
+        - If date changes, cancel long running background task and load current date.
+        - Potentially store some information in cache in service.
+    */
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
+        Today = localDate ?? Today;
+
+        if(Model.SelectedDateTime < Today)
+        {
+            Model.SelectedDateTime = Today;
+        }
+
+        await LoadMonth(Model.SelectedDateTime ?? Today);
+        await base.OnParametersSetAsync();
+
+        Loading = false;
+    }
+
+    private void OnDateChange(DateTime? date)
+    {
+        Model.BookingRequest.SelectedTime = null;
+
+        if (date != null)
+        {
+            Model.SelectedDateTime = date;
+        }
+    }
+
+    private async Task OnMonthChange(DateTime? dt)
+    {
+        Loading = true;
+
+        Model.SelectedDateTime = dt;
+
+        if (dt != null)
+        {
+            await LoadMonth(dt.Value);
+        }
+        Loading = false;
+    }
+
+    private async Task LoadMonth(DateTime dt)
+    {
+        var start = new DateOnly(dt.Year, dt.Month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+
+        if (end.ToDateTime(new TimeOnly()) < Today)
+        {
+            return;
+        }
+
+        if (start < DateOnly.FromDateTime(Today))
+        {
+            start = DateOnly.FromDateTime(Today);
+        }
+
+        var result = await BookingService.GetAvailabilityBetweenDates(Model.BookingRequest.Service, start, end);
+        if (result.IsSuccess)
+        {
+            TimesDto = result.Result!;
+        }
+        else
+        {
+            // TODO logging
+            // TODO show error message
+        }
+
+        StateHasChanged();
+    }
+
+    private bool IsDateDisabled(DateTime dt)
+    {
+        var date = DateOnly.FromDateTime(dt);
+
+        if (dt < (Model.BookingRequest.Service.StartDate?.Date ?? Today) || dt < Today)
+        {
+            return true;
+        }
+
+        var dateAvail = TimesDto?.Availability.SingleOrDefault(x => x.Date == date);
+
+        return dateAvail?.Times.Count == 0;
+    }
+
+    private string GetDateStyle(DateTime dt)
+    {
+        var date = DateOnly.FromDateTime(dt);
+
+        if (IsDateDisabled(dt) && dt >= Today)
+        {
+            if (TimesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times.Count == 0)
+            {
+                return "red-important ";
+            }
+        }
+
+        if (TimesByDate(DateOnly.FromDateTime(dt)).All(x => x.State != AvailabilityState.Available)){
+            return "text-muted";
+        }
+
+        return string.Empty;
+    }
+
+    private async Task SaveBookingRequest()
+    {
+        Loading = true;
+        // TODO make calls to save request
+        await Task.Delay(100);
+        Loading = false;
+    }
+}

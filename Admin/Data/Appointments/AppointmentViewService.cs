@@ -4,13 +4,13 @@ using Core.Interfaces;
 
 namespace Admin.Data.Events
 {
-    public class AppointmentViewService(IAppointmentDataService dataService, IMessageService messages) : ViewServiceBase(messages)
+    public class AppointmentViewService(IAppointmentService dataService, IMessageService messages) : ViewServiceBase(messages)
     {
         public async Task<List<PositionedAppointment>> GetEvents(DateOnly start, DateOnly end)
         {
             // TODO error handling in more generic ways so that errors are always shown
-            var result = await base.HandleServiceRequest<List<Appointment>>(() =>
-                dataService.GetBookingsBetweenDates(start, end)
+            var result = await base.HandleServiceRequest<List<AppointmentDto>>(() =>
+                dataService.GetAppointmentsBetweenDates(start, end)
                 );
 
             if(result == null)
@@ -22,7 +22,7 @@ namespace Admin.Data.Events
             }
         }
 
-        public async Task<List<Appointment>> GetEventsWithError()
+        public async Task<List<AppointmentDto>> GetEventsWithError()
         {
             var result = await HandleServiceRequest(dataService.GetErrors);
 

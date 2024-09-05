@@ -8,7 +8,7 @@ namespace Admin.Tests.Data.Events
 {
     public class AppointmentViewServiceTests
     {
-        private readonly Mock<IAppointmentDataService> DataMock = new();
+        private readonly Mock<IAppointmentService> DataMock = new();
         private readonly Mock<IMessageService> MessageMock = new();
         private AppointmentViewService ViewService;
 
@@ -26,28 +26,26 @@ namespace Admin.Tests.Data.Events
         ///                                         <-- Event #3 -->
         /// </summary>
         [Fact]
-        public async Task EventViewService_NoPadding_NoClashes()
+        public async Task AppointmentViewService_NoPadding_NoClashes()
         {
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.Appointment>
+            var mockList = new List<AppointmentDto>
                     {
 
-                        new() {
-                            Name = "Event #2 - Example",
+                        new("Event #2 - Example", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(2, 30)),
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
                         },
-                        new() {
-                            Name = "Event #3 - Breakfast",
+                        new("Event #3 - Breakfast", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(5, 30)),
                             EndTime = new DateTime(date, new TimeOnly(9, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
                         },
-                        new() {
+                        new("Event #1", new PersonDto() ) {
                             Name = "Event #1",
                             StartTime = new DateTime(date, new TimeOnly(0, 0)),
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
@@ -56,9 +54,9 @@ namespace Admin.Tests.Data.Events
                         },
                     };
 
-            DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(date, date);
@@ -76,7 +74,7 @@ namespace Admin.Tests.Data.Events
 
 
         [Fact]
-        public async Task EventViewService_NoPadding_Clashes()
+        public async Task AppointmentViewService_NoPadding_Clashes()
         {
             /* <----- Time ---->
             * <-- Event #1 (1 clash) -->     <-- Event #3 --> (1 clash) -->
@@ -85,24 +83,21 @@ namespace Admin.Tests.Data.Events
 
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.Appointment>
+            var mockList = new List<AppointmentDto>
                     {
-                        new() {
-                            Name = "Event #1",
+                        new("Event #1", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(1, 30)),
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
                         },
-                        new() {
-                            Name = "Event #2 - Example",
+                        new("Event #2 - Example", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(2, 30)),
                             EndTime = new DateTime(date, new TimeOnly(5, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
                             PaddingStart = TimeSpan.FromMinutes(0),
                         },
-                        new() {
-                            Name = "Event #3 - Breakfast",
+                        new("Event #3 - Breakfast", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(4, 0)),
                             EndTime = new DateTime(date, new TimeOnly(7, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
@@ -110,9 +105,9 @@ namespace Admin.Tests.Data.Events
                         }
                     };
 
-            DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList)));
+                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList)));
 
             var result = await ViewService.GetEvents(date, date);
 
@@ -136,7 +131,7 @@ namespace Admin.Tests.Data.Events
         }
 
         [Fact]
-        public async Task EventViewService_Padding_NoClashes()
+        public async Task AppointmentViewService_Padding_NoClashes()
         {
             /** <----- Time ---->
              * <-- <-- Event 1 --> -->  <-<-Event 2->->       <----<Event 3>-->
@@ -144,24 +139,21 @@ namespace Admin.Tests.Data.Events
 
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.Appointment>
+            var mockList = new List<AppointmentDto>
                     {
-                        new() {
-                            Name = "Event #1",
+                        new("Event #1", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(1, 00)),
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(45),
                             PaddingStart = TimeSpan.FromMinutes(45),
                         },
-                        new() {
-                            Name = "Event #2 - Example",
+                        new("Event #2 - Example", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(8, 0)),
                             EndTime = new DateTime(date, new TimeOnly(10, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(15),
                             PaddingStart = TimeSpan.FromMinutes(15),
                         },
-                        new() {
-                            Name = "Event #3 - Breakfast",
+                        new("Event #3 - Breakfast", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(17, 0)),
                             EndTime = new DateTime(date, new TimeOnly(18, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(180),
@@ -169,9 +161,9 @@ namespace Admin.Tests.Data.Events
                         }
                     };
 
-            DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(date, date);
@@ -189,7 +181,7 @@ namespace Admin.Tests.Data.Events
         }
 
         [Fact]
-        public async Task EventViewService_Padding_Clashes()
+        public async Task AppointmentViewService_Padding_Clashes()
         {
             /** <----- Time ---->
              * <-- <-- Event 1 --> -->       <----<Event 3>-->
@@ -198,24 +190,21 @@ namespace Admin.Tests.Data.Events
 
             var date = new DateOnly(2024, 6, 5);
 
-            var mockList = new List<Core.Dto.Appointment>
+            var mockList = new List<AppointmentDto>
                     {
-                        new() {
-                            Name = "Event #1",
+                        new("Event #1", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(1, 00)),
                             EndTime = new DateTime(date, new TimeOnly(2, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(45),
                             PaddingStart = TimeSpan.FromMinutes(45),
                         },
-                        new() {
-                            Name = "Event #2 - Example",
+                        new("Event #2 - Example",new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(2, 0)),
                             EndTime = new DateTime(date, new TimeOnly(5, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(15),
                             PaddingStart = TimeSpan.FromMinutes(30),
                         },
-                        new() {
-                            Name = "Event #3 - Breakfast",
+                        new("Event #3 - Breakfast", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(6, 30)),
                             EndTime = new DateTime(date, new TimeOnly(8, 0)),
                             PaddingEnd = TimeSpan.FromMinutes(60),
@@ -223,9 +212,9 @@ namespace Admin.Tests.Data.Events
                         }
                     };
 
-            DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(date, date);
@@ -246,7 +235,51 @@ namespace Admin.Tests.Data.Events
         }
 
         [Fact]
-        public async Task EventViewService_MultipleDays_MultipleNumClashes()
+        public async Task AppointmentViewService_NestedAppointments()
+        {
+            /**
+             * 
+             * <-       1       ->
+             *      <- 2 ->
+             *   < -    3    ->
+             * 
+             */
+
+            var date = new DateOnly(2024, 8, 7);
+            var mockList = new List<AppointmentDto>()
+            {
+                new ("1", new PersonDto())
+                {
+                    StartTime = new DateTime(date, new TimeOnly(9, 30)),
+                    EndTime =  new DateTime(date, new TimeOnly(18, 0)),
+                },
+                new ("2", new PersonDto())
+                {
+                    StartTime =  new DateTime(date, new TimeOnly(13, 0)),
+                    EndTime =  new DateTime(date, new TimeOnly(15, 0)),
+                },
+
+                new ("2", new PersonDto())
+                {
+                    StartTime = new DateTime(date, new TimeOnly(11, 0)),
+                    EndTime = new DateTime(date, new TimeOnly(17, 0))
+                }
+            };
+
+
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+               .Returns(
+                   Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
+               );
+
+            var result = await ViewService.GetEvents(date, date);
+
+            Assert.True(result.Count == mockList.Count);
+            Assert.True(result.All(x => x.WidthPc(date) == (int)(AppointmentLayoutConsts.EventsWidthPc / 3f)));
+        }
+
+        [Fact]
+        public async Task AppointmentViewService_MultipleDays_MultipleNumClashes()
         {
             /**
              *              |                           |           |
@@ -257,88 +290,78 @@ namespace Admin.Tests.Data.Events
 
             var day1 = new DateOnly(2020, 1, 1);
 
-            var mockList = new List<Appointment>
+            var mockList = new List<AppointmentDto>
             {
-                //region day1
-                new Appointment
+                #region day1
+                new("1", new PersonDto())
                 {
-                    Name = "1",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
                 },
-                new Appointment
+                new("2", new PersonDto())
                 {
-                    Name = "2",
                     StartTime = new DateTime(day1, new TimeOnly(1, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(2, 0)),
                 },
-                new Appointment
+                new("3", new PersonDto())
                 {
-                    Name = "3",
                     StartTime = new DateTime(day1, new TimeOnly(1, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 0)),
                 },
-                new Appointment
+                new("4", new PersonDto())
                 {
-                    Name = "4",
                     StartTime = new DateTime(day1, new TimeOnly(2, 30)),
                     EndTime = new DateTime(day1, new TimeOnly(3, 30)),
                 },
-                new Appointment
+                new("5", new PersonDto())
                 {
-                    Name = "5",
                     StartTime = new DateTime(day1, new TimeOnly(4, 0)),
                     EndTime = new DateTime(day1, new TimeOnly(5, 30)),
                 },
-                //endregion day1
+                #endregion day1
 
-                //day2
-                new Appointment
+                #region day2
+                new("6", new PersonDto())
                 {
-                    Name = "6",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(9, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(12, 0)),
                 },
-                new Appointment
+                new("7", new PersonDto())
                 {
-                    Name = "7",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(13, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(14, 30)),
                 },
-                new Appointment
+                new("8", new PersonDto())
                 {
-                    Name = "8",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(13, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(14, 30)),
                 },
-                new Appointment
+                new("9", new PersonDto())
                 {
-                    Name = "9",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(22, 0)),
                     EndTime = new DateTime(day1.AddDays(3), new TimeOnly(1, 30)),
                     PaddingStart = TimeSpan.FromMinutes(180),
                     PaddingEnd = TimeSpan.FromMinutes(100)
                 },
-                new Appointment
+                new("10", new PersonDto())
                 {
-                    Name = "10",
                     StartTime = new DateTime(day1.AddDays(1), new TimeOnly(23, 0)),
                     EndTime = new DateTime(day1.AddDays(1), new TimeOnly(23, 59, 59)),
                 },
+                #endregion
 
-                //day 3
-                new Appointment
+                // day 3
+                new("11", new PersonDto())
                 {
-                    Name = "11",
                     StartTime = new DateTime(day1.AddDays(2), new TimeOnly(2, 45)),
                     EndTime = new DateTime(day1.AddDays(2), new TimeOnly(4, 50)),
                 },
             };
 
 
-            DataMock.Setup(x => x.GetBookingsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<Appointment>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
             var result = await ViewService.GetEvents(day1, day1.AddDays(2));

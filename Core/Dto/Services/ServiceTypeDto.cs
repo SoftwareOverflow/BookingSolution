@@ -80,7 +80,7 @@ namespace Core.Dto
 
         public ICollection<ServiceRepeaterDto> Repeats { get; set; } = [];
 
-        //region mappings
+        #region mappings
         public int PaddingStartMins
         {
             get => (int)PaddingStart.TotalMinutes;
@@ -98,6 +98,6 @@ namespace Core.Dto
             get => (int)Duration.TotalMinutes;
             set => Duration = TimeSpan.FromMinutes(value);
         }
-        //endregion
+        #endregion
     }
 }

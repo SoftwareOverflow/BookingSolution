@@ -8,5 +8,6 @@ namespace Data.Interfaces
 
         public Task<Business?> GetBusinessForUser(string userId);
 
+        public Task<Business?> GetBusiness(Guid businessGuid);
     }
 }

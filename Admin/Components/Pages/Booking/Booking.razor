@@ -1,0 +1,100 @@
+﻿@page "/book/{BusinessGuid:guid}/{ServiceGuid:guid}"
+
+@attribute [AllowAnonymous]
+
+@using Admin.Components.Shared.Booking
+@using Admin.Data.Booking
+@using Core.Dto
+@using Core.Interfaces
+@using Microsoft.AspNetCore.Components.Rendering
+
+@inject IBookingService BookingService
+
+@layout EmptyLayout
+
+@inherits LoadingPage
+
+<!-- Build the inherited RenderTree -->
+@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
+
+
+<div class="bg-light border-1 border-opacity-10 border-primary bg-light @BgClass">
+    @*     @if (IsDemo)
+    {
+    <div class="container position-relative flex-row-center top-0 start-0 h-100 w-100">
+    <img src="images/sample_watermark.png" class="img-fluid position-absolute h-100" alt="Sample" />
+    <div class="container-md-6 flex-row-center h-100">
+    <img src="images/sample_watermark.png" class="img-fluid position-absolute h-100" alt="Sample" />
+    </div>
+    <div class="col-md-6 flex-row-center h-100">
+    <img src="images/sample_watermark.png" class="img-fluid position-absolute h-100" alt="Sample" />
+    </div>
+    </div>
+    } *@
+
+    @if (IsError || BookingRequest == null)
+    {
+        // TODO show error page
+        <div class="container">
+            <p class="pt-3">Something isnt right here!</p>
+        </div>
+    }
+    else
+    {
+        <BookingForm Model="BookingRequest" IsDemo="IsDemo" />
+    }
+
+    <div class="d-flex position-relative flex-row fixed-bottom justify-content-end pe-3 pb-3">
+        <small>Powered by IndeBook</small>
+    </div>
+</div>
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@code {
+    [Parameter]
+    public Guid? BusinessGuid { get; set; }
+
+    [Parameter]
+    public Guid? ServiceGuid { get; set; }
+
+    private ServiceTypeDto? ServiceTypeDto { get; set; } = null;
+
+    [Parameter]
+    public Boolean IsDemo { get; set; } = true;
+
+    public bool IsError = false;
+
+    public string BgClass => IsDemo ? "watermark" : "";
+
+    public BookingRequestModel? BookingRequest;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (BusinessGuid.HasValue && ServiceGuid.HasValue)
+        {
+            var result = await BookingService.GetNewBookingRequest(BusinessGuid.Value, ServiceGuid.Value);
+
+            if (result.IsSuccess)
+            {
+                BookingRequest = new BookingRequestModel(result.Result!);
+            }
+            else
+            {
+                // TODO logging
+            }
+
+        }
+
+        Loading = false;
+
+        await base.OnParametersSetAsync();
+        StateHasChanged();
+    }
+
+    // TODO check that it's inside an iFrame
+    // TODO check the referer header
+}

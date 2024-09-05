@@ -11,7 +11,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.Parse("2024-12-21");
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(12, 30)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(14, 30)),
@@ -27,7 +27,7 @@ namespace Admin.Tests.Data.Events
         {
             var date = DateOnly.Parse("2024-12-21");
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("1", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(17, 59)).AddMinutes(-45),
                     EndTime = DateTime.Now,
@@ -44,7 +44,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.Parse("2024-05-15");
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(15, 25)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(15, 55)),
@@ -61,7 +61,7 @@ namespace Admin.Tests.Data.Events
             var date = new DateOnly(2023, 1, 29);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(17, 30)).AddMinutes(-45),
                     EndTime = new DateTime(date, new TimeOnly(20, 00)),
@@ -79,7 +79,7 @@ namespace Admin.Tests.Data.Events
             var endDate = new DateOnly(2023, 01, 03);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(17, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
@@ -99,7 +99,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.FromDateTime(dateTime);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = dateTime
                 });
@@ -119,7 +119,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.FromDateTime(dateTime);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = dateTime,
                     PaddingStart = TimeSpan.FromMinutes(50)
@@ -140,7 +140,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.FromDateTime(dateTime);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45)
@@ -161,7 +161,8 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.FromDateTime(dateTime);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
+
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(3).AddMinutes(45),
@@ -183,7 +184,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.FromDateTime(dateTime);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = dateTime,
                     EndTime = dateTime.AddHours(7).AddMinutes(15),
@@ -202,7 +203,7 @@ namespace Admin.Tests.Data.Events
         public void Event_LTR_NoClash()
         {
             var booking = new PositionedAppointment(
-                booking: new Appointment());
+                booking: new AppointmentDto("Name", new PersonDto()));
 
             // Only fill EventLayoutConsts.EventsWidthPc of the width so there is place to still click.
             Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, booking.WidthPc(DateOnly.MaxValue));
@@ -216,7 +217,7 @@ namespace Admin.Tests.Data.Events
             var endDate = new DateOnly(2023, 01, 03);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(1, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
@@ -241,7 +242,7 @@ namespace Admin.Tests.Data.Events
             var endDate = new DateOnly(2023, 01, 03);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(startDate, new TimeOnly(1, 30)).AddMinutes(-45),
                     EndTime = new DateTime(endDate, new TimeOnly(20, 00)),
@@ -268,7 +269,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.Parse("2024-07-06");
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(10, 15)),
                     EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -295,7 +296,7 @@ namespace Admin.Tests.Data.Events
             var date = DateOnly.Parse("2024-07-06");
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(10, 15)),
                     EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -315,7 +316,7 @@ namespace Admin.Tests.Data.Events
             var date = new DateOnly(2024, 7, 6);
 
             var booking = new PositionedAppointment(
-                booking: new Appointment
+                booking: new AppointmentDto("Name", new PersonDto())
                 {
                     StartTime = new DateTime(date, new TimeOnly(10, 15)),
                     EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -335,7 +336,7 @@ namespace Admin.Tests.Data.Events
         {
             var date = new DateOnly(2024, 7, 6);
             var booking = new PositionedAppointment(
-            booking: new Appointment
+            booking: new AppointmentDto("Name", new PersonDto())
             {
                 StartTime = new DateTime(date, new TimeOnly(0, 0)),
                 EndTime = new DateTime(date, new TimeOnly(10, 45)),
@@ -351,7 +352,7 @@ namespace Admin.Tests.Data.Events
         {
             var date = new DateOnly(2024, 7, 6);
             var booking = new PositionedAppointment(
-            booking: new Appointment
+            booking: new AppointmentDto("Name", new PersonDto())
             {
                 StartTime = new DateTime(date, new TimeOnly(0, 0)),
                 EndTime = new DateTime(date, new TimeOnly(22, 45)),

@@ -48,25 +48,13 @@
     {
         if (firstRender)
         {
-            try
+            var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
+            if(localDate != null)
             {
-                var dateStr = await JsInterop.InvokeAsync<string>("getLocalDate");
-                bool readLocalDate = DateTime.TryParse(dateStr, out var localDate);
-                if (readLocalDate)
-                {
-                    Date = localDate;
-                    ClientDateContainer.SetItem(localDate.Date);
-                }
-                else
-                {
-                    // TODO logging.
-                }
-            }
-            catch (Exception)
-            {
-                // TODO logging.
+                Date = localDate.Value;
             }
 
+            ClientDateContainer.SetItem(Date);
 
             // Load data in any case, defaulting to server
             await OnCalendarStateChange(CalendarLayoutType, Date);

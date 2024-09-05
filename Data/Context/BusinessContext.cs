@@ -10,6 +10,18 @@ namespace Data.Context
 
         private DbSet<BusinessUser> BusinessUsers { get; set; }
 
+        public async Task<Business?> GetBusiness(Guid businessGuid)
+        {
+            var result = await Businesses.Include(b => b.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync(b => b.Guid == businessGuid);
+            if(result == null)
+            {
+                // TODO logging
+                return null;
+            }
+
+            return result;
+        }
+
         public async Task<Business?> GetBusinessForUser(string userId)
         {
             var result =  await BusinessUsers.Include(u => u.Business).SingleOrDefaultAsync(x => x.UserId == userId);
