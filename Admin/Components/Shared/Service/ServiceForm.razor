@@ -14,225 +14,224 @@
 @inject NavigationManager NavigationManager
 @inject IMessageService MessageService
 @inject IServiceTypeService ServiceTypeService
+@inject StateContainerSingle<ServiceTypeDto> StateContainer
 
-<div class="mx-3 col-md-6">
-    <EditForm class="bg-light" @ref="Form" Spacing="4" Model="ServiceModel">
-        <ObjectGraphDataAnnotationsValidator />
+<EditForm class="bg-light" @ref="Form" Spacing="4" Model="ServiceModel">
+    <ObjectGraphDataAnnotationsValidator />
+    <div class="flex-row-center">
+        <div class="form-floating w-50">
+            <InputText @bind-Value="ServiceModel.Service.Name" class="form-control bg-light border-top-0 border-start-0 border-end-0 rounded-0" aria-required="true" placeholder="Name" />
+            <label for="name">Service Name</label>
+            <ValidationMessage For="() => ServiceModel.Service.Name" class="text-danger" />
+        </div>
+    </div>
+    <div class="mt-5 pt-5">
+        <h5 class="text-center">
+            Service Timings:
+        </h5>
+        <div>
+            <div class="flex-row-center">
+                <h6 class="lead my-0 mx-3">Slots Offered:</h6>
+                <MudRadioGroup @bind-Value="ServiceModel.Service!.BookingFrequencyMins">
+                    <label>
+                        <MudRadio Value="15">Every 15 mins</MudRadio>
+                    </label>
+
+                    <label>
+                        <MudRadio Value="30">Every 30 mins</MudRadio>
+                    </label>
+
+                    <label>
+                        <MudRadio Value="60">Every hour</MudRadio>
+                    </label>
+                </MudRadioGroup>
+            </div>
+            <div class="flex-row-center">
+                <h6 class="lead mx-3 my-0">Between:</h6>
+                <span class="material-symbols-outlined">schedule</span>
+                <MudTimePicker MinuteSelectionStep="15" @bind-Time="ServiceModel.Service.EarliestTime" Adornment="Adornment.None" ShowToolbar="false" />
+                <span>&#x2014;</span>
+                <MudTimePicker MinuteSelectionStep="15" @bind-Time="ServiceModel.Service.LatestTime"
+                               ShowToolbar="false"
+                               Adornment="Adornment.None" />
+            </div>
+        </div>
+    </div>
+    <div class="mt-5 pt-5">
+        <h5 class="text-center">Service Price:</h5>
         <div class="flex-row-center">
-            <div class="form-floating w-50">
-                <InputText @bind-Value="ServiceModel.Service.Name" class="form-control bg-light border-top-0 border-start-0 border-end-0 rounded-0" aria-required="true" placeholder="Name" />
-                <label for="name">Service Name</label>
-                <ValidationMessage For="() => ServiceModel.Service.Name" class="text-danger" />
+            <MudTooltip Placement="Placement.Right" Text="This is the price the user pays. You may receive less than this if you take payment online.">
+                <span class="material-symbols-outlined">info</span>
+            </MudTooltip>
+            <h6 class="lead my-0 mx-3">Price: £</h6><MudNumericField For="(() => ServiceModel.Service.Price)" InputId="price-input" HideSpinButtons="true" Class="price-field" @bind-Value=ServiceModel.Service!.Price Format="N2" />
+        </div>
+    </div>
+    <div class="mt-5 pt-5">
+        <h5 class="text-center">Booking Duration (hh:mm):</h5>
+        <div class="flex-row-center">
+            <div class="d-flex flex-row justify-content-end">
+                <MudNumericField Class="d-flex w-fit-content" Error="@(ServiceModel.Service.Duration.TotalMinutes == 0)" @bind-Value="@ServiceModel.DurationHours" Min="0" Step="1" />
+            </div>
+            <span class="d-6 fw-bolder lead mx-4">&colon;</span>
+            <div class="d-flex flex-row justify-content-end">
+                <MudNumericField Class="d-flex w-fit-content" Error="@(ServiceModel.Service.Duration.TotalMinutes == 0)" @bind-Value="@ServiceModel.DurationMinutes" Min="0" Step="15" />
             </div>
         </div>
-        <div class="mt-5 pt-5">
-            <h5 class="text-center">
-                Service Timings:
-            </h5>
-            <div>
+        <div class="flex-row-center">
+            <ValidationMessage For="@(() => ServiceModel.Service.Duration)" class="text-danger" />
+        </div>
+    </div>
+    <div class="mt-5 pt-5">
+        <h5 class="text-center">Availability:</h5>
+        <div class="flex-row-center">
+            <h6 class="lead my-0 mx-3">Starting From:</h6>
+            <MudDatePicker @bind-Date="ServiceModel.Service.StartDate" ShowToolbar="false" />
+        </div>
+
+        <div class="container">
+            <div class="mx-5 my-2 border-1 border-primary">
                 <div class="flex-row-center">
-                    <h6 class="lead my-0 mx-3">Slots Offered:</h6>
-                    <MudRadioGroup @bind-Value="ServiceModel.Service!.BookingFrequencyMins">
-                        <label>
-                            <MudRadio Value="15">Every 15 mins</MudRadio>
-                        </label>
+                    <div class="btn-group" role="group" aria-label="repeat type">
+                        <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-weekly" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.Weekly)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.Weekly)" />
+                        <label class="btn btn-outline-primary" for="btn-repeat-weekly">Weekly</label>
 
-                        <label>
-                            <MudRadio Value="30">Every 30 mins</MudRadio>
-                        </label>
+                        <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-monthly-exact" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute)" />
+                        <label class="btn btn-outline-primary" for="btn-repeat-monthly-exact">Monthly (By Date)</label>
 
-                        <label>
-                            <MudRadio Value="60">Every hour</MudRadio>
-                        </label>
-                    </MudRadioGroup>
+                        <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-monthly-relative" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.MonthlyRelative)" />
+                        <label class="btn btn-outline-primary" for="btn-repeat-monthly-relative">Monthly (By Weekday)</label>
+                    </div>
                 </div>
-                <div class="flex-row-center">
-                    <h6 class="lead mx-3 my-0">Between:</h6>
-                    <span class="material-symbols-outlined">schedule</span>
-                    <MudTimePicker MinuteSelectionStep="15" @bind-Time="ServiceModel.Service.EarliestTime" Adornment="Adornment.None" ShowToolbar="false" />
-                    <span>&#x2014;</span>
-                    <MudTimePicker MinuteSelectionStep="15" @bind-Time="ServiceModel.Service.LatestTime"
-                                   ShowToolbar="false"
-                                   Adornment="Adornment.None" />
-                </div>
-            </div>
-        </div>
-        <div class="mt-5 pt-5">
-            <h5 class="text-center">Service Price:</h5>
-            <div class="flex-row-center">
-                <MudTooltip Placement="Placement.Right" Text="This is the price the user pays. You may receive less than this if you take payment online.">
-                    <span class="material-symbols-outlined">info</span>
-                </MudTooltip>
-                <h6 class="lead my-0 mx-3">Price: £</h6><MudNumericField For="(() => ServiceModel.Service.Price)" InputId="price-input" HideSpinButtons="true" Class="price-field" @bind-Value=ServiceModel.Service!.Price Format="N2" />
-            </div>
-        </div>
-        <div class="mt-5 pt-5">
-            <h5 class="text-center">Booking Duration (hh:mm):</h5>
-            <div class="flex-row-center">
-                <div class="d-flex flex-row justify-content-end">
-                    <MudNumericField Class="d-flex w-fit-content" Error="@(ServiceModel.Service.Duration.TotalMinutes == 0)" @bind-Value="@ServiceModel.DurationHours" Min="0" Step="1" />
-                </div>
-                <span class="d-6 fw-bolder lead mx-4">&colon;</span>
-                <div class="d-flex flex-row justify-content-end">
-                    <MudNumericField Class="d-flex w-fit-content" Error="@(ServiceModel.Service.Duration.TotalMinutes == 0)" @bind-Value="@ServiceModel.DurationMinutes" Min="0" Step="15" />
-                </div>
-            </div>
-            <div class="flex-row-center">
-                <ValidationMessage For="@(() => ServiceModel.Service.Duration)" class="text-danger" />
-            </div>
-        </div>
-        <div class="mt-5 pt-5">
-            <h5 class="text-center">Availability:</h5>
-            <div class="flex-row-center">
-                <h6 class="lead my-0 mx-3">Starting From:</h6>
-                <MudDatePicker @bind-Date="ServiceModel.Service.StartDate" ShowToolbar="false" />
-            </div>
 
-            <div class="container">
-                <div class="mx-5 my-2 border-1 border-primary">
-                    <div class="flex-row-center">
-                        <div class="btn-group" role="group" aria-label="repeat type">
-                            <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-weekly" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.Weekly)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.Weekly)" />
-                            <label class="btn btn-outline-primary" for="btn-repeat-weekly">Weekly</label>
+                @if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.Weekly)
+                {
+                    <div id="availability-weekly text-center" class="">
+                        <p class="text-center mb-0 mt-1">
+                            <small class="my-1">Offer this service every week on the days selected</small>
+                        </p>
+                        <div class="flex-row-center justify-content-evenly">
 
-                            <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-monthly-exact" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute)" />
-                            <label class="btn btn-outline-primary" for="btn-repeat-monthly-exact">Monthly (By Date)</label>
-
-                            <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-monthly-relative" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.MonthlyRelative)" />
-                            <label class="btn btn-outline-primary" for="btn-repeat-monthly-relative">Monthly (By Weekday)</label>
+                            @for (int i = 0; i < 7; i++)
+                            {
+                                var day = DateHelpers.StartOfWeek(ClientDate).AddDays(i);
+                                <span class="flex-row-center">
+                                    <MudCheckBox @bind-Value="ServiceModel.WeeklyRepeat[day.DayOfWeek]" />
+                                    @day.ToString("ddd")
+                                </span>
+                            }
                         </div>
                     </div>
+                }
+                else if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)
+                {
+                    <div id="availability-monthly-exact">
+                        <div class="text-center mb-0 mt-1">
+                            <small class="my-1">Offer this service every month on the same day (e.g. 7th of every month)</small>
 
-                    @if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.Weekly)
-                    {
-                        <div id="availability-weekly text-center" class="">
-                            <p class="text-center mb-0 mt-1">
-                                <small class="my-1">Offer this service every week on the days selected</small>
-                            </p>
-                            <div class="flex-row-center justify-content-evenly">
-
-                                @for (int i = 0; i < 7; i++)
+                            <div class="container">
+                                @for (int i = 1; i < 31;)
                                 {
-                                    var day = DateHelpers.StartOfWeek(ClientDate).AddDays(i);
-                                    <span class="flex-row-center">
-                                        <MudCheckBox @bind-Value="ServiceModel.WeeklyRepeat[day.DayOfWeek]" />
-                                        @day.ToString("ddd")
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                    }
-                    else if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)
-                    {
-                        <div id="availability-monthly-exact">
-                            <div class="text-center mb-0 mt-1">
-                                <small class="my-1">Offer this service every month on the same day (e.g. 7th of every month)</small>
+                                    <div class="flex-row-center justify-content-around">
+                                        @for (int j = 1; j <= 7; j++)
+                                        {
+                                            var index = i - 1;
+                                            var selected = index <= 30 ? ServiceModel.MonthlyAbsoluteRepeat[index] : false;
+                                            var bgClass = selected ? "bg-primary text-white" : "text-muted";
+                                            <div class="m-1 w-100 text-center">
 
-                                <div class="container">
-                                    @for (int i = 1; i < 31;)
-                                    {
-                                        <div class="flex-row-center justify-content-around">
-                                            @for (int j = 1; j <= 7; j++)
-                                            {
-                                                var index = i - 1;
-                                                var selected = index <= 30 ? ServiceModel.MonthlyAbsoluteRepeat[index] : false;
-                                                var bgClass = selected ? "bg-primary text-white" : "text-muted";
-                                                <div class="m-1 w-100 text-center">
-
-                                                    <span class="lead badge border-1 @bgClass" style="cursor: pointer"
-                                                          @onclick="@(() => {
+                                                <span class="lead badge border-1 @bgClass" style="cursor: pointer"
+                                                      @onclick="@(() => {
                                                           if(index <= 30) {
                                                               ServiceModel.MonthlyAbsoluteRepeat[index] = !ServiceModel.MonthlyAbsoluteRepeat[index];
                                                               StateHasChanged();
                                                           }
                                                       })">
-                                                        @(i <= 31 ? i.ToString("00") : "")
-                                                    </span>
-                                                </div>
+                                                    @(i <= 31 ? i.ToString("00") : "")
+                                                </span>
+                                            </div>
 
-                                                i++;
+                                            i++;
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)
+                {
+                    <div id="availability-monthly-by-week">
+                        <div class="text-center mb-0 mt-1">
+                            <small class="my-1">Offer this service on the same week of every month (e.g. the second Thursday of every month)</small>
+                            <div class="container text-end">
+                                @for (int i = 1; i <= 4; i++)
+                                {
+                                    int index = i;
+                                    string occuranceName = "";
+                                    if (i == 1)
+                                    {
+                                        occuranceName = "first";
+                                    }
+                                    else if (i == 2)
+                                    {
+                                        occuranceName = "second";
+                                    }
+                                    else if (i == 3)
+                                    {
+                                        occuranceName = "third";
+                                    }
+                                    else if (i == 4)
+                                    {
+                                        index = -1;
+                                        occuranceName = "last";
+                                    }
+                                    var occuranceString = $"On the {occuranceName} occurance:";
+
+                                    <div class="row align-items-center">
+
+                                        <p class="my-0 col-3 text-align-end">@occuranceString</p>
+
+                                        <div class="flex-row-center col-9 justify-content-start">
+                                            @for (int j = 0; j < 7; j++)
+                                            {
+                                                var day = DateHelpers.StartOfWeek(ClientDate).AddDays(j);
+                                                <span class="flex-row-center justify-content-between">
+                                                    <MudCheckBox @bind-Value="ServiceModel.MonthlyRelativeRepeat[index][day.DayOfWeek]" />
+                                                    @day.ToString("ddd")
+                                                </span>
                                             }
                                         </div>
-                                    }
-                                </div>
+                                    </div>
+                                }
                             </div>
+
+
                         </div>
-                    }
-                    else if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)
-                    {
-                        <div id="availability-monthly-by-week">
-                            <div class="text-center mb-0 mt-1">
-                                <small class="my-1">Offer this service on the same week of every month (e.g. the second Thursday of every month)</small>
-                                <div class="container text-end">
-                                    @for (int i = 1; i <= 4; i++)
-                                    {
-                                        int index = i;
-                                        string occuranceName = "";
-                                        if (i == 1)
-                                        {
-                                            occuranceName = "first";
-                                        }
-                                        else if (i == 2)
-                                        {
-                                            occuranceName = "second";
-                                        }
-                                        else if (i == 3)
-                                        {
-                                            occuranceName = "third";
-                                        }
-                                        else if (i == 4)
-                                        {
-                                            index = -1;
-                                            occuranceName = "last";
-                                        }
-                                        var occuranceString = $"On the {occuranceName} occurance:";
-
-                                        <div class="row align-items-center">
-
-                                            <p class="my-0 col-3 text-align-end">@occuranceString</p>
-
-                                            <div class="flex-row-center col-9 justify-content-start">
-                                                @for (int j = 0; j < 7; j++)
-                                                {
-                                                    var day = DateHelpers.StartOfWeek(ClientDate).AddDays(j);
-                                                    <span class="flex-row-center justify-content-between">
-                                                        <MudCheckBox @bind-Value="ServiceModel.MonthlyRelativeRepeat[index][day.DayOfWeek]" />
-                                                        @day.ToString("ddd")
-                                                    </span>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-
-
-                            </div>
-                        </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         </div>
+    </div>
 
-        <div class="flex-row-center my-5 py-5">
-            <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" data-toggle="modal" data-target="#unsaved-changes-modal" @onclick="ShowUnsavedChangesDialog">
-                <span class="mx-2 material-symbols-outlined">cancel</span>
-                Cancel
-            </button>
+    <div class="flex-row-center my-5 py-5">
+        <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" data-toggle="modal" data-target="#unsaved-changes-modal" @onclick="ShowUnsavedChangesDialog">
+            <span class="mx-2 material-symbols-outlined">cancel</span>
+            Cancel
+        </button>
 
-            <div style="@(IsCreating ? "display: none;" : "")">
-                <button class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
-                    <span class="mx-2 material-symbols-outlined">delete</span>
-                    Delete Service
-                </button>
-            </div>
-
-            <button class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5" @onclick="SaveChangesAsync">
-                <span class="mx-2 material-symbols-outlined">save</span>
-                Save Changes
+        <div style="@(IsCreating ? "display: none;" : "")">
+            <button class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
+                <span class="mx-2 material-symbols-outlined">delete</span>
+                Delete Service
             </button>
         </div>
-    </EditForm>
-</div>
+
+        <button class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5" @onclick="SaveChangesAsync">
+            <span class="mx-2 material-symbols-outlined">save</span>
+            Save Changes
+        </button>
+    </div>
+</EditForm>
 
 @code {
     [Parameter, EditorRequired]
@@ -301,7 +300,6 @@
         {
             var parameters = new DialogParameters<ConfirmationDialog> {
                 { x => x.Content, "Any future bookings for this service will be affected" },
-                { x => x.Id, "hello"},
             };
 
             dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters, new()
@@ -318,7 +316,7 @@
             var dto = ServiceModel.MapToDto();
             var saveResult = await ServiceTypeService.CreateOrUpdateServiceType(dto);
 
-            if(saveResult.IsSuccess)
+            if (saveResult.IsSuccess)
             {
                 var message = IsCreating ? "New Service Created" : "Changes Saved Succesfully";
 
@@ -326,9 +324,15 @@
                        message,
                         MessageBase.MessageType.Success));
 
-                NavigationManager.NavigateTo("/Services");
+                if(IsCreating)
+                {
+                    StateContainer.SetItem(saveResult.Result!);
+                    NavigationManager.NavigateTo("/services/edit#booking-form-embed");
+                }
+
                 return true;
-            } else
+            }
+            else
             {
                 // TODO logging
                 MessageService.AddMessage(new MessageBase("Failed to save service", MessageBase.MessageType.Warning));

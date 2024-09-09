@@ -18,7 +18,7 @@
 @((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
 
 
-<div class="bg-light border-1 border-opacity-10 border-primary bg-light @BgClass">
+<div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light vh-100 @BgClass">
     @*     @if (IsDemo)
     {
     <div class="container position-relative flex-row-center top-0 start-0 h-100 w-100">
@@ -43,7 +43,7 @@
     {
         <BookingForm Model="BookingRequest" IsDemo="IsDemo" />
     }
-
+    <div class="flex-grow-1" />
     <div class="d-flex position-relative flex-row fixed-bottom justify-content-end pe-3 pb-3">
         <small>Powered by IndeBook</small>
     </div>
@@ -63,8 +63,8 @@
 
     private ServiceTypeDto? ServiceTypeDto { get; set; } = null;
 
-    [Parameter]
-    public Boolean IsDemo { get; set; } = true;
+    [SupplyParameterFromQuery]
+    public Boolean IsDemo { get; set; } = false;
 
     public bool IsError = false;
 

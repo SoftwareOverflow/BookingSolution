@@ -26,5 +26,19 @@ namespace Admin.Data.Helpers
 
             return null;
         }
+
+        public static async Task<bool> CopyToClipboard(IJSRuntime js, string textToCopy)
+        {
+            try
+            {
+                return await js.InvokeAsync<bool>("clipboardCopy.copyText", textToCopy);
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return false;
+        }
     }
 }

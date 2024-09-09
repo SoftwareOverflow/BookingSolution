@@ -16,8 +16,14 @@
 @if (Service != null)
 {
     <h1>Manage Your Service:</h1>
-
-    <ServiceForm Dto="Service" IsCreating="false" />
+    <div class="container bg-light">
+        <div class="row">
+            <ServiceForm Dto="Service" IsCreating="false" />
+        </div>
+        <div class="row">
+            <ServiceBookingSample Service="Service"/>
+        </div>
+    </div>
 }
 
 @code {
@@ -27,7 +33,7 @@
     {
         Service = StateContainer.GetItem();
 
-        if (Service == null)
+        if (Service == null || string.IsNullOrEmpty(Service.Guid.ToString()))
         {
             MessageService.AddMessage(new MessageBase(
                     message: "Unable to locate service type to edit",
@@ -37,16 +43,6 @@
             NavigateBack(true);
         }
     }
-
-    // private void Delete()
-    // {
-    //     // TODO open another Are You Sure dialog
-    // }
-
-    // private void SaveChangesAsync()
-    // {
-    //     // TODO open another Are You Sure dialog with warning
-    // }
 
     private void NavigateBack(bool replaceHistory = false)
     {

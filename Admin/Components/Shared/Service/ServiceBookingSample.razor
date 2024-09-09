@@ -1,0 +1,51 @@
+﻿@using Admin.Data.Helpers
+@using Core.Dto
+@using Core.Interfaces
+@using System.Web
+
+@inject IJSRuntime Js
+@inject IMessageService MessageService;
+
+@if (Service != null)
+{
+    <h4 class="mt-5 pt-5">Copy & Pate the following code block into your website:</h4>
+    <section id="booking-form-embed" class="border-0 border-primary">
+        <div class="d-flex flex-row justify-content-start align-items-center m-0 border-primary border-1 p-2 m-2">
+            <span>
+                <button @onclick=CopyCode>
+                    <span class="material-symbols-outlined pe-2">file_copy</span>
+                </button>
+            </span>
+            <span class="overflow-x-scroll">
+                <pre class="d-inline-flex m-0">
+                <code>@EmbedCode</code>
+            </pre>
+            </span>
+        </div>
+    </section>
+
+    <p class="lead">The embedded form will look similar to this:</p>
+    <iframe src="@(BookingUrl)?IsDemo=true" title="Book Online - Example" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';" />
+}
+
+
+@code {
+    [Parameter, EditorRequired]
+    public ServiceTypeDto Service { get; set; }
+
+    string BookingUrl => $"https://localhost:7141/book/f8a38099-99ff-4563-9a89-fb902e5df454/{Service.Guid}";
+
+    string EmbedCode => $"<iframe src=\"{BookingUrl}\" title=\"Book Online\" onload=\"this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';\"/>";
+
+    private async Task CopyCode()
+    {
+        if (await JavascriptHelpers.CopyToClipboard(Js, EmbedCode))
+        {
+            MessageService.AddMessage(new MessageBase("Copied to clipboard", MessageBase.MessageType.Success));
+        }
+        else
+        {
+            MessageService.AddMessage(new MessageBase("Failed to copy to clipboard", MessageBase.MessageType.Warning));
+        }
+    }
+}
