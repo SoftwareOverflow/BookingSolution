@@ -4,22 +4,25 @@
 @using System.Web
 
 @inject IJSRuntime Js
-@inject IMessageService MessageService;
+@inject IMessageService MessageService
+@inject IBusinessService BusinessService
 
-@if (Service != null)
+@if (Service != null && !string.IsNullOrEmpty(BusinessGuid))
 {
     <h4 class="mt-5 pt-5">Copy & Pate the following code block into your website:</h4>
     <section id="booking-form-embed" class="border-0 border-primary">
         <div class="d-flex flex-row justify-content-start align-items-center m-0 border-primary border-1 p-2 m-2">
             <span>
-                <button @onclick=CopyCode>
-                    <span class="material-symbols-outlined pe-2">file_copy</span>
-                </button>
+                <MudTooltip Text="Copy Code">
+                    <button @onclick=CopyCode>
+                        <span class="material-symbols-outlined pe-2">file_copy</span>
+                    </button>
+                </MudTooltip>
             </span>
             <span class="overflow-x-scroll">
                 <pre class="d-inline-flex m-0">
                 <code>@EmbedCode</code>
-            </pre>
+                    </pre>
             </span>
         </div>
     </section>
@@ -33,9 +36,27 @@
     [Parameter, EditorRequired]
     public ServiceTypeDto Service { get; set; }
 
-    string BookingUrl => $"https://localhost:7141/book/f8a38099-99ff-4563-9a89-fb902e5df454/{Service.Guid}";
+    private string BusinessGuid = "";
+
+    // TODO change URL to config value
+    string BookingUrl => $"https://localhost:7141/book/{BusinessGuid}/{Service.Guid}";
 
     string EmbedCode => $"<iframe src=\"{BookingUrl}\" title=\"Book Online\" onload=\"this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';\"/>";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var result = await BusinessService.GetBusinessForUser();
+        if (result.IsSuccess)
+        {
+            BusinessGuid = result.Result!.Guid.ToString();
+        }
+        else
+        {
+            // TODO logging
+        }
+
+        await base.OnParametersSetAsync();
+    }
 
     private async Task CopyCode()
     {
