@@ -18,6 +18,10 @@ namespace Data.Extensions
 
             services.AddTransient<IServiceContext, ApplicationDbContext>();
             services.AddTransient<IBusinessContext, ApplicationDbContext>();
+            services.AddTransient<IAppointmentContext, ApplicationDbContext>();
+            // TODO potentially split IBookingContext to a completely separate DbContext
+            services.AddTransient<IBookingContext, ApplicationDbContext>();
+
         }
     }
 }

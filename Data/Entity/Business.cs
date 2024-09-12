@@ -1,4 +1,6 @@
-﻿namespace Data.Entity
+﻿using Data.Entity.Appointments;
+
+namespace Data.Entity
 {
     public class Business : BaseEntity
     {
@@ -15,6 +17,8 @@
         // TODO might need some sort of API Key to check against, or could possibly use the guid property
 
         public virtual Address Address { get; set; }
+
+        public virtual ICollection<Appointment> Appointments { get; set; } = [];
 
         public virtual ICollection<Service> Services { get; set; } = [];
 

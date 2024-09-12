@@ -4,6 +4,7 @@ using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240910172524_AddAppointmentTable")]
+    partial class AddAppointmentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,7 +63,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Address", (string)null);
+                    b.ToTable("Address");
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.Appointment", b =>
@@ -102,7 +105,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("Appointments", (string)null);
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.Person", b =>
@@ -139,7 +142,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Person", (string)null);
+                    b.ToTable("Person");
                 });
 
             modelBuilder.Entity("Data.Entity.Business", b =>
@@ -169,7 +172,7 @@ namespace Data.Migrations
 
                     b.HasIndex("AddressId");
 
-                    b.ToTable("Businesses", (string)null);
+                    b.ToTable("Businesses");
                 });
 
             modelBuilder.Entity("Data.Entity.BusinessUser", b =>
@@ -184,7 +187,7 @@ namespace Data.Migrations
 
                     b.HasIndex("BusinessId");
 
-                    b.ToTable("BusinessUsers", (string)null);
+                    b.ToTable("BusinessUsers");
                 });
 
             modelBuilder.Entity("Data.Entity.Service", b =>
@@ -238,7 +241,7 @@ namespace Data.Migrations
 
                     b.HasIndex("BusinessId");
 
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("Data.Entity.ServiceRepeater", b =>
@@ -266,7 +269,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("ServiceRepeater", (string)null);
+                    b.ToTable("ServiceRepeater");
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.Appointment", b =>

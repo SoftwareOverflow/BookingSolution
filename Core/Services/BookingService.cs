@@ -4,20 +4,20 @@ using Core.Dto.BookingRequest;
 using Core.Dto.Services;
 using Core.Interfaces;
 using Core.Responses;
+using Data.Entity.Appointments;
 using Data.Interfaces;
 
 namespace Core.Services
 {
-    internal class BookingService(IBusinessContext businessContext, IAppointmentService appointmentService, IMapper mapper) : IBookingService
+    internal class BookingService(IBookingContext bookingContext, IMapper mapper) : IBookingService
     {
-        private readonly IBusinessContext BusinessContext = businessContext;
-        private readonly IAppointmentService AppointmentService = appointmentService;
+        private readonly IBookingContext BookingContext = bookingContext;
 
         private readonly IMapper Mapper = mapper;
 
         // TODO maybe cache some so we don't need to repeat the calls when the user moves back and forth through their date selection
 
-        public async Task<ServiceResult<AvailabilityDto>> GetAvailabilityBetweenDates(ServiceTypeDto dto, DateOnly startDate, DateOnly endDate)
+        public async Task<ServiceResult<AvailabilityDto>> GetAvailabilityBetweenDates(ServiceTypeDto dto, Guid businessGuid, DateOnly startDate, DateOnly endDate)
         {
             try
             {
@@ -57,8 +57,6 @@ namespace Core.Services
                     }
                 }
 
-
-
                 List<TimeAvailability> times = [];
                 var time = dto.EarliestTime!.Value;
                 while (time.Add(dto.Duration) <= dto.LatestTime!.Value)
@@ -77,18 +75,12 @@ namespace Core.Services
                     Availability = availableDays.Select(x =>
                     new DateAvailability(x)
                     {
-                        Times = new List<TimeAvailability>(times) // Make a copy so we can it independently of other dates later
+                        Times = new List<TimeAvailability>(times) // Make a copy so we can modify it independently of other dates later
                     }).ToList()
                 };
 
-                var appointmentResult = await AppointmentService.GetAppointmentsBetweenDates(startDate, endDate);
-                if (!appointmentResult.IsSuccess)
-                {
-                    // TODO logging
-
-                    return new ServiceResult<AvailabilityDto>(null, appointmentResult.ResultType, ["Failed to load available times"]);
-                }
-                var existingAppointments = appointmentResult.Result;
+                var appointments = await BookingContext.GetBookingsBetweenDates(businessGuid, startDate, endDate);
+                var existingAppointments = Mapper.Map<ICollection<Appointment>, ICollection<AppointmentDto>>(appointments);
 
                 foreach (var dateAvailability in availabilityDto.Availability)
                 {
@@ -308,10 +300,9 @@ namespace Core.Services
         {
             try
             {
-                var businessResult = await BusinessContext.GetBusiness(businessGuid);
-                var service = businessResult?.Services.SingleOrDefault(s => s.Guid == serviceGuid) ?? null;
+                var service = await BookingContext.GetService(businessGuid, serviceGuid);
 
-                if (businessResult == null || service == null)
+                if (service == null)
                 {
                     return new ServiceResult<BookingRequestDto>(null, ResultType.ClientError, ["Failed to find service for business"]);
                 }
@@ -320,7 +311,7 @@ namespace Core.Services
 
                 var today = DateOnly.FromDateTime(DateTime.Now);
                 var nextAvailableDate = GetNextServiceDate(serviceDto, today);
-                var bookingRequestDto = new BookingRequestDto(serviceDto, new PersonDto(), nextAvailableDate.IsSuccess ? nextAvailableDate.Result : today);
+                var bookingRequestDto = new BookingRequestDto(serviceDto, businessGuid, new PersonDto(), nextAvailableDate.IsSuccess ? nextAvailableDate.Result : today);
 
                 return new ServiceResult<BookingRequestDto>(bookingRequestDto);
             }
@@ -330,6 +321,62 @@ namespace Core.Services
             }
 
             return ServiceResult<BookingRequestDto>.DefaultServerFailure();
+        }
+
+        public async Task<ServiceResult<AppointmentDto>> SendBookingRequest(BookingRequestDto dto, Guid businessGuid)
+        {
+            try
+            {
+                if(dto.SelectedTime == null)
+                {
+                    return new ServiceResult<AppointmentDto>(null, ResultType.ClientError, ["Booking time is required"]);
+                }
+
+                var requestStart = new DateTime(dto.SelectedDate, dto.SelectedTime.Value);
+
+                // Map the BookingRequest to an appointment
+                var appointment = new AppointmentDto(dto.Service.Name, dto.Person)
+                {
+                    Service = dto.Service,
+                    StartTime = requestStart,
+                    EndTime = requestStart.Add(dto.Service.Duration),
+                };
+
+                // TODO check for clashes
+                var clashResult = await GetAvailabilityBetweenDates(dto.Service, businessGuid, dto.SelectedDate, dto.SelectedDate);
+
+                if (clashResult.IsSuccess)
+                {
+                    var day = clashResult.Result!.Availability.Single();
+                    if(day.Times.Count == 0)
+                    {
+                        return new ServiceResult<AppointmentDto>(null, ResultType.ClientError, ["Unable to book this service on this day"]);
+                    }
+
+                    if(day.Times.Single(x => x.Time == dto.SelectedTime.Value).State == AvailabilityState.Available)
+                    {
+                        var entity = Mapper.Map<Appointment>(appointment);
+
+                        bool result = await BookingContext.CreateBookingRequest(entity, dto.BusinessGuid);
+
+                        if (result)
+                        {
+                            appointment = Mapper.Map<AppointmentDto>(entity);
+
+                            return new ServiceResult<AppointmentDto>(appointment);
+                        }
+                    } else
+                    {
+                        return new ServiceResult<AppointmentDto>(null, ResultType.ClientError, ["Requested time is not available"]);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return ServiceResult<AppointmentDto>.DefaultServerFailure();
         }
     }
 }

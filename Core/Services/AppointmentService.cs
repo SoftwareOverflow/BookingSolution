@@ -1,11 +1,18 @@
-﻿using Core.Dto;
+﻿using AutoMapper;
+using Core.Dto;
 using Core.Interfaces;
 using Core.Responses;
+using Data.Entity.Appointments;
+using Data.Interfaces;
 
 namespace Core.Services
 {
-    internal class AppointmentService : IAppointmentService
+    internal class AppointmentService(IAppointmentContext appointmentContext, IMapper mapper) : IAppointmentService
     {
+        private readonly IAppointmentContext AppointmentContext = appointmentContext;
+
+        private readonly IMapper Mapper = mapper;
+
         /// <summary>
         /// Get all <see cref="AppointmentDto"/> objects in a given date range.
         /// </summary>
@@ -108,17 +115,40 @@ namespace Core.Services
             return new ServiceResult<List<AppointmentDto>>(events);
         }
 
-        public async Task<ServiceResult<AppointmentDto>> GetErrors()
+
+        public async Task<ServiceResult<AppointmentDto>> CreateOrUpdateAppointment(AppointmentDto appointment)
         {
-            await Task.Delay(500);
+            try
+            {
+                var entity = Mapper.Map<Appointment>(appointment);
 
-            var result = new ServiceResult<AppointmentDto>(null, ResultType.ServerError);
-            result.Errors.Add("An Unkown error occurred");
+                bool result = false;
+                if (entity.Guid == Guid.Empty)
+                {
+                    result = await AppointmentContext.Create(entity);
+                } else
+                {
+                    result = await AppointmentContext.Update(entity);
+                }
 
-            await Task.Delay(500);
-            result.Errors.Add("Another error happened - YIKES!");
+                if(result)
+                {
+                    appointment = Mapper.Map<AppointmentDto>(entity);
 
-            return result;
+                    return new ServiceResult<AppointmentDto>(appointment);
+                }
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return ServiceResult<AppointmentDto>.DefaultServerFailure();
+        }
+
+        public Task<ServiceResult<bool>> DeleteAppointment(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

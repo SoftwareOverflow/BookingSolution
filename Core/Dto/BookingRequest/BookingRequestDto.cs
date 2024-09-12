@@ -36,9 +36,15 @@ namespace Core.Dto.BookingRequest
         [DisplayName("Time")]
         public TimeOnly? SelectedTime { get; set; }
 
-        public BookingRequestDto(ServiceTypeDto service, PersonDto person, DateOnly selectedDate)
+        /// <summary>
+        /// Guid of the business being booked
+        /// </summary>
+        public Guid BusinessGuid { get; private set; }
+
+        public BookingRequestDto(ServiceTypeDto service, Guid businessGuid, PersonDto person, DateOnly selectedDate)
         {
             Service = service;
+            BusinessGuid = businessGuid;
             Person = person;
             SelectedDate = selectedDate;
         }

@@ -22,13 +22,15 @@
             <span class="overflow-x-scroll">
                 <pre class="d-inline-flex m-0">
                 <code>@EmbedCode</code>
-                    </pre>
+                        </pre>
             </span>
         </div>
     </section>
 
     <p class="lead">The embedded form will look similar to this:</p>
-    <iframe src="@(BookingUrl)?IsDemo=true" title="Book Online - Example" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';" />
+    <div class="w-100 h-auto">
+        <iframe src="@(BookingUrl)?IsDemo=true" style="border: 0; height:100%; width:100%" title="Book Online - Example" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';" />
+    </div>
 }
 
 
@@ -41,7 +43,8 @@
     // TODO change URL to config value
     string BookingUrl => $"https://localhost:7141/book/{BusinessGuid}/{Service.Guid}";
 
-    string EmbedCode => $"<iframe src=\"{BookingUrl}\" title=\"Book Online\" onload=\"this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';\"/>";
+    //Using four spaces instead of \t tab
+    string EmbedCode => $"<div style=\"width: 100%; height: auto;\">\n    <iframe src=\"{BookingUrl}\" title=\"Book Online\" width=\"100%\" height=\"100%\" style=\"border: 0;\" referrerpolicy=\"origin\" onload=\"this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';\"/>\n<div>";
 
     protected override async Task OnParametersSetAsync()
     {

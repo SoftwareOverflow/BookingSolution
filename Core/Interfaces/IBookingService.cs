@@ -14,8 +14,10 @@ namespace Core.Interfaces
         /// <returns><see cref="ServiceResult{BookingRequestDto}"/> indicating if this business exists for the service</returns>
         public Task<ServiceResult<BookingRequestDto>> GetNewBookingRequest(Guid businessGuid, Guid serviceGuid);
 
-        public Task<ServiceResult<AvailabilityDto>> GetAvailabilityBetweenDates(ServiceTypeDto dto, DateOnly startDate, DateOnly endDate);
+        public Task<ServiceResult<AvailabilityDto>> GetAvailabilityBetweenDates(ServiceTypeDto dto, Guid businessGuid, DateOnly startDate, DateOnly endDate);
 
         public ServiceResult<DateOnly> GetNextServiceDate(ServiceTypeDto dto, DateOnly startDate);
+
+        public Task<ServiceResult<AppointmentDto>> SendBookingRequest(BookingRequestDto dto, Guid businessGuid);
     }
 }

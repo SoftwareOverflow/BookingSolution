@@ -35,6 +35,9 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddRazorComponents(options =>
     options.DetailedErrors = builder.Environment.IsDevelopment());
 
+// TODO remove this if I split out the booking form to a different project.
+builder.Services.AddAntiforgery(x => x.SuppressXFrameOptionsHeader = true);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

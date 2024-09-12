@@ -62,5 +62,15 @@ namespace Data.Context
                 }
             }
         }
+
+        private async Task<int> GetBusinessId()
+        {
+            var userId = UserService.GetCurrentUserId() ?? throw new UnauthorizedAccessException("Unable to find logged in user");
+            var businessUser = await BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId);
+
+            return businessUser == null
+                ? throw new InvalidOperationException("Unable to find business for current user")
+                : businessUser.BusinessId;
+        }
     }
 }

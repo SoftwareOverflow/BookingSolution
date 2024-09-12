@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Data.Entity.Appointments;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Data.Entity
@@ -62,5 +63,10 @@ namespace Data.Entity
         /// All the Repeats for this Service
         /// </summary>
         public virtual ICollection<ServiceRepeater> Repeats { get; set; } = [];
+
+        /// <summary>
+        /// Appointments made for this service
+        /// </summary>
+        public virtual ICollection<Appointment> Appointments { get; set; } = [];
     }
 }

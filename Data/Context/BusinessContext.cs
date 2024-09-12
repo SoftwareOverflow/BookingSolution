@@ -12,7 +12,7 @@ namespace Data.Context
 
         public async Task<Business?> GetBusiness(Guid businessGuid)
         {
-            var result = await Businesses.Include(b => b.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync(b => b.Guid == businessGuid);
+            var result = await Businesses.Where(x => x.Guid == businessGuid).Include(b => b.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync();
             if(result == null)
             {
                 // TODO logging

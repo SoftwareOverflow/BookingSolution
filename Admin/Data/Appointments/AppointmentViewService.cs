@@ -21,12 +21,5 @@ namespace Admin.Data.Events
                 return result.GetPositionedEventBookings();
             }
         }
-
-        public async Task<List<AppointmentDto>> GetEventsWithError()
-        {
-            var result = await HandleServiceRequest(dataService.GetErrors);
-
-            return [];
-        }
     }
 }

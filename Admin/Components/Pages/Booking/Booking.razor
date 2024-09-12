@@ -9,6 +9,10 @@
 @using Microsoft.AspNetCore.Components.Rendering
 
 @inject IBookingService BookingService
+@inject IMessageService MessageService
+@inject ISnackbar Snackbar
+
+@implements IDisposable
 
 @layout EmptyLayout
 
@@ -18,20 +22,7 @@
 @((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
 
 
-<div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light vh-100 @BgClass">
-    @*     @if (IsDemo)
-    {
-    <div class="container position-relative flex-row-center top-0 start-0 h-100 w-100">
-    <img src="images/sample_watermark.png" class="img-fluid position-absolute h-100" alt="Sample" />
-    <div class="container-md-6 flex-row-center h-100">
-    <img src="images/sample_watermark.png" class="img-fluid position-absolute h-100" alt="Sample" />
-    </div>
-    <div class="col-md-6 flex-row-center h-100">
-    <img src="images/sample_watermark.png" class="img-fluid position-absolute h-100" alt="Sample" />
-    </div>
-    </div>
-    } *@
-
+<div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light @BgClass">
     @if (IsError || BookingRequest == null)
     {
         // TODO show error page
@@ -39,9 +30,19 @@
             <p class="pt-3">Something isnt right here!</p>
         </div>
     }
+    else if (RequestSent)
+    {
+        <div class="container flex-column-center text-center h-100">
+            <h3>@(IsDemo ? "Example - " : "")Booking Request Sent</h3>
+            <p class="lead">Your booking request has been sent to the business</p>
+            <p>You'll get an email once they confirm your booking</p>
+            <small>If you have any questions about your booking you should contact the business directly</small>
+
+        </div>
+    }
     else
     {
-        <BookingForm Model="BookingRequest" IsDemo="IsDemo" />
+        <BookingForm Model="BookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
     }
     <div class="flex-grow-1" />
     <div class="d-flex position-relative flex-row fixed-bottom justify-content-end pe-3 pb-3">
@@ -67,6 +68,8 @@
     public Boolean IsDemo { get; set; } = false;
 
     public bool IsError = false;
+
+    public bool RequestSent = false;
 
     public string BgClass => IsDemo ? "watermark" : "";
 
@@ -95,6 +98,49 @@
         StateHasChanged();
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            MessageService.AddMessageListener(OnMessage);
+            Snackbar.Configuration.PositionClass = MudBlazor.Defaults.Classes.Position.TopCenter;
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
     // TODO check that it's inside an iFrame
     // TODO check the referer header
+
+    private void OnRequestSent()
+    {
+        RequestSent = true;
+    }
+
+    private void OnMessage(MessageBase message)
+    {
+        var severity = Severity.Normal;
+        switch (message.Severity)
+        {
+            case MessageBase.MessageType.Success:
+                severity = Severity.Success;
+                break;
+            case MessageBase.MessageType.Normal:
+                severity = Severity.Normal;
+                break;
+            case MessageBase.MessageType.Warning:
+                severity = Severity.Warning;
+                break;
+            case MessageBase.MessageType.Error:
+                severity = Severity.Error;
+                break;
+        }
+
+        Snackbar.Add(message.Message, severity);
+    }
+
+    public void Dispose()
+    {
+        MessageService.RemoveMessageListener(OnMessage);
+    }
 }

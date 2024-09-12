@@ -1,6 +1,7 @@
 ﻿@using Admin.Components.Pages
 @using Admin.Data.Booking
 @using Admin.Data.Helpers
+@using Core.Dto
 @using Core.Dto.BookingRequest
 @using Core.Interfaces
 @using Core.Responses
@@ -14,6 +15,7 @@
 @inherits LoadingPage
 
 @inject IBookingService BookingService
+@inject IMessageService MessageService
 @inject IJSRuntime JsInterop
 
 <!-- Build the inherited RenderTree -->
@@ -34,7 +36,8 @@
 
         <div class="row">
             <div class="col col-xl-6 text-center">
-                <MudDatePicker PickerVariant="PickerVariant.Static"
+                <MudDatePicker @ref="DatePicker"
+                               PickerVariant="PickerVariant.Static"
                                Label="Select Date"
                                Date="Model.SelectedDateTime"
                                Orientation="Orientation.Landscape"
@@ -145,6 +148,11 @@
     [Parameter, EditorRequired]
     public bool IsDemo { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback OnRequestSent { get; set; }
+
+    private MudDatePicker DatePicker;
+
     public AvailabilityDto? TimesDto = null;
 
     private DateTime Today = DateTime.Now;
@@ -162,6 +170,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        Loading = true;
         var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
         Today = localDate ?? Today;
 
@@ -179,6 +188,13 @@
         await base.OnParametersSetAsync();
 
         Loading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await DatePicker.GoToDate(Model.SelectedDateTime ?? Today);
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private void OnDateChange(DateTime? date)
@@ -219,7 +235,7 @@
             start = DateOnly.FromDateTime(Today);
         }
 
-        var result = await BookingService.GetAvailabilityBetweenDates(Model.BookingRequest.Service, start, end);
+        var result = await BookingService.GetAvailabilityBetweenDates(Model.BookingRequest.Service, Model.BookingRequest.BusinessGuid, start, end);
         if (result.IsSuccess)
         {
             TimesDto = result.Result!;
@@ -270,8 +286,24 @@
     private async Task SaveBookingRequest()
     {
         Loading = true;
-        // TODO make calls to save request
-        await Task.Delay(100);
+
+        if (IsDemo)
+        {
+            await OnRequestSent.InvokeAsync();
+        }
+        else
+        {
+            var result = await BookingService.SendBookingRequest(Model.BookingRequest, Model.BookingRequest.BusinessGuid);
+            if (result.IsSuccess)
+            {
+                await OnRequestSent.InvokeAsync();
+            }
+            else
+            {
+                result.Errors.ForEach(x => MessageService.AddMessage(new MessageBase(x, MessageBase.MessageType.Warning)));
+            }
+        }
+
         Loading = false;
     }
 }
