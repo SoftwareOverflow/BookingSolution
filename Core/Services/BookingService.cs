@@ -340,6 +340,7 @@ namespace Core.Services
                     Service = dto.Service,
                     StartTime = requestStart,
                     EndTime = requestStart.Add(dto.Service.Duration),
+                    BookingType = BookingTypeDto.ONLINE,
                 };
 
                 // TODO check for clashes

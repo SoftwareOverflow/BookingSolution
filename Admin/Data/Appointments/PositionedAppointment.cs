@@ -4,7 +4,7 @@ namespace Admin.Data.Events
 {
     public class PositionedAppointment
     {
-        public AppointmentDto Event { get; set; }
+        public AppointmentDto Appointment { get; set; }
 
         /// <summary>
         /// Contains clash information for each date of the event.
@@ -15,32 +15,32 @@ namespace Admin.Data.Events
 
         public PositionedAppointment(AppointmentDto booking)
         {
-            Event = booking;
+            Appointment = booking;
         }
 
         public DateOnly GetStartDate(bool padded = false)
         {
-            var startDate = padded ? Event.StartTimePadded : Event.StartTime;
+            var startDate = padded ? Appointment.StartTimePadded : Appointment.StartTime;
             return DateOnly.FromDateTime(startDate);
         }
 
         public DateOnly GetEndDate(bool padded = false)
         {
-            var end = padded ? Event.EndTimePadded : Event.EndTime;
+            var end = padded ? Appointment.EndTimePadded : Appointment.EndTime;
             return DateOnly.FromDateTime(end);
         }
 
         private double GetDurationMins(DateOnly date, bool padded)
         {
-            var start = Event.GetStartTime(date, padded).ToTimeSpan();
-            var end = Event.GetEndTime(date, padded).ToTimeSpan();
+            var start = Appointment.GetStartTime(date, padded).ToTimeSpan();
+            var end = Appointment.GetEndTime(date, padded).ToTimeSpan();
 
             return end.Subtract(start).TotalMinutes;
         }
 
         public int TopPx(DateOnly date, bool padded = false)
         {
-            var start = Event.GetStartTime(date, padded);
+            var start = Appointment.GetStartTime(date, padded);
 
             int top = (int)(start.ToTimeSpan().TotalMinutes * AppointmentLayoutConsts.CellHeightMin);
 
@@ -76,12 +76,12 @@ namespace Admin.Data.Events
 
         public bool HasPadding(DateOnly date)
         {
-            if (Event.PaddingEnd.TotalMinutes == 0 &&
-                Event.PaddingStart.TotalMinutes == 0)
+            if (Appointment.PaddingEnd.TotalMinutes == 0 &&
+                Appointment.PaddingStart.TotalMinutes == 0)
                 return false;
 
-            var startDate = DateOnly.FromDateTime(Event.StartTime);
-            var endDate = DateOnly.FromDateTime(Event.EndTime);
+            var startDate = DateOnly.FromDateTime(Appointment.StartTime);
+            var endDate = DateOnly.FromDateTime(Appointment.EndTime);
 
             if (startDate == date || endDate == date)
             {
@@ -125,7 +125,7 @@ namespace Admin.Data.Events
         /// <returns></returns>
         public int GetRelativeHeightPc(DateOnly date){
 
-            if(Event.GetEndTime(date, false) >= new TimeOnly(23, 59))
+            if(Appointment.GetEndTime(date, false) >= new TimeOnly(23, 59))
             {
                 return 100;
             }
@@ -136,7 +136,7 @@ namespace Admin.Data.Events
             return (int)((unpadded * 100f / (totalHeight * 100f)) * 100f);
         }
 
-        public TimeOnly GetStartTime(DateOnly date, bool padded) => Event.GetStartTime(date, padded);
-        public TimeOnly GetEndTime(DateOnly date, bool padded) => Event.GetEndTime(date, padded);
+        public TimeOnly GetStartTime(DateOnly date, bool padded) => Appointment.GetStartTime(date, padded);
+        public TimeOnly GetEndTime(DateOnly date, bool padded) => Appointment.GetEndTime(date, padded);
     }
 }

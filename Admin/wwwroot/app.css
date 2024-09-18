@@ -112,3 +112,7 @@ h1:focus {
 .center-text {
     text-align: center;
 }
+
+.row > .form-floating > label {
+    margin-left: 0.75em;
+}

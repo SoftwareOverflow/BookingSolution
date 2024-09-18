@@ -1,5 +1,5 @@
 ﻿@using Admin.Data.Events
-@using Admin.Data.Helpers
+@using Core.Dto
 
 @inherits ClientDateComponent
 
@@ -16,13 +16,14 @@
             {
                 var localDate = date; //Copy the date variable as it changes later.
                 var activeClass = date.Date == ClientDate ? "active" : "";
-                if(StartDate.Date != EndDate.Date)
+                if (StartDate.Date != EndDate.Date)
                 {
                     <a class="day-date-header @activeClass" onclick="@(() => OnCalendarStateChange(CalendarLayoutType.Day, localDate))">
                         <div>@(date.ToString("ddd"))</div>
                         <div>@(date.Day)</div>
                     </a>
-                } else
+                }
+                else
                 {
                     <div class="day-date-header @activeClass">
                         <div>@(date.ToString("ddd"))</div>
@@ -43,12 +44,8 @@
                             <tbody>
                                 @for (int i = 0; i < 24; i++)
                                 {
-                                    var time = new TimeOnly(0, 0);
-
-
-                                    var label = time.AddHours(i).ToString("hh:mm tt");
-
-                                    <SchedulerTimeRowLabel Time="@label" />
+                                    var time = new TimeOnly(i, 0);
+                                    <SchedulerTimeRowLabel Time="@time" />
                                 }
                             </tbody>
                         </table>
@@ -60,7 +57,7 @@
                                 date = StartDate;
                                 while (date <= EndDate)
                                 {
-                                    <SchedulerInnerDayTableContents Date="@DateOnly.FromDateTime(date)" Events="@Events" />
+                                    <SchedulerInnerDayTableContents Date="@DateOnly.FromDateTime(date)" Events="@Events" OnAppointmentClick="EditAppointment" />
                                     date = date.AddDays(1);
                                 }
                             }
@@ -69,7 +66,7 @@
                 </tr>
             </tbody>
         </table>
-</div>
+    </div>
 </div>
 
 
@@ -86,4 +83,12 @@
 
     [Parameter, EditorRequired]
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public EventCallback<AppointmentDto> OnEditAppointment { get; set; }
+
+    private async Task EditAppointment(AppointmentDto appointment)
+    {
+        await OnEditAppointment.InvokeAsync(appointment);
+    }
 }

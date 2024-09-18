@@ -4,10 +4,10 @@
 <div class="day-col-container">
     <table class="scheduler-inner-table">
         <tbody>
-            @for (int i = 1; i <= 24; i++)
+            @for (int i = 0; i < 24; i++)
             {
-                <tr><td class="cell-half-hour"></td></tr>
                 <tr><td class="cell-hour"></td></tr>
+                <tr><td class="cell-half-hour"></td></tr>
             }
         </tbody>
     </table>
@@ -23,10 +23,10 @@
                 --event-height: @(item.HeightPx(Date, true))px;
                 --event-left: @(item.LeftPc(Date))%;
                 --event-width: @(item.WidthPc(Date))%;">
-            <div class="event-padding">
+            <div class="event-padding" @onclick="(() => EditAppointment(item))">
                 <div class="event" style="--event-top-unpadded: @(item.GetRelativeTopPx(Date))px;
                     --event-height-unpadded: @(item.GetRelativeHeightPc(Date))%;">
-                    <p>@item.Event.Name</p>
+                    <p>@item.Appointment.Name</p>
                 </div>
             </div>
         </div>
@@ -39,4 +39,12 @@
 
     [Parameter]
     public List<PositionedAppointment> Events { get; set; } = new List<PositionedAppointment>();
+
+    [Parameter, EditorRequired]
+    public EventCallback<AppointmentDto> OnAppointmentClick { get; set; }
+
+    private async Task EditAppointment(PositionedAppointment dto)
+    {
+        await OnAppointmentClick.InvokeAsync(dto.Appointment);
+    }
 }

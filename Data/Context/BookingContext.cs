@@ -2,7 +2,6 @@
 using Data.Entity.Appointments;
 using Data.Extensions;
 using Data.Interfaces;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Context
@@ -22,9 +21,6 @@ namespace Data.Context
             var businessId = business?.Id ?? throw new ArgumentException("Cannot find business");
 
             // Ignore the filter queries because we won't be logged in at this point, but we still need to match to the business
-            var abc = Appointments;
-            var def = Appointments.IgnoreQueryFilters();
-            var ghi = Appointments.IgnoreQueryFilters().BetweenDates(startDate, endDate);
             return Appointments.IgnoreQueryFilters().BetweenDates(startDate, endDate).ToList();
         }
 
@@ -40,9 +36,7 @@ namespace Data.Context
             }
             
             appointment.BusinessId = business.Id;
-            //appointment.Business = business;
             appointment.Service = service; // Ensure the service mathces (including id) otherwise EF will try and create a new service and break FK constraint to business
-            //appointment.ServiceId = service.Id;
 
             if(appointment.Person == null)
             {

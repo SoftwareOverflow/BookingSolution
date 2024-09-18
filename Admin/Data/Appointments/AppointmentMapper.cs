@@ -6,9 +6,12 @@ namespace Admin.Data.Events
     {
         internal static List<PositionedAppointment> GetPositionedEventBookings(this List<AppointmentDto> events)
         {
-            var result = new List<PositionedAppointment>();
-
             var positionedEvents = events.OrderBy(x => x.StartTimePadded).Select(x => new PositionedAppointment(x)).ToList();
+
+            if(positionedEvents.Count == 0)
+            {
+                return positionedEvents;
+            }
 
             var minDate = positionedEvents.Min(x => x.GetStartDate(true));
             var maxDate = positionedEvents.Max(x => x.GetEndDate(true));
@@ -44,7 +47,7 @@ namespace Admin.Data.Events
                         eventsToCheck ??= [];
 
                         var clashes = eventsToCheck.Where(x => booking.GetStartTime(currDate, true) < x.GetEndTime(currDate, true)).ToList();
-                        //totalClashes += clashes.Count;
+
                         if (clashes.Count != 0)
                         {
                             for (int j = 0; j < clashes.Count; j++)

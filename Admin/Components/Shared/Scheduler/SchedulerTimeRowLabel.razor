@@ -1,15 +1,15 @@
 ﻿<tr class="time-slot-row" >
-    <td class="time-slot time-slot-label">
+    <td id="@($"time-{Time:HHmm}")" class="time-slot time-slot-label">
         <span>
-            @Time
+            @Time.ToString("hh:mm tt")
         </span>
     </td>
 </tr>
 <tr class="time-slow-row">
-    <td class="time-slot" />
+    <td id="@($"time-{Time:HH30}")" class="time-slot" />
 </tr>
 
 @code {
     [Parameter, EditorRequired]
-    public string Time { get; set; }
+    public TimeOnly Time { get; set; }
 }

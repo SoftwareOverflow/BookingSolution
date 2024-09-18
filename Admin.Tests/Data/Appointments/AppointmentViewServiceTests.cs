@@ -18,6 +18,18 @@ namespace Admin.Tests.Data.Events
             ViewService = new AppointmentViewService(DataMock.Object, MessageMock.Object);
         }
 
+        [Fact]
+        public async Task AppointmentViewService_GetAppointments_EmptyList()
+        {
+            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(new ServiceResult<List<AppointmentDto>>([])));
+
+            var date = new DateOnly(2024, 08, 25);
+
+            var result = await ViewService.GetEvents(date, date);
+
+            Assert.Empty(result);
+        }
+
 
         /// <summary>
         /// <----- Time ---->
@@ -61,9 +73,9 @@ namespace Admin.Tests.Data.Events
 
             var result = await ViewService.GetEvents(date, date);
 
-            Assert.Equal(mockList[2], result[0].Event);
-            Assert.Equal(mockList[0], result[1].Event);
-            Assert.Equal(mockList[1], result[2].Event);
+            Assert.Equal(mockList[2], result[0].Appointment);
+            Assert.Equal(mockList[0], result[1].Appointment);
+            Assert.Equal(mockList[1], result[2].Appointment);
 
             // Ensure we have no clashes by checking all items set to EventLayoutConsts.EventsWidthPc% width
             foreach (var item in result)
@@ -111,9 +123,9 @@ namespace Admin.Tests.Data.Events
 
             var result = await ViewService.GetEvents(date, date);
 
-            Assert.Equal(mockList[0], result[0].Event);
-            Assert.Equal(mockList[1], result[1].Event);
-            Assert.Equal(mockList[2], result[2].Event);
+            Assert.Equal(mockList[0], result[0].Appointment);
+            Assert.Equal(mockList[1], result[1].Appointment);
+            Assert.Equal(mockList[2], result[2].Appointment);
 
             Assert.Equal(0, result[0].LeftPc(date));
 
@@ -168,9 +180,9 @@ namespace Admin.Tests.Data.Events
 
             var result = await ViewService.GetEvents(date, date);
 
-            Assert.Equal(mockList[0], result[0].Event);
-            Assert.Equal(mockList[1], result[1].Event);
-            Assert.Equal(mockList[2], result[2].Event);
+            Assert.Equal(mockList[0], result[0].Appointment);
+            Assert.Equal(mockList[1], result[1].Appointment);
+            Assert.Equal(mockList[2], result[2].Appointment);
 
             // Ensure we have no clashes by checking all items set to EventLayoutConsts.EventsWidthPc% width
             foreach (var item in result)
@@ -219,9 +231,9 @@ namespace Admin.Tests.Data.Events
 
             var result = await ViewService.GetEvents(date, date);
 
-            Assert.Equal(mockList[0], result[0].Event);
-            Assert.Equal(mockList[1], result[1].Event);
-            Assert.Equal(mockList[2], result[2].Event);
+            Assert.Equal(mockList[0], result[0].Appointment);
+            Assert.Equal(mockList[1], result[1].Appointment);
+            Assert.Equal(mockList[2], result[2].Appointment);
 
             var width = result[0].WidthPc(date);
             Assert.Equal(0, result[0].LeftPc(date));

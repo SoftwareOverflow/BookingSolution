@@ -1,6 +1,8 @@
 ﻿@using Admin.Components.Pages
+@using Admin.Components.Shared.Appointment
 @using Admin.Data.Events
 @using Admin.Data.Helpers
+@using Core.Dto
 @using Microsoft.AspNetCore.Components.Rendering
 @using MudBlazor.Extensions
 
@@ -9,25 +11,33 @@
 @inject AppointmentViewService EventService
 @inject IJSRuntime JsInterop
 @inject StateContainerSingle<DateTime> ClientDateContainer
+@inject NavigationManager NavigationManager
 
 <!-- Build the inherited RenderTree -->
 @((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
 
 <div class="scheduler-container" style="--scheduler-table-cell-height: @(AppointmentLayoutConsts.CellHeight)px">
-    <SchedulerHeader Date="@Date" LayoutType="@CalendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
+    <SchedulerHeader OnCreateAppointment="CreateAppointment" Date="@Date" LayoutType="@CalendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
     @if (CalendarLayoutType == CalendarLayoutType.Month)
     {
-        <SchedulerMonth StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" />
+        <SchedulerMonth StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
     }
     else
     {
-        <SchedulerDays StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" />
+        <SchedulerDays StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
+    }
+
+    @if (AppointmentToEdit != null)
+    {
+        <AppointmentForm Appointment="AppointmentToEdit" OnClose="OnAppointmentFormClosed"/>
     }
 </div>
 
 @code {
 
     private CalendarLayoutType CalendarLayoutType = CalendarLayoutType.Week;
+
+    private AppointmentDto? AppointmentToEdit = null;
 
     /// <summary>
     /// The selected date.
@@ -49,7 +59,7 @@
         if (firstRender)
         {
             var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
-            if(localDate != null)
+            if (localDate != null)
             {
                 Date = localDate.Value;
             }
@@ -70,6 +80,13 @@
         DateRange = DateHelpers.GetDateRange(layoutType, date);
         Events = await LoadEvents();
 
+        var today = ClientDateContainer.GetItem();
+        var nextApp = Events.FirstOrDefault(x => x.Appointment.StartTimePadded >= today);
+        if (nextApp != null)
+        {
+            var startTime = TimeOnly.FromTimeSpan(nextApp.Appointment.StartTimePadded.TimeOfDay.Subtract(TimeSpan.FromHours(1)));
+            NavigationManager.NavigateTo($"/#time-{startTime:HH}00");
+        }
         StateHasChanged();
     }
 
@@ -82,5 +99,26 @@
         StateHasChanged();
 
         return result;
+    }
+
+    private void CreateAppointment(DateTime dt)
+    {
+        AppointmentToEdit = new AppointmentDto("", new PersonDto())
+            {
+                StartTime = dt,
+                EndTime = dt.AddHours(1)
+            };
+    }
+
+    private void EditAppointment(AppointmentDto dto) => AppointmentToEdit = dto;
+
+    private async Task OnAppointmentFormClosed(bool didEdit)
+    {
+        AppointmentToEdit = null;
+
+        if (didEdit)
+        {
+            Events = await LoadEvents();
+        }
     }
 }

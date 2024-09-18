@@ -1,0 +1,268 @@
+﻿@using Admin.Components.Pages
+@using Admin.Components.Shared.Dialog
+@using Admin.Data.Appointments.Model
+@using Core.Dto
+@using Core.Interfaces
+@using Microsoft.AspNetCore.Components.Rendering
+
+@inject IAppointmentService AppointmentService
+@inject IServiceTypeService ServiceTypeService
+@inject IDialogService DialogService
+@inject IMessageService MessageService
+
+@inherits LoadingPage
+
+<MudOverlay LightBackground Visible="Model.Appointment != null" Class="w-100 h-100">
+    <!-- Build the inherited RenderTree -->
+    @((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
+
+    <div class="container text-center position-relative bg-white bg-opacity-75 border-1 border-primary py-5">
+        <button class="btn-lg material-symbols-outlined position-absolute top-0 end-0" @onclick="ShowUnsavedChangesDialog">close</button>
+        <h2>@(Appointment.Guid == Guid.Empty ? "Create New Appointment" : "Manage Appointment")</h2>
+        <EditForm Model="Model" class="flex-column-center" OnValidSubmit="SaveChangesAsync">
+            <ObjectGraphDataAnnotationsValidator />
+
+            <div class="flex-row-center w-50 justify-content-start my-2">
+
+                <span class="lead text-muted mx-2 mw-50 text-nowrap text-end">Link to a Service:</span>
+
+                <InputSelect @bind-Value="Model.ServiceGuid" class="form-select" aria-label="Service selection">
+                    <option value="">None</option>
+                    @foreach (var service in Services)
+                    {
+                        <option value="@service.Guid">@service.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="row w-50 flex-row-center">
+                <div class="form-floating px-0">
+                    <InputText @bind-Value="Model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
+                    <label for="name">Appointment Name</label>
+                    <ValidationMessage For="() => Model.Name" class="text-danger" />
+                </div>
+            </div>
+
+            <div class="row flex-row-center">
+                <div class="col-12 col-lg-6">
+                    <div class="flex-row-center">
+                        <span class="mud-form-label lead text-muted ms-2 text-end w-25">Start:</span>
+                        <div class="me-5 w-fit-content">
+                            <MudDatePicker @bind-Date="Model.StartDate" />
+                        </div>
+                        <div class="mx-5 w-fit-content">
+                            <MudTimePicker @bind-Time="Model.StartTime" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="flex-row-center">
+                        <span class="mud-form-label lead text-muted ms-2 text-end w-25">End:</span>
+                        <div class="me-5 w-fit-content">
+                            <MudDatePicker @bind-Date="Model.EndDate" />
+                        </div>
+                        <div class="mx-5 w-fit-content">
+                            <MudTimePicker @bind-Time="Model.EndTime" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-row-center">
+                    <!-- This covers both start and end times ('end must be after start') so is on its own row -->
+                    <ValidationMessage For="@(() => Model.Appointment!.EndTime)" />
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="w-100">
+                    <h5>Who is attending?</h5>
+                </div>
+                <div class="form-floating col-12 col-lg-6 my-1">
+                    <InputText @bind-Value="Model.Appointment!.Person.FirstName" class="form-control" aria-required="true" placeholder="First Name" />
+                    <label for="given-name">First Name</label>
+                    <ValidationMessage For="() => Model.Appointment.Person.FirstName" class="text-danger" />
+                </div>
+                <div class="form-floating col-12 col-lg-6 my-1">
+                    <InputText @bind-Value="Model.Appointment.Person.LastName" class="form-control" aria-required="true" placeholder="Last Name" />
+                    <label for="family-name">Last Name</label>
+                    <ValidationMessage For="() => Model.Appointment.Person.LastName" class="text-danger" />
+                </div>
+                <div class="form-floating col-12 col-lg-6 my-1">
+                    <InputText @bind-Value="Model.Appointment.Person.EmailAddress" class="form-control" aria-required="true" placeholder="name@example.com" />
+                    <label for="email">Email</label>
+                    <ValidationMessage For="() => Model.Appointment.Person.EmailAddress" class="text-danger" />
+                </div>
+                <div class="form-floating col-12 col-lg-6 my-1">
+                    <InputText @bind-Value="Model.Appointment.Person.PhoneNumber" class="form-control" aria-required="true" placeholder="Phone" />
+                    <label for="phone">Phone</label>
+                    <ValidationMessage For="() => Model.Appointment.Person.PhoneNumber" class="text-danger" />
+                </div>
+            </div>
+
+            <div class="my-1">
+                @foreach (var error in Model.Errors)
+                {
+                    @* TODO CSS to fill width of MudAlert? *@
+                    <MudAlert Class="m-2" Severity="@error.Severity" Variant="Variant.Outlined">
+                        <div class="d-flex flex-row">
+                            @error.Message
+                            @if (error.Fix != null)
+                            {
+                                <button type="button" class="ms-5" @onclick="@(() => FixError(error))">Fix</button>
+                            }
+                        </div>
+                    </MudAlert>
+                }
+            </div>
+
+            <div class="flex-row-center my-5 py-5">
+                <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" @onclick="ShowUnsavedChangesDialog">
+                    <span class="mx-2 material-symbols-outlined">cancel</span>
+                    Cancel
+                </button>
+
+                <div style="@(Model.Appointment.Guid == Guid.Empty ? "display: none;" : "")">
+                    <button type="button" class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
+                        <span class="mx-2 material-symbols-outlined">delete</span>
+                        Delete Service
+                    </button>
+                </div>
+
+                <button type="submit" class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5">
+                    <span class="mx-2 material-symbols-outlined">save</span>
+                    @(Model.Appointment.Guid == Guid.Empty ? "Save" : "Save Changes")
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</MudOverlay>
+
+@code {
+    [Parameter, EditorRequired]
+    public EventCallback<bool> OnClose { get; set; }
+
+    [Parameter, EditorRequired]
+    public AppointmentDto Appointment { get; set; } = new AppointmentDto(string.Empty, new PersonDto());
+
+    private AppointmentModel Model = new(new AppointmentDto(string.Empty, new PersonDto()), []);
+
+    private List<ServiceTypeDto> Services = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Loading = true;
+        var result = await ServiceTypeService.GetServiceTypes();
+        if (result.IsSuccess && result.Result != null)
+        {
+            Services = result.Result;
+        }
+
+        Model = new AppointmentModel(Appointment, Services);
+
+        await base.OnParametersSetAsync();
+
+        Loading = false;
+    }
+
+    private void FixError(AppointmentModelError error)
+    {
+        error.Fix?.Invoke(Model);
+        Model.Errors.Remove(error);
+
+        StateHasChanged();
+    }
+
+
+    private async Task CloseOverlay(bool didEdit = false)
+    {
+        await OnClose.InvokeAsync(didEdit);
+    }
+
+    public async Task Delete()
+    {
+        if (Model.Appointment.Guid == Guid.Empty)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.Warning, "This cannot be undone!" },
+        };
+
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters);
+        var result = await dialog.Result;
+
+        if (!result?.Canceled ?? false)
+        {
+            var deleteResult = await AppointmentService.DeleteAppointment(Model.Appointment.Guid);
+            if (deleteResult.IsSuccess)
+            {
+                MessageService.AddMessage(new MessageBase(
+                       message: "Appointment deleted succesfully",
+                       severity: MessageBase.MessageType.Normal
+               ));
+            }
+            else
+            {
+                MessageService.AddMessage(new MessageBase(message: "Failed to delete appointment", severity: MessageBase.MessageType.Error));
+                deleteResult.Errors.ForEach(e =>
+                {
+                    MessageService.AddMessage(new MessageBase(message: e, severity: MessageBase.MessageType.Error));
+                });
+            }
+
+
+            await CloseOverlay(true);
+        }
+    }
+
+    private async Task ShowUnsavedChangesDialog()
+    {
+        var dialog = await DialogService.ShowAsync<UnsavedChangesDialog>(null, new DialogOptions()
+            {
+                NoHeader = true,
+            });
+        var result = await dialog.Result;
+
+
+        if (!result?.Canceled ?? false)
+        {
+            await CloseOverlay();
+        }
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, new DialogOptions()
+            {
+                NoHeader = true
+            });
+
+        var result = await dialog.Result;
+
+        if (!result?.Canceled ?? false)
+        {
+            var isCreating = Model.Appointment.Guid == Guid.Empty;
+
+            var saveResult = await AppointmentService.CreateOrUpdateAppointment(Model.Appointment);
+            if (saveResult.IsSuccess)
+            {
+                var message = isCreating ? "New Service Created" : "Changes Saved Succesfully";
+
+                MessageService.AddMessage(new MessageBase(
+                       message,
+                        MessageBase.MessageType.Success));
+
+                await CloseOverlay(true);
+            }
+            else
+            {
+                // TODO logging
+                MessageService.AddMessage(new MessageBase("Failed to save service", MessageBase.MessageType.Warning));
+                saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
+            }
+        }
+    }
+}

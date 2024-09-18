@@ -832,7 +832,8 @@ namespace Core.Tests.Services
                 }
                 ]));
 
-            BookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Returns(Task.FromResult(true));  
+            Appointment appointment;
+            BookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Callback((Appointment app, Guid _) => appointment = app ).Returns(Task.FromResult(true));  
 
             // Attempt to book 10:00 -> 11:30
             var service = new ServiceTypeDto()
@@ -860,6 +861,7 @@ namespace Core.Tests.Services
                 StartTime = new DateTime(date, new TimeOnly(10, 0)),
                 EndTime = new DateTime(date, new TimeOnly(11, 30)),
                 Service = service,
+                BookingType = BookingTypeDto.ONLINE,
             };
 
             Assert.True(result.IsSuccess);

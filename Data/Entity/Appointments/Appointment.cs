@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Data.Entity.Appointments
 {
@@ -22,6 +23,11 @@ namespace Data.Entity.Appointments
 
         // TODO store some sort of status for the appointment
         // TODO this should be an id to a status table for normalization
+
+        /// <summary>
+        /// The type of the booking - e.g. online or manual
+        /// </summary>       
+        public BookingType BookingType { get; set; }
 
         /// <summary>
         /// Foregin Key to the <see cref="Person"/> who made the booking

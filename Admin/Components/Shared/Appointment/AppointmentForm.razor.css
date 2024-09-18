@@ -1,0 +1,7 @@
+﻿.mud-form-label {
+    margin-top: 6px;
+}
+
+::deep .mud-input-root-text {
+    text-align: center !important;
+}

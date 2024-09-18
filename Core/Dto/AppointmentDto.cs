@@ -1,15 +1,21 @@
-﻿namespace Core.Dto
+﻿using Core.Dto.Validation;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace Core.Dto
 {
     public record AppointmentDto(string Name, PersonDto Person) : DtoBase
     {
         /// <summary>
         /// Name of the booked service
         /// </summary>
+        [Required]
         public string Name { get; set; } = Name;
 
         /// <summary>
         /// The person who made the booking
         /// </summary>
+        [ValidateComplexType]
         public PersonDto Person { get; set; } = Person;
 
         /// <summary>
@@ -25,6 +31,7 @@
         /// <summary>
         /// The EndTime of the booking, excluding any padding
         /// </summary>
+        [DateMustBeAfter(nameof(StartTime))]
         public DateTime EndTime { get; set; }
 
         /// <summary>
@@ -37,6 +44,7 @@
         /// </summary>
         public TimeSpan PaddingEnd { get; set; } = TimeSpan.Zero;
 
+        public BookingTypeDto BookingType { get; set; }
 
         #region unmapped utility properties / methods
         public DateTime StartTimePadded => StartTime.Subtract(PaddingStart);

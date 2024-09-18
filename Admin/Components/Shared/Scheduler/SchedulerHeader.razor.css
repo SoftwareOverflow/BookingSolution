@@ -1,20 +1,4 @@
-﻿.scheduler-header {
-    justify-content: space-between;
-    background-color: #f8f9fa;
-}
-
-.header-left {
-    padding-left: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.header-right {
-    padding-right: 10px;
-}
-
-.date-string-dropdown {
+﻿.date-string-dropdown {
     display: inline-flex;
     align-items: center
 }

@@ -1,14 +1,15 @@
 ﻿@using Admin.Data.Events
 @using Admin.Data.Helpers
+@using Core.Dto
 
 @inherits ClientDateComponent
 
-<table class="scheduler-table-container">
+<table class="w-100 position-relative scheduler-table-container">
     <thead>
         <tr>
             @for (int i = 0; i < 7; i++)
             {
-                <th class="inner-table-cell header">
+                <th class="inner-table-cell p-2">
                     <span>
                         @StartDate.AddDays(i).ToString("dddd")
                     </span>
@@ -29,7 +30,7 @@
 
                         <td class="inner-table-cell">
                             <div class="cell-placeholder">
-                                <a class="heading @activeClass" @onclick=@(() => OnCalendarStateChange(CalendarLayoutType.Day, currentDate))>
+                                <a role="button" class="m-1 heading @activeClass" @onclick=@(() => OnCalendarStateChange(CalendarLayoutType.Day, currentDate))>
                                     @(date.Day == 1 ? date.ToString("MMM ") : "")@date.Day
                                 </a>
 
@@ -40,7 +41,8 @@
 
                                     if (startTime != endTime)
                                     {
-                                        <div class="inner-event-details">
+                                        <div role="button" class="flex-row-center justify-content-start overflow-hidden rounded-pill text-nowrap bg-primary text-white m-1 pe-1 pointer-event"
+                                            @onclick=@(async () => await EditAppointment(item.Appointment))>
                                             @if (item.GetStartDate(true) < DateOnly.FromDateTime(date))
                                             {
                                                 <MudTooltip Text="Event starts on previous day" Class="material-icons-tooltip">
@@ -51,12 +53,13 @@
                                                     </div>
                                                 </MudTooltip>
                                             }
-                                            <div class="event-time">@startTime.ToString("HH:mm")</div>
-                                            <div class="event-name">@item.Event.Name</div>
+                                            <small class="mx-1 fw-light">@startTime.ToString("HH:mm")</small>
+                                            <div class="text-truncate">@item.Appointment.Name</div>
                                             @if (item.GetEndDate(true) > DateOnly.FromDateTime(date))
                                             {
-                                                <MudTooltip Text="Event ends on future day" Class="hello">
-                                                    <div class="icon-tooltip">
+                                                <div class="flex-grow-1" />
+                                                <MudTooltip Text="Event ends on future day">
+                                                    <div class="icon-tooltip float-end">
                                                         <span class="material-symbols-outlined">
                                                             line_end_circle
                                                         </span>
@@ -89,4 +92,12 @@
 
     [Parameter, EditorRequired]
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public EventCallback<AppointmentDto> OnEditAppointment { get; set; }
+
+    private async Task EditAppointment(AppointmentDto appointment)
+    {
+        await OnEditAppointment.InvokeAsync(appointment);
+    }
 }
