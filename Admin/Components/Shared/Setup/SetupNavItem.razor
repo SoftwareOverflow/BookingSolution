@@ -1,0 +1,32 @@
+﻿
+<li class="nav-item nav-tabs my-3 w-100">
+    <a class="nav-link rounded-start @ActiveClass w-100 disabled" href="#">
+        <div class="flex-row-center justify-content-start">
+            <span class="material-symbols-outlined fs-3 @ColorClass">@Icon</span>
+            <h5 class="fw-normal my-0 mx-1 @ColorClass">@Text</h5>
+            <div class="flex-grow-1" />
+            @if (IsComplete)
+            {
+                <span class="ms-5 material-symbols-outlined text-success fs-3 @ColorClass">task_alt</span>
+            }
+        </div>
+    </a>
+</li>
+
+
+@code {
+    [Parameter, EditorRequired]
+    public bool IsComplete { get; set; } = false;
+
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = "";
+
+    [Parameter]
+    public bool IsActive { get; set; } = false;
+
+    private string Icon => IsComplete ? "inventory" : "pending_actions";
+
+    private string ActiveClass => IsActive ? "active" : "";
+
+    private string ColorClass => IsComplete ? "text-success" : "";
+}

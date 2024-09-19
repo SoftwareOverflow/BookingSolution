@@ -1,0 +1,80 @@
+﻿@using Admin.Components.Pages
+@using Admin.Components.Shared.Business
+@using Admin.Components.Shared.Setup
+@using Core.Dto
+@using Core.Interfaces
+
+@inherits LoadingPage
+
+@inject IBusinessService BusinessService
+@inject NavigationManager NavigationManager
+@inject IMessageService MessageService
+
+@if (IsSetupComplete)
+{
+    @SetupComplete
+}
+else
+{
+    <div class="w-100">
+        <h2>Let's get setup:</h2>
+    </div>
+
+    <div class="mx-0 d-flex">
+        <ul class="nav nav-pills flex-column d-inline-flex w-fit-content">
+            <SetupNavItem IsComplete="IsAccountRegistered" Text="Create Account" />
+            <SetupNavItem IsComplete="IsBusinessRegistered" Text="Register Business" IsActive="true" />
+            <SetupNavItem IsComplete="IsBillingSetup" Text="Setup Billing" />
+            <SetupNavItem IsComplete="IsServiceOffered" Text="Offer A Service" />
+        </ul>
+
+        <div class="flex-grow-1 flex-row-center bg-opacity-10 border-primary border-1 bg-secondary bg-opacity-10">
+            <div class="w-75">
+                <BusinessForm Business="new BusinessDto()" IsNewBusiness="true" OnValidFormSubmittedAsync="RegisterBusiness" />
+            </div>
+        </div>
+
+    </div>
+}
+
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment SetupComplete { get; set; } = default!;
+
+    private bool IsSetupComplete => IsAccountRegistered && IsBusinessRegistered && IsBillingSetup && IsServiceOffered;
+
+    private bool IsAccountRegistered = true; // Should always be registered to get this far
+
+    private bool IsBusinessRegistered = false;
+
+    private bool IsBillingSetup = false;
+
+    private bool IsServiceOffered = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Loading = true;
+
+            var result = await BusinessService.GetBusinessForUser();
+
+            if (!result.IsSuccess)
+            {
+                MessageService.AddMessage(new MessageBase("An error occured whilst loading.", MessageBase.MessageType.Error));
+            }
+            else if (result.Result == null)
+            {
+                NavigationManager.NavigateTo("/Business/Create");
+            }
+
+            Loading = false;
+        }
+    }
+
+    private async Task RegisterBusiness(BusinessDto dto)
+    {
+
+    }
+}
