@@ -3,6 +3,7 @@
 @attribute [AllowAnonymous]
 
 @using Admin.Components.Shared.Booking
+@using Admin.Components.Shared.Loading
 @using Admin.Data.Booking
 @using Core.Dto
 @using Core.Interfaces
@@ -16,11 +17,7 @@
 
 @layout EmptyLayout
 
-@inherits LoadingPage
-
-<!-- Build the inherited RenderTree -->
-@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
-
+<LoadingSpinner Visible="Loading" />
 
 <div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light @BgClass">
     @if (IsError || BookingRequest == null)
@@ -67,6 +64,8 @@
     [SupplyParameterFromQuery]
     public Boolean IsDemo { get; set; } = false;
 
+    private bool Loading = true;
+
     public bool IsError = false;
 
     public bool RequestSent = false;
@@ -77,6 +76,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        Loading = true;
+
         if (BusinessGuid.HasValue && ServiceGuid.HasValue)
         {
             var result = await BookingService.GetNewBookingRequest(BusinessGuid.Value, ServiceGuid.Value);

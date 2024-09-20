@@ -1,10 +1,9 @@
 ﻿@using Admin.Components.Pages
 @using Admin.Components.Shared.Business
+@using Admin.Components.Shared.Loading
 @using Admin.Components.Shared.Setup
 @using Core.Dto
 @using Core.Interfaces
-
-@inherits LoadingPage
 
 @inject IBusinessService BusinessService
 @inject NavigationManager NavigationManager
@@ -16,6 +15,8 @@
 }
 else
 {
+    <LoadingSpinner Visible="Loading" />
+
     <div class="w-100">
         <h2>Let's get setup:</h2>
     </div>
@@ -51,6 +52,8 @@ else
     private bool IsBillingSetup = false;
 
     private bool IsServiceOffered = false;
+
+    private bool Loading = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

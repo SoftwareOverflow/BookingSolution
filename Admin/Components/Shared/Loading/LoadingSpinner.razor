@@ -1,0 +1,24 @@
+﻿<MudOverlay Class="mud-loading-overlay" Visible="Visible" Absolute="false" DarkBackground="true">
+    <div class="d-flex flex-column align-center justify-center">
+        <MudProgressCircular Style="LoaderType.Circular" Indeterminate="true" />
+        <MudText>Loading...</MudText>
+    </div>
+</MudOverlay>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public bool Visible { get; set; }
+
+    // public void Show(){
+    //     Console.WriteLine("Showing loading spinner");
+    //     Loading = true;
+    //     StateHasChanged();
+    // }
+
+    // public void Hide() {
+    //     Console.WriteLine("Hiding loading spinner");
+    //     Loading = false;
+    //     StateHasChanged();
+    // }
+}

@@ -1,5 +1,6 @@
 ﻿@using Admin.Components.Pages
 @using Admin.Components.Shared.Dialog
+@using Admin.Components.Shared.Loading
 @using Admin.Data.Appointments.Model
 @using Core.Dto
 @using Core.Interfaces
@@ -10,11 +11,9 @@
 @inject IDialogService DialogService
 @inject IMessageService MessageService
 
-@inherits LoadingPage
-
 <MudOverlay LightBackground Visible="Model.Appointment != null" Class="w-100 h-100">
-    <!-- Build the inherited RenderTree -->
-    @((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
+    <MudPopoverProvider />
+    <LoadingSpinner Visible="Loading" />
 
     <div class="container text-center position-relative bg-white bg-opacity-75 border-1 border-primary py-5">
         <button class="btn-lg material-symbols-outlined position-absolute top-0 end-0" @onclick="ShowUnsavedChangesDialog">close</button>
@@ -125,7 +124,7 @@
                 <div style="@(Model.Appointment.Guid == Guid.Empty ? "display: none;" : "")">
                     <button type="button" class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
                         <span class="mx-2 material-symbols-outlined">delete</span>
-                        Delete Service
+                        Delete Appointment
                     </button>
                 </div>
 
@@ -148,6 +147,8 @@
     private AppointmentModel Model = new(new AppointmentDto(string.Empty, new PersonDto()), []);
 
     private List<ServiceTypeDto> Services = [];
+
+    private bool Loading = true;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -244,6 +245,9 @@
 
         if (!result?.Canceled ?? false)
         {
+            Loading = true;
+            StateHasChanged();
+
             var isCreating = Model.Appointment.Guid == Guid.Empty;
 
             var saveResult = await AppointmentService.CreateOrUpdateAppointment(Model.Appointment);
@@ -263,6 +267,8 @@
                 MessageService.AddMessage(new MessageBase("Failed to save service", MessageBase.MessageType.Warning));
                 saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
             }
+            Loading = false;
+            StateHasChanged();
         }
     }
 }

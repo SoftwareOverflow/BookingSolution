@@ -1,4 +1,5 @@
 ﻿@using Admin.Components.Pages
+@using Admin.Components.Shared.Loading
 @using Admin.Data.Booking
 @using Admin.Data.Helpers
 @using Core.Dto
@@ -12,16 +13,13 @@
 
 @rendermode RenderMode.InteractiveServer
 
-@inherits LoadingPage
-
 @inject IBookingService BookingService
 @inject IMessageService MessageService
 @inject IJSRuntime JsInterop
 
-<!-- Build the inherited RenderTree -->
-@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
-
 @* TODO show error for Availability being null *@
+
+<LoadingSpinner Visible="Loading" />
 
 <div class="container">
     <EditForm Model="Model" OnValidSubmit="SaveBookingRequest">
@@ -151,6 +149,8 @@
     [Parameter, EditorRequired]
     public EventCallback OnRequestSent { get; set; }
 
+    private bool Loading = true;
+
     private MudDatePicker DatePicker;
 
     public AvailabilityDto? TimesDto = null;
@@ -170,7 +170,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        Loading = true;
         var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
         Today = localDate ?? Today;
 
@@ -184,10 +183,7 @@
             Model.SelectedDateTime = Today;
         }
 
-        await LoadMonth(Model.SelectedDateTime ?? Today);
         await base.OnParametersSetAsync();
-
-        Loading = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -217,6 +213,7 @@
         {
             await LoadMonth(dt.Value);
         }
+
         Loading = false;
     }
 

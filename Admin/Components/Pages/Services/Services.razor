@@ -1,7 +1,6 @@
 ﻿@page "/services"
 
-@inherits LoadingPage
-
+@using Admin.Components.Shared.Loading
 @using Admin.Data.Helpers
 @using Core.Dto
 @using Core.Interfaces
@@ -11,8 +10,7 @@
 @inject StateContainerSingle<ServiceTypeDto> StateContainer
 @inject IServiceTypeService ServiceTypeService
 
-<!-- Build the inherited RenderTree -->
-@((RenderTreeBuilder builder) => base.BuildRenderTree(builder))
+<LoadingSpinner Visible="Loading" />
 
 <h3>Manage The Services You Offer</h3>
 <p class="lead text-muted">Saved changes will affect future bookings!</p>
@@ -37,9 +35,6 @@
                         </button>
                     </div>
                     <div class="card-body bg-primary d-flex flex-column">
-                        @* <p class="text-muted fst-italic">
-                    @item.Description
-                    </p> *@
                         <div class="flex-grow-1" />
                         <p class="lead">@item.Price.ToString("C")</p>
                     </div>
@@ -51,20 +46,25 @@
 
 
 @code {
+    private bool Loading = true;
+
     private List<ServiceTypeDto> ServiceTypes = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         Loading = true;
 
         var result = await ServiceTypeService.GetServiceTypes();
-        if(result.IsSuccess)
+        if (result.IsSuccess)
         {
             ServiceTypes = result.Result!;
-        } else
+        }
+        else
         {
             // TODO show error messages..
         }
+
+        await base.OnParametersSetAsync();
 
         Loading = false;
     }
@@ -79,39 +79,4 @@
     {
         NavigationManager.NavigateTo("/Services/Create");
     }
-
-    // private void SetEditMode(ServiceType service) => ServiceTypeInEdit = service;
-
-    // private bool IsSelected(ServiceType item)
-    // {
-    //     if(ServiceTypeInEdit == null)
-    //     {
-    //         return true;
-    //     }
-    //     else if (item == ServiceTypeInEdit)
-    //     {
-    //         return true;
-    //     }
-    //     else
-    //     {
-    //         return false;
-    //     }
-    // }
-
-    // private Task OpenEditDialogAsync(ServiceType serviceToEdit)
-    // {
-    //     var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = false, MaxWidth = MaxWidth.ExtraExtraLarge,};
-
-    //     var parameters = new DialogParameters<EditServiceTypeDialog>
-    //     {
-    //         { x => x.ServiceType, serviceToEdit }
-    //     };
-
-    //     return DialogService.ShowAsync<EditServiceTypeDialog>(null, parameters, options);
-    // }
-
-    // private void EditServiceType(ServiceType serviceToEdit)
-    // {
-    //     NavigationManager.NavigateTo($"/services/edit/{serviceToEdit.Name}");
-    // }
 }
