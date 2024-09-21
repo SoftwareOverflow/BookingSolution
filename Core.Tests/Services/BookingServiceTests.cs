@@ -16,7 +16,7 @@ namespace Core.Tests.Services
     public class BookingServiceTests
     {
 
-        private readonly Mock<IBookingContext> BookingContext = new();
+        private readonly Mock<IBookingRepo> BookingContext = new();
         private readonly IMapper Mapper;
 
         private readonly BookingService BookingService;

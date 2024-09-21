@@ -14,8 +14,8 @@ namespace Core.Tests.Services
 {
     public class ServiceTypeServiceTests
     {
-        private readonly Mock<IServiceContext> ServiceContextMock = new();
-        private readonly Mock<IBusinessContext> BusinessContextMock = new();
+        private readonly Mock<IServiceRepo> ServiceContextMock = new();
+        private readonly Mock<IBusinessRepo> BusinessContextMock = new();
         private readonly Mock<IUserServiceInternal> UserManager = new();
 
         private IServiceTypeService ServiceTypeService;

@@ -1,5 +1,6 @@
 ﻿using Data.Context;
 using Data.Interfaces;
+using Data.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,15 +13,23 @@ namespace Data.Extensions
 
         public static void AddPersistanceLayer(this IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(
-                options => options.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+            services.AddDbContextFactory<ApplicationDbContext>(
+                                options =>
+                                {
+                                    options.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+#if DEBUG
+                                    options.EnableSensitiveDataLogging();
+#endif
+                                },
+                                ServiceLifetime.Scoped
                 );
 
-            services.AddTransient<IServiceContext, ApplicationDbContext>();
-            services.AddTransient<IBusinessContext, ApplicationDbContext>();
-            services.AddTransient<IAppointmentContext, ApplicationDbContext>();
+
+            services.AddTransient<IServiceRepo, ServiceRepo>();
+            services.AddTransient<IBusinessRepo, BusinessRepo>();
+            services.AddTransient<IAppointmentRepo, AppointmentRepo>();
             // TODO potentially split IBookingContext to a completely separate DbContext
-            services.AddTransient<IBookingContext, ApplicationDbContext>();
+            services.AddTransient<IBookingRepo, BookingRepo>();
 
         }
     }

@@ -10,8 +10,8 @@ namespace Core.Services
 {
     internal class ServiceTypeService : IServiceTypeService
     {
-        private readonly IServiceContext ServiceContext;
-        private readonly IBusinessContext BusinessContext;
+        private readonly IServiceRepo ServiceContext;
+        private readonly IBusinessRepo BusinessContext;
 
         private readonly IUserServiceInternal UserService;
 
@@ -19,7 +19,7 @@ namespace Core.Services
 
         private List<ServiceTypeDto> ServiceTypesCache = new List<ServiceTypeDto>();
 
-        public ServiceTypeService(IServiceContext serviceContext, IBusinessContext businessContext, IUserServiceInternal userService, IMapper mapper)
+        public ServiceTypeService(IServiceRepo serviceContext, IBusinessRepo businessContext, IUserServiceInternal userService, IMapper mapper)
         {
             ServiceContext = serviceContext;
             BusinessContext = businessContext;

@@ -11,10 +11,10 @@ namespace Core.Services
 {
     internal class BusinessService : IBusinessService
     {
-        private readonly IBusinessContext Context;
+        private readonly IBusinessRepo Context;
         private readonly IMapper Mapper;
         private readonly IUserServiceInternal UserService;
-        public BusinessService(IBusinessContext context, IMapper mapper, IUserServiceInternal userService)
+        public BusinessService(IBusinessRepo context, IMapper mapper, IUserServiceInternal userService)
         {
             Context = context;
             Mapper = mapper;

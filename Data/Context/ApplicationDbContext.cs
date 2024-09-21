@@ -1,13 +1,20 @@
 ﻿using Auth.Interfaces;
 using Data.Entity;
+using Data.Entity.Appointments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Data.Context
 {
-    internal partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUserService userService) : DbContext(options)
+    internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUserService userService) : DbContext(options)
     {
+        internal DbSet<Service> Services { get; set; }
+        internal DbSet<Appointment> Appointments { get; set; }
+        internal DbSet<Person> Person { get; set; }
+        internal DbSet<Business> Businesses { get; set; }
+        internal DbSet<BusinessUser> BusinessUsers { get; set; }
+
         private readonly IUserService UserService = userService;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -63,7 +70,7 @@ namespace Data.Context
             }
         }
 
-        private async Task<int> GetBusinessId()
+        internal async Task<int> GetBusinessId()
         {
             var userId = UserService.GetCurrentUserId() ?? throw new UnauthorizedAccessException("Unable to find logged in user");
             var businessUser = await BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId);

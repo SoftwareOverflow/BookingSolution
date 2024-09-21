@@ -2,7 +2,7 @@
 
 namespace Data.Interfaces
 {
-    public interface IBusinessContext
+    public interface IBusinessRepo
     {
         public Task<bool> RegisterBusiness(string userId, Business business);
 

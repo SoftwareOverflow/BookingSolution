@@ -7,9 +7,9 @@ using Data.Interfaces;
 
 namespace Core.Services
 {
-    internal class AppointmentService(IAppointmentContext appointmentContext, IMapper mapper) : IAppointmentService
+    internal class AppointmentService(IAppointmentRepo appointmentContext, IMapper mapper) : IAppointmentService
     {
-        private readonly IAppointmentContext AppointmentContext = appointmentContext;
+        private readonly IAppointmentRepo AppointmentContext = appointmentContext;
 
         private readonly IMapper Mapper = mapper;
 

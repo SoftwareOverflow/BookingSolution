@@ -2,7 +2,7 @@
 
 namespace Data.Interfaces
 {
-    public interface IAppointmentContext
+    public interface IAppointmentRepo
     {
         public ICollection<Appointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate);
 

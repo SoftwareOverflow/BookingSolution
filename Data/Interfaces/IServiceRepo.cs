@@ -2,7 +2,7 @@
 
 namespace Data.Interfaces
 {
-    public interface IServiceContext
+    public interface IServiceRepo
     {
         public Task<IEnumerable<Service>> GetAllServicesForUser();
 

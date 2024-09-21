@@ -3,7 +3,7 @@ using Data.Entity.Appointments;
 
 namespace Data.Interfaces
 {
-    public interface IBookingContext
+    public interface IBookingRepo
     {
         public Task<Service?> GetService(Guid businessGuid, Guid serviceGuid);
 

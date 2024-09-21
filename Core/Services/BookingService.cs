@@ -9,9 +9,9 @@ using Data.Interfaces;
 
 namespace Core.Services
 {
-    internal class BookingService(IBookingContext bookingContext, IMapper mapper) : IBookingService
+    internal class BookingService(IBookingRepo bookingContext, IMapper mapper) : IBookingService
     {
-        private readonly IBookingContext BookingContext = bookingContext;
+        private readonly IBookingRepo BookingContext = bookingContext;
 
         private readonly IMapper Mapper = mapper;
 
