@@ -50,12 +50,29 @@ namespace Data.Repository
         {
             await ExecuteVoidAsync(async (db) =>
             {
-                var existing = await db.Appointments.SingleOrDefaultAsync(x => x.Guid == appointment.Guid) ?? throw new ArgumentException("Unable to find existing appointment");
+                var existing = await db.Appointments.Include(a => a.Person).SingleOrDefaultAsync(x => x.Guid == appointment.Guid) ?? throw new ArgumentException("Unable to find existing appointment");
 
-                // Manually map the foreign keys first
+                // Manually map the foreign keys first to ensure we don't try and create any new objects
+                appointment.Id = existing.Id;
                 appointment.BusinessId = existing.BusinessId;
-                appointment.ServiceId = existing.ServiceId;
                 appointment.PersonId = existing.PersonId;
+
+                // Handle the Service
+                if(appointment.Service != null)
+                {
+                    var service = await db.Services.SingleOrDefaultAsync(s => s.Guid == appointment.Service.Guid) ?? throw new ArgumentException("Unable to find linked service");
+
+                    appointment.ServiceId = service.Id;
+                    appointment.Service = null;
+                } else
+                {
+                    appointment.ServiceId = null;
+                }
+
+                // Handle the Person - need to update separately due to SetValues only applying to top level entity.
+                appointment.Person.Id = existing.PersonId;
+                db.Person.Entry(existing.Person).CurrentValues.SetValues(appointment.Person);
+                db.Person.Update(existing.Person);
 
                 db.Appointments.Entry(existing).CurrentValues.SetValues(appointment);
                 db.Appointments.Update(existing);
