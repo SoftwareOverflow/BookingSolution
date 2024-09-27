@@ -11,23 +11,23 @@
 @inject IDialogService DialogService
 @inject IMessageService MessageService
 
-<MudOverlay LightBackground Visible="Model.Appointment != null" Class="w-100 h-100">
+<MudOverlay LightBackground Visible="_model.Appointment != null" Class="w-100 h-100">
     <MudPopoverProvider />
-    <LoadingSpinner Visible="Loading" />
+    <LoadingSpinner Visible="_loading" />
 
     <div class="container text-center position-relative bg-white bg-opacity-75 border-1 border-primary py-5">
         <button class="btn-lg material-symbols-outlined position-absolute top-0 end-0" @onclick="ShowUnsavedChangesDialog">close</button>
         <h2>@(Appointment.Guid == Guid.Empty ? "Create New Appointment" : "Manage Appointment")</h2>
-        <EditForm Model="Model" class="flex-column-center" OnValidSubmit="SaveChangesAsync">
+        <EditForm Model="_model" class="flex-column-center" OnValidSubmit="SaveChangesAsync">
             <ObjectGraphDataAnnotationsValidator />
 
             <div class="flex-row-center w-50 justify-content-start my-2">
 
                 <span class="lead text-muted mx-2 mw-50 text-nowrap text-end">Link to a Service:</span>
 
-                <InputSelect @bind-Value="Model.ServiceGuid" class="form-select" aria-label="Service selection">
+                <InputSelect @bind-Value="_model.ServiceGuid" class="form-select" aria-label="Service selection">
                     <option value="">None</option>
-                    @foreach (var service in Services)
+                    @foreach (var service in _services)
                     {
                         <option value="@service.Guid">@service.Name</option>
                     }
@@ -36,9 +36,9 @@
 
             <div class="row w-50 flex-row-center">
                 <div class="form-floating px-0">
-                    <InputText @bind-Value="Model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
+                    <InputText @bind-Value="_model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
                     <label for="name">Appointment Name</label>
-                    <ValidationMessage For="() => Model.Name" class="text-danger" />
+                    <ValidationMessage For="() => _model.Name" class="text-danger" />
                 </div>
             </div>
 
@@ -47,10 +47,10 @@
                     <div class="flex-row-center">
                         <span class="mud-form-label lead text-muted ms-2 text-end w-25">Start:</span>
                         <div class="me-5 w-fit-content">
-                            <MudDatePicker @bind-Date="Model.StartDate" />
+                            <MudDatePicker @bind-Date="_model.StartDate" />
                         </div>
                         <div class="mx-5 w-fit-content">
-                            <MudTimePicker @bind-Time="Model.StartTime" />
+                            <MudTimePicker @bind-Time="_model.StartTime" />
                         </div>
                     </div>
                 </div>
@@ -59,17 +59,17 @@
                     <div class="flex-row-center">
                         <span class="mud-form-label lead text-muted ms-2 text-end w-25">End:</span>
                         <div class="me-5 w-fit-content">
-                            <MudDatePicker @bind-Date="Model.EndDate" />
+                            <MudDatePicker @bind-Date="_model.EndDate" />
                         </div>
                         <div class="mx-5 w-fit-content">
-                            <MudTimePicker @bind-Time="Model.EndTime" />
+                            <MudTimePicker @bind-Time="_model.EndTime" />
                         </div>
                     </div>
                 </div>
 
                 <div class="flex-row-center">
                     <!-- This covers both start and end times ('end must be after start') so is on its own row -->
-                    <ValidationMessage For="@(() => Model.Appointment!.EndTime)" />
+                    <ValidationMessage For="@(() => _model.Appointment!.EndTime)" />
                 </div>
             </div>
 
@@ -78,29 +78,29 @@
                     <h5>Who is attending?</h5>
                 </div>
                 <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="Model.Appointment!.Person.FirstName" class="form-control" aria-required="true" placeholder="First Name" />
+                    <InputText @bind-Value="_model.Appointment!.Person.FirstName" class="form-control" aria-required="true" placeholder="First Name" />
                     <label for="given-name">First Name</label>
-                    <ValidationMessage For="() => Model.Appointment.Person.FirstName" class="text-danger" />
+                    <ValidationMessage For="() => _model.Appointment.Person.FirstName" class="text-danger" />
                 </div>
                 <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="Model.Appointment.Person.LastName" class="form-control" aria-required="true" placeholder="Last Name" />
+                    <InputText @bind-Value="_model.Appointment.Person.LastName" class="form-control" aria-required="true" placeholder="Last Name" />
                     <label for="family-name">Last Name</label>
-                    <ValidationMessage For="() => Model.Appointment.Person.LastName" class="text-danger" />
+                    <ValidationMessage For="() => _model.Appointment.Person.LastName" class="text-danger" />
                 </div>
                 <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="Model.Appointment.Person.EmailAddress" class="form-control" aria-required="true" placeholder="name@example.com" />
+                    <InputText @bind-Value="_model.Appointment.Person.EmailAddress" class="form-control" aria-required="true" placeholder="name@example.com" />
                     <label for="email">Email</label>
-                    <ValidationMessage For="() => Model.Appointment.Person.EmailAddress" class="text-danger" />
+                    <ValidationMessage For="() => _model.Appointment.Person.EmailAddress" class="text-danger" />
                 </div>
                 <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="Model.Appointment.Person.PhoneNumber" class="form-control" aria-required="true" placeholder="Phone" />
+                    <InputText @bind-Value="_model.Appointment.Person.PhoneNumber" class="form-control" aria-required="true" placeholder="Phone" />
                     <label for="phone">Phone</label>
-                    <ValidationMessage For="() => Model.Appointment.Person.PhoneNumber" class="text-danger" />
+                    <ValidationMessage For="() => _model.Appointment.Person.PhoneNumber" class="text-danger" />
                 </div>
             </div>
 
             <div class="my-1">
-                @foreach (var error in Model.Errors)
+                @foreach (var error in _model.Errors)
                 {
                     @* TODO CSS to fill width of MudAlert? *@
                     <MudAlert Class="m-2" Severity="@error.Severity" Variant="Variant.Outlined">
@@ -121,7 +121,7 @@
                     Cancel
                 </button>
 
-                <div style="@(Model.Appointment.Guid == Guid.Empty ? "display: none;" : "")">
+                <div style="@(_model.Appointment.Guid == Guid.Empty ? "display: none;" : "")">
                     <button type="button" class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
                         <span class="mx-2 material-symbols-outlined">delete</span>
                         Delete Appointment
@@ -130,7 +130,7 @@
 
                 <button type="submit" class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5">
                     <span class="mx-2 material-symbols-outlined">save</span>
-                    @(Model.Appointment.Guid == Guid.Empty ? "Save" : "Save Changes")
+                    @(_model.Appointment.Guid == Guid.Empty ? "Save" : "Save Changes")
                 </button>
             </div>
         </EditForm>
@@ -144,32 +144,32 @@
     [Parameter, EditorRequired]
     public AppointmentDto Appointment { get; set; } = new AppointmentDto(string.Empty, new PersonDto());
 
-    private AppointmentModel Model = new(new AppointmentDto(string.Empty, new PersonDto()), []);
+    private AppointmentModel _model = new(new AppointmentDto(string.Empty, new PersonDto()), []);
 
-    private List<ServiceTypeDto> Services = [];
+    private List<ServiceTypeDto> _services = [];
 
-    private bool Loading = true;
+    private bool _loading = true;
 
     protected override async Task OnParametersSetAsync()
     {
-        Loading = true;
+        _loading = true;
         var result = await ServiceTypeService.GetServiceTypes();
         if (result.IsSuccess && result.Result != null)
         {
-            Services = result.Result;
+            _services = result.Result;
         }
 
-        Model = new AppointmentModel(Appointment, Services);
+        _model = new AppointmentModel(Appointment, _services);
 
         await base.OnParametersSetAsync();
 
-        Loading = false;
+        _loading = false;
     }
 
     private void FixError(AppointmentModelError error)
     {
-        error.Fix?.Invoke(Model);
-        Model.Errors.Remove(error);
+        error.Fix?.Invoke(_model);
+        _model.Errors.Remove(error);
 
         StateHasChanged();
     }
@@ -182,7 +182,7 @@
 
     public async Task Delete()
     {
-        if (Model.Appointment.Guid == Guid.Empty)
+        if (_model.Appointment.Guid == Guid.Empty)
         {
             return;
         }
@@ -197,7 +197,7 @@
 
         if (!result?.Canceled ?? false)
         {
-            var deleteResult = await AppointmentService.DeleteAppointment(Model.Appointment.Guid);
+            var deleteResult = await AppointmentService.DeleteAppointment(_model.Appointment.Guid);
             if (deleteResult.IsSuccess)
             {
                 MessageService.AddMessage(new MessageBase(
@@ -245,12 +245,12 @@
 
         if (!result?.Canceled ?? false)
         {
-            Loading = true;
+            _loading = true;
             StateHasChanged();
 
-            var isCreating = Model.Appointment.Guid == Guid.Empty;
+            var isCreating = _model.Appointment.Guid == Guid.Empty;
 
-            var saveResult = await AppointmentService.CreateOrUpdateAppointment(Model.Appointment);
+            var saveResult = await AppointmentService.CreateOrUpdateAppointment(_model.Appointment);
             if (saveResult.IsSuccess)
             {
                 var message = isCreating ? "New Service Created" : "Changes Saved Succesfully";
@@ -267,7 +267,7 @@
                 MessageService.AddMessage(new MessageBase("Failed to save service", MessageBase.MessageType.Warning));
                 saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
             }
-            Loading = false;
+            _loading = false;
             StateHasChanged();
         }
     }

@@ -9,13 +9,13 @@ namespace Data.Context
 {
     internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUserService userService) : DbContext(options)
     {
-        internal DbSet<Service> Services { get; set; }
-        internal DbSet<Appointment> Appointments { get; set; }
-        internal DbSet<Person> Person { get; set; }
-        internal DbSet<Business> Businesses { get; set; }
-        internal DbSet<BusinessUser> BusinessUsers { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<Person> People { get; set; }
+        public DbSet<Business> Businesses { get; set; }
+        public DbSet<BusinessUser> BusinessUsers { get; set; }
 
-        private readonly IUserService UserService = userService;
+        private readonly IUserService _userService = userService;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,7 +52,7 @@ namespace Data.Context
             // Slightly hard to read - cannot use null propogating operator in Expression.
             // Require that we have a businessUser, with a valid & matching BusinessId. Only return items related to the current business
             Expression<Func<BusinessControlledEntity, bool>> filterExpr =
-                bce => bce.BusinessId == ((BusinessUsers.SingleOrDefault((x => x.UserId == UserService.GetCurrentUserId())) != null ? BusinessUsers.Single(x => x.UserId == UserService.GetCurrentUserId()).BusinessId : int.MinValue));
+                bce => bce.BusinessId == ((BusinessUsers.SingleOrDefault((x => x.UserId == _userService.GetCurrentUserId())) != null ? BusinessUsers.Single(x => x.UserId == _userService.GetCurrentUserId()).BusinessId : int.MinValue));
 
             foreach (var mutableEntityType in modelBuilder.Model.GetEntityTypes())
             {
@@ -72,12 +72,12 @@ namespace Data.Context
 
         internal async Task<int> GetBusinessId()
         {
-            var userId = UserService.GetCurrentUserId() ?? throw new UnauthorizedAccessException("Unable to find logged in user");
-            var businessUser = await BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId);
+            var userId = _userService.GetCurrentUserId() ?? throw new UnauthorizedAccessException("Unable to find logged in user");
+            var businessUser = await BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId) ?? throw new InvalidOperationException("Unable to find business for current user");
 
-            return businessUser == null
-                ? throw new InvalidOperationException("Unable to find business for current user")
-                : businessUser.BusinessId;
+            return  businessUser.BusinessId;
         }
+
+        internal string GetCurrentUserId() => _userService.GetCurrentUserId();
     }
 }

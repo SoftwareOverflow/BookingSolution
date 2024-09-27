@@ -33,7 +33,7 @@ namespace Core.Dto
         /// <summary>
         /// Backing property for <see cref="BookingFrequencyMins"/>
         /// </summary>
-        private TimeSpan BookingFrequency = TimeSpan.FromMinutes(30);
+        private TimeSpan _bookingFrequency = TimeSpan.FromMinutes(30);
 
         /// <summary>
         /// Represents gap between offered booking slots.
@@ -46,11 +46,11 @@ namespace Core.Dto
         {
             get
             {
-                return (int)BookingFrequency.TotalMinutes;
+                return (int)_bookingFrequency.TotalMinutes;
             }
             set
             {
-                BookingFrequency = TimeSpan.FromMinutes(value);
+                _bookingFrequency = TimeSpan.FromMinutes(value);
             }
         }
 

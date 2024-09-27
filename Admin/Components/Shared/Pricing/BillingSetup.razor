@@ -19,12 +19,12 @@
     <div class="row justify-content-center align-items-center g-0">
         <p class="col-5 lead text-end my-0">Pay Monthly</p>
         <div style="width: fit-content">
-            <MudSwitch Class="mx-0" LabelPosition="LabelPosition.Start" @bind-Value="PayYearly" Color="Color.Info" aria-labelledby="pay-yearly-label" />
+            <MudSwitch Class="mx-0" LabelPosition="LabelPosition.Start" @bind-Value="_payYearly" Color="Color.Info" aria-labelledby="pay-yearly-label" />
         </div>
         <p class="lead col-5 my-0" id="pay-yearly-label">Pay Yearly & Save!</p>
     </div>
 </div>
 
 @code {
-    private bool PayYearly = true;
+    private bool _payYearly = true;
 }

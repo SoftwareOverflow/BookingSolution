@@ -7,18 +7,17 @@ using Core.Responses;
 using Core.Services;
 using Data.Entity;
 using Data.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Moq;
 
 namespace Core.Tests.Services
 {
     public class ServiceTypeServiceTests
     {
-        private readonly Mock<IServiceRepo> ServiceContextMock = new();
-        private readonly Mock<IBusinessRepo> BusinessContextMock = new();
-        private readonly Mock<IUserServiceInternal> UserManager = new();
+        private readonly Mock<IServiceRepo> _serviceContextMock = new();
+        private readonly Mock<IBusinessRepo> _businessContextMock = new();
+        private readonly Mock<IUserServiceInternal> _userManagerMock = new();
 
-        private IServiceTypeService ServiceTypeService;
+        private IServiceTypeService _serviceTypeService;
 
 
         public ServiceTypeServiceTests()
@@ -26,98 +25,93 @@ namespace Core.Tests.Services
             var mappingConfig = new MapperConfiguration(x => x.AddProfile(new AutoMapperConfig()));
             var mapper = mappingConfig.CreateMapper();
 
-            ServiceTypeService = new ServiceTypeService(ServiceContextMock.Object, BusinessContextMock.Object, UserManager.Object, mapper);
+            _serviceTypeService = new ServiceTypeService(_serviceContextMock.Object, _businessContextMock.Object, _userManagerMock.Object, mapper);
 
         }
 
         [Fact]
         public async void CreateService_NullUser_Fails()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(""));
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(""));
 
-            var result = await ServiceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
+            var result = await _serviceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
 
             Assert.False(result.IsSuccess);
             Assert.Equal(Responses.ResultType.ClientError, result.ResultType);
 
             // Check that no database call was made
-            BusinessContextMock.Verify(x => x.GetBusinessForUser(It.IsAny<string>()), Times.Never);
-            ServiceContextMock.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<Service>()), Times.Never);
-            ServiceContextMock.Verify(x => x.Update(It.IsAny<string>(), It.IsAny<Service>()), Times.Never);
+            _businessContextMock.Verify(x => x.GetBusiness(), Times.Never);
+            _serviceContextMock.Verify(x => x.Create(It.IsAny<Service>()), Times.Never);
+            _serviceContextMock.Verify(x => x.Update(It.IsAny<Service>()), Times.Never);
         }
 
         [Fact]
         public async void CreateService_UserNoBusiness_Fails()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("123-example-id-123"));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser(It.IsAny<string>())).Returns(Task.FromResult<Business?>(null));
-            ServiceContextMock.Setup(x => x.Create(It.IsAny<string>(), It.IsAny<Service>())).Returns(Task.FromResult(false));
-            ServiceContextMock.Setup(x => x.Update(It.IsAny<string>(), It.IsAny<Service>())).Returns(Task.FromResult(false));
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("123-example-id-123"));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(null));
+            _serviceContextMock.Setup(x => x.Create(It.IsAny<Service>())).Returns(Task.FromResult(false));
+            _serviceContextMock.Setup(x => x.Update(It.IsAny<Service>())).Returns(Task.FromResult(false));
 
-            var result = await ServiceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
+            var result = await _serviceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
 
             // Check that no database call was made
-            BusinessContextMock.Verify(x => x.GetBusinessForUser("123-example-id-123"), Times.Once);
-            ServiceContextMock.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<Service>()), Times.Never);
-            ServiceContextMock.Verify(x => x.Update(It.IsAny<string>(), It.IsAny<Service>()), Times.Never);
+            _businessContextMock.Verify(x => x.GetBusiness(), Times.Once);
+            _serviceContextMock.Verify(x => x.Create(It.IsAny<Service>()), Times.Never);
+            _serviceContextMock.Verify(x => x.Update(It.IsAny<Service>()), Times.Never);
         }
 
         [Fact]
         public async void CreateService_NoGuid_CallsCreate()
         {
             Service? createdService = null;
-            string? userIdParameter = null;
 
             var userId = "Some random user Id as string";
 
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser(It.IsAny<string>())).Returns(Task.FromResult<Business?>(new Business() { Id = 7 }));
-            ServiceContextMock.Setup(x => x.Create(It.IsAny<string>(), It.IsAny<Service>()))
-                .Callback<string, Service>((id, obj) =>
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business() { Id = 7 }));
+            _serviceContextMock.Setup(x => x.Create(It.IsAny<Service>()))
+                .Callback<Service>((obj) =>
                 {
-                    userIdParameter = id;
                     createdService = obj;
 
                 })
                 .Returns(Task.FromResult(true));
 
 
-            var result = await ServiceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
+            var result = await _serviceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(userIdParameter!, userId!);
             Assert.Equal(7, createdService!.BusinessId);
 
             // Check database calls
-            BusinessContextMock.Verify(x => x.GetBusinessForUser(userId), Times.Once);
-            ServiceContextMock.Verify(x => x.Create(userId, It.IsAny<Service>()), Times.Once);
-            ServiceContextMock.Verify(x => x.Update(It.IsAny<string>(), It.IsAny<Service>()), Times.Never);
+            _businessContextMock.Verify(x => x.GetBusiness(), Times.Once);
+            _serviceContextMock.Verify(x => x.Create(It.IsAny<Service>()), Times.Once);
+            _serviceContextMock.Verify(x => x.Update(It.IsAny<Service>()), Times.Never);
         }
 
         [Fact]
         public async void CreateService_Guid_CallsUpdate()
         {
             Service? createdService = null;
-            string? userIdParameter = null;
 
             var userId = "Some random user Id as string";
 
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser(It.IsAny<string>())).Returns(Task.FromResult<Business?>(new Business() { Id = 7 }));
-            ServiceContextMock.Setup(x => x.Update(It.IsAny<string>(), It.IsAny<Service>()))
-                .Callback<string, Service>((id, obj) =>
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business() { Id = 7 }));
+            _serviceContextMock.Setup(x => x.Update(It.IsAny<Service>()))
+                .Callback<Service>((obj) =>
                 {
-                    userIdParameter = id;
                     createdService = obj;
 
                 })
                 .Returns(Task.FromResult(true));
 
             var serviceGuid = Guid.NewGuid().ToString();
-            var result = await ServiceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto()
+            var result = await _serviceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto()
             {
                 Guid = Guid.Parse(serviceGuid),
                 BookingFrequencyMins = 12,
@@ -137,13 +131,12 @@ namespace Core.Tests.Services
             });
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(userIdParameter!, userId!);
             Assert.Equal(7, createdService!.BusinessId);
 
             // Check database calls
-            BusinessContextMock.Verify(x => x.GetBusinessForUser(userId), Times.Once);
-            ServiceContextMock.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<Service>()), Times.Never);
-            ServiceContextMock.Verify(x => x.Update(userId, It.IsAny<Service>()), Times.Once);
+            _businessContextMock.Verify(x => x.GetBusiness(), Times.Once);
+            _serviceContextMock.Verify(x => x.Create(It.IsAny<Service>()), Times.Never);
+            _serviceContextMock.Verify(x => x.Update(It.IsAny<Service>()), Times.Once);
 
             // Check the object used to call the service is mapped correctly
             Assert.NotNull(createdService);
@@ -166,9 +159,9 @@ namespace Core.Tests.Services
         [Fact]
         public async void GetServices_NoUserFails()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(""));
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(""));
 
-            var result = await ServiceTypeService.GetServiceTypes();
+            var result = await _serviceTypeService.GetServiceTypes();
 
             Assert.Null(result.Result);
             Assert.Equal(ResultType.ClientError, result.ResultType);
@@ -181,10 +174,10 @@ namespace Core.Tests.Services
         {
             var userId = "Some random user Id as string";
 
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser(It.IsAny<string>())).Returns(Task.FromResult<Business?>(null));
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(null));
 
-            var result = await ServiceTypeService.GetServiceTypes();
+            var result = await _serviceTypeService.GetServiceTypes();
 
             Assert.Null(result.Result);
             Assert.Equal(ResultType.ClientError, result.ResultType);
@@ -197,13 +190,13 @@ namespace Core.Tests.Services
         {
             var userId = "UserId";
 
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser("UserId")).Returns(Task.FromResult<Business?>(new Business()
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult(userId));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business()
             {
                 Guid = Guid.NewGuid(),
                 Id = 2
             }));
-            ServiceContextMock.Setup(x => x.GetAllServicesForUser()).Returns(Task.FromResult(new List<Service>() {
+            _serviceContextMock.Setup(x => x.GetServices()).Returns(Task.FromResult(new List<Service>() {
                 new Service()
                 {
                     Id = 3,
@@ -221,7 +214,7 @@ namespace Core.Tests.Services
            }.AsEnumerable()));
 
 
-            var result = await ServiceTypeService.GetServiceTypes();
+            var result = await _serviceTypeService.GetServiceTypes();
 
             Assert.Equal(ResultType.Success, result.ResultType);
             Assert.True(result.IsSuccess);
@@ -234,16 +227,16 @@ namespace Core.Tests.Services
         [Fact]
         public async void GetServices_DatabaseError_Returns()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser("UserId")).Returns(Task.FromResult<Business?>(new Business()
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business()
             {
                 Guid = Guid.NewGuid(),
                 Id = 2
             }));
 
-            ServiceContextMock.Setup(x => x.GetAllServicesForUser()).Throws(new InvalidOperationException());
+            _serviceContextMock.Setup(x => x.GetServices()).Throws(new InvalidOperationException());
 
-            var result = await ServiceTypeService.GetServiceTypes();
+            var result = await _serviceTypeService.GetServiceTypes();
 
             Assert.False(result.IsSuccess);
             Assert.Null(result.Result);
@@ -254,11 +247,11 @@ namespace Core.Tests.Services
         [Fact]
         public async void DeleteService_Returns()
         {
-            ServiceContextMock.Setup(x => x.Delete(It.IsAny<Guid>())).Returns(Task.FromResult(true));
+            _serviceContextMock.Setup(x => x.Delete(It.IsAny<Guid>())).Returns(Task.FromResult(true));
 
-            var result = await ServiceTypeService.DeleteById(Guid.NewGuid());
+            var result = await _serviceTypeService.DeleteById(Guid.NewGuid());
 
-            ServiceContextMock.Verify(x => x.Delete(It.IsAny<Guid>()), Times.Once);
+            _serviceContextMock.Verify(x => x.Delete(It.IsAny<Guid>()), Times.Once);
 
             Assert.True(result.IsSuccess);
             Assert.True(result.Result);
@@ -267,18 +260,18 @@ namespace Core.Tests.Services
         [Fact]
         public async void CreateService_DatabaseError_Returns()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser("UserId")).Returns(Task.FromResult<Business?>(new Business()
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business()
             {
                 Guid = Guid.NewGuid(),
                 Id = 2
             }));
 
-            ServiceContextMock.Setup(x => x.Create(It.IsAny<string>(), It.IsAny<Service>())).Throws(new InvalidOperationException());
+            _serviceContextMock.Setup(x => x.Create(It.IsAny<Service>())).Throws(new InvalidOperationException());
 
-            var result = await ServiceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
+            var result = await _serviceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto());
 
-            ServiceContextMock.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<Service>()), Times.Once);
+            _serviceContextMock.Verify(x => x.Create(It.IsAny<Service>()), Times.Once);
 
             Assert.False(result.IsSuccess);
             Assert.Null(result.Result);
@@ -289,18 +282,18 @@ namespace Core.Tests.Services
         [Fact]
         public async void UpdateService_DatabaseError_Returns()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser("UserId")).Returns(Task.FromResult<Business?>(new Business()
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business()
             {
                 Guid = Guid.NewGuid(),
                 Id = 2
             }));
 
-            ServiceContextMock.Setup(x => x.Update(It.IsAny<string>(), It.IsAny<Service>())).Throws(new InvalidOperationException());
+            _serviceContextMock.Setup(x => x.Update(It.IsAny<Service>())).Throws(new InvalidOperationException());
 
-            var result = await ServiceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto() { Guid = Guid.NewGuid() });
+            var result = await _serviceTypeService.CreateOrUpdateServiceType(new ServiceTypeDto() { Guid = Guid.NewGuid() });
 
-            ServiceContextMock.Verify(x => x.Update(It.IsAny<string>(), It.IsAny<Service>()), Times.Once);
+            _serviceContextMock.Verify(x => x.Update(It.IsAny<Service>()), Times.Once);
 
             Assert.False(result.IsSuccess);
             Assert.Null(result.Result);
@@ -311,18 +304,18 @@ namespace Core.Tests.Services
         [Fact]
         public async void DeleteService_DatabaseError_Returns()
         {
-            UserManager.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
-            BusinessContextMock.Setup(x => x.GetBusinessForUser("UserId")).Returns(Task.FromResult<Business?>(new Business()
+            _userManagerMock.Setup(x => x.GetUserIdAsync()).Returns(Task.FromResult("UserId"));
+            _businessContextMock.Setup(x => x.GetBusiness()).Returns(Task.FromResult<Business?>(new Business()
             {
                 Guid = Guid.NewGuid(),
                 Id = 2
             }));
 
-            ServiceContextMock.Setup(x => x.Delete(It.IsAny<Guid>())).Throws(new Exception());
+            _serviceContextMock.Setup(x => x.Delete(It.IsAny<Guid>())).Throws(new Exception());
 
-            var result = await ServiceTypeService.DeleteById(Guid.NewGuid());
+            var result = await _serviceTypeService.DeleteById(Guid.NewGuid());
 
-            ServiceContextMock.Verify(x => x.Delete(It.IsAny<Guid>()), Times.Once);
+            _serviceContextMock.Verify(x => x.Delete(It.IsAny<Guid>()), Times.Once);
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ServerError, result.ResultType);

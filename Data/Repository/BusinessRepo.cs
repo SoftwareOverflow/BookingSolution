@@ -7,24 +7,10 @@ namespace Data.Repository
 {
     internal class BusinessRepo(IDbContextFactory<ApplicationDbContext> factory) : BaseRepo(factory), IBusinessRepo
     {
-        public async Task<Business?> GetBusiness(Guid businessGuid)
-        {
-            return await ExecuteAsync(async (db) =>
-            {
-                var result = await db.Businesses.Where(x => x.Guid == businessGuid).Include(b => b.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync();
-                if (result == null)
-                {
-                    // TODO logging
-                    return null;
-                }
 
-                return result;
-            });
-        }
-
-        public async Task<Business?> GetBusinessForUser(string userId)
+        public async Task<Business?> GetBusiness()
         {
-            return await ExecuteAsync(async (db) =>
+            return await ExecuteAsync(async (db, userId) =>
             {
                 var result = await db.BusinessUsers.Include(u => u.Business).SingleOrDefaultAsync(x => x.UserId == userId);
 
@@ -38,9 +24,9 @@ namespace Data.Repository
             });
         }
 
-        public async Task<bool> RegisterBusiness(string userId, Business business)
+        public async Task<bool> RegisterBusiness(Business business)
         {
-            await ExecuteVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db, userId) =>
             {
                 using var transaction = db.Database.BeginTransaction();
 

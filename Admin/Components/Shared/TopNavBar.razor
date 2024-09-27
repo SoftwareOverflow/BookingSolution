@@ -77,7 +77,7 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
-    private bool IsAuthenticated = false;
+    private bool _isAuthenticated = false;
 
     private string NavLinkClass => $"nav-link {(Authorized ? "": "disabled" )}";
 
@@ -90,7 +90,7 @@
 
             if (user?.Identity is not null && user.Identity.IsAuthenticated)
             {
-                IsAuthenticated = true;
+                _isAuthenticated = true;
             }
         }
     }

@@ -68,3 +68,7 @@ app.AddApplicationLayers();
 app.UseAntiforgery();
 
 app.Run();
+
+
+// Hacky - need public class for integration testing
+public partial class Program { }

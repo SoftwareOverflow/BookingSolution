@@ -8,9 +8,9 @@ namespace Data.Repository
 {
     internal class ServiceRepo(IDbContextFactory<ApplicationDbContext> factory) : BaseRepo(factory), IServiceRepo
     {
-        public async Task<bool> Create(string userId, Service service)
+        public async Task<bool> Create(Service service)
         {
-            await ExecuteVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db, userId) =>
             {
                 var existing = await db.Services.SingleOrDefaultAsync(x => x.Guid == service.Guid);
 
@@ -31,25 +31,22 @@ namespace Data.Repository
             return true;
         }
 
-        public async Task<bool> Update(string userId, Service service)
+        public async Task<bool> Update(Service service)
         {
-            await ExecuteVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db, userId) =>
             {
+                var businessId = (await db.BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId))?.BusinessId
+                    ?? throw new ArgumentException($"Unable to locate business for user with id {userId}");
+
                 var existingService = await db.Services.Include(s => s.Repeats).SingleOrDefaultAsync(x => x.Guid == service.Guid);
 
                 if (existingService != null && service.Guid != Guid.Empty)
                 {
-                    var businessId = (await db.BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId))?.BusinessId
-                    ?? throw new ArgumentException($"Unable to locate business for user with id {userId}");
-
-                    if (service.BusinessId != businessId)
-                    {
-                        throw new InvalidOperationException("Unable to match the business id with the provided UserId");
-                    }
 
                     service.Id = existingService.Id;
+                    service.BusinessId = businessId;
 
-                    // The nested ServiceRepeater objects do NOT get updated by default for some reason. Manually force copy them
+                    // The nested ServiceRepeater objects do NOT get updated by default. Manually copy them
                     existingService.Repeats = service.Repeats;
 
                     db.Services.Entry(existingService).CurrentValues.SetValues(service);
@@ -68,11 +65,9 @@ namespace Data.Repository
             return true;
         }
 
-        // TODO add some sort of BusinessOwndedEntity which contains the FK to Business.
-        // Add global filter for that (see TradeTrack example)
-        public async Task<IEnumerable<Service>> GetAllServicesForUser()
+        public async Task<IEnumerable<Service>> GetServices()
         {
-            return await ExecuteAsync(async (db) =>
+            return await ExecuteAsync(async (db, _) =>
             {
                 return await db.Services.Include(s => s.Repeats).ToListAsync();
             }) ?? [];
@@ -80,11 +75,18 @@ namespace Data.Repository
 
         public async Task<bool> Delete(Guid serviceId)
         {
-            await ExecuteVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db, _) =>
             {
-                var toRemove = await db.Services.SingleOrDefaultAsync(x => x.Guid == serviceId);
+                var toRemove = await db.Services.Include(s => s.Appointments).SingleOrDefaultAsync(x => x.Guid == serviceId);
+
                 if (toRemove != null)
                 {
+                    // Disassociate all the appointments for this service
+                    foreach (var apt in toRemove.Appointments)
+                    {
+                        apt.ServiceId = null;
+                    }
+
                     db.Services.Remove(toRemove);
                     await db.SaveChangesAsync();
                 }

@@ -6,11 +6,11 @@ namespace Admin.Data.Helpers
 {
     public class ViewServiceBase
     {
-        private IMessageService Messages;
+        private IMessageService _messageService;
 
-        public ViewServiceBase(IMessageService messageManager)
+        public ViewServiceBase(IMessageService messageService)
         {
-            Messages = messageManager;
+            _messageService = messageService;
         }
 
         public async Task<T?> HandleServiceRequest<T>(Func<Task<ServiceResult<T>>> request)
@@ -24,7 +24,7 @@ namespace Admin.Data.Helpers
             {
                 foreach (var error in result.Errors)
                 {
-                    Messages.AddMessage(new MessageBase(error, MessageBase.MessageType.Error));
+                    _messageService.AddMessage(new MessageBase(error, MessageBase.MessageType.Error));
                 }
             }
 

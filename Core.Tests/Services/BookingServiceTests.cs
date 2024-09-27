@@ -16,17 +16,17 @@ namespace Core.Tests.Services
     public class BookingServiceTests
     {
 
-        private readonly Mock<IBookingRepo> BookingContext = new();
-        private readonly IMapper Mapper;
+        private readonly Mock<IBookingRepo> _bookingContext = new();
+        private readonly IMapper _mapper;
 
-        private readonly BookingService BookingService;
+        private readonly BookingService _bookingService;
 
         public BookingServiceTests()
         {
             var mappingConfig = new MapperConfiguration(x => x.AddProfile(new AutoMapperConfig()));
-            Mapper = mappingConfig.CreateMapper();
+            _mapper = mappingConfig.CreateMapper();
 
-            BookingService = new BookingService(BookingContext.Object, Mapper);
+            _bookingService = new BookingService(_bookingContext.Object, _mapper);
         }
 
         [Fact]
@@ -35,15 +35,15 @@ namespace Core.Tests.Services
             var businessGuid = Guid.NewGuid();
             var serviceGuid = Guid.NewGuid();
 
-            BookingContext.Setup(x => x.GetService(businessGuid, serviceGuid)).Returns(Task.FromResult<Service?>(null));
+            _bookingContext.Setup(x => x.GetService(businessGuid, serviceGuid)).Returns(Task.FromResult<Service?>(null));
 
-            var result = await BookingService.GetNewBookingRequest(businessGuid, serviceGuid);
+            var result = await _bookingService.GetNewBookingRequest(businessGuid, serviceGuid);
 
             Assert.Equal(ResultType.ClientError, result.ResultType);
             Assert.Null(result.Result);
             Assert.Contains(result.Errors, x => x.Contains("business"));
 
-            BookingContext.Verify(x => x.GetService(businessGuid, serviceGuid), Times.Once);
+            _bookingContext.Verify(x => x.GetService(businessGuid, serviceGuid), Times.Once);
         }
 
         [Fact]
@@ -60,11 +60,11 @@ namespace Core.Tests.Services
                 LatestTime = new TimeOnly(18, 00),
             };
 
-            BookingContext.Setup(x => x.GetService(businessGuid, serviceGuid)).Returns(Task.FromResult<Service?>(service));
+            _bookingContext.Setup(x => x.GetService(businessGuid, serviceGuid)).Returns(Task.FromResult<Service?>(service));
 
-            var result = await BookingService.GetNewBookingRequest(businessGuid, serviceGuid);
+            var result = await _bookingService.GetNewBookingRequest(businessGuid, serviceGuid);
 
-            var serviceDto = Mapper.Map<ServiceTypeDto>(service);
+            var serviceDto = _mapper.Map<ServiceTypeDto>(service);
 
             var bookingRequest = new BookingRequestDto(serviceDto, businessGuid, new PersonDto(), DateOnly.FromDateTime(DateTime.Now));
 
@@ -72,15 +72,15 @@ namespace Core.Tests.Services
             Assert.Equal(serviceGuid, result.Result!.Service.Guid);
             Assert.Equivalent(bookingRequest, result.Result);
 
-            BookingContext.Verify(x => x.GetService(businessGuid, serviceGuid), Times.Once);
+            _bookingContext.Verify(x => x.GetService(businessGuid, serviceGuid), Times.Once);
         }
 
         [Fact]
         public async void GetBookingRequest_DatabaseThrows_Fails()
         {
-            BookingContext.Setup(x => x.GetService(It.IsAny<Guid>(), It.IsAny<Guid>())).Throws(new Exception("Internal database error"));
+            _bookingContext.Setup(x => x.GetService(It.IsAny<Guid>(), It.IsAny<Guid>())).Throws(new Exception("Internal database error"));
 
-            var result = await BookingService.GetNewBookingRequest(Guid.NewGuid(), Guid.NewGuid());
+            var result = await _bookingService.GetNewBookingRequest(Guid.NewGuid(), Guid.NewGuid());
 
             Assert.Equivalent(ServiceResult<ServiceTypeDto>.DefaultServerFailure(), result);
         }
@@ -94,7 +94,7 @@ namespace Core.Tests.Services
                 Repeats = []
             };
 
-            var result = BookingService.GetNextServiceDate(service, new DateOnly(2024, 9, 1));
+            var result = _bookingService.GetNextServiceDate(service, new DateOnly(2024, 9, 1));
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ServerError, result.ResultType);
@@ -111,7 +111,7 @@ namespace Core.Tests.Services
                 StartDate = new DateTime(2024, 9, 2)
             };
 
-            var result = BookingService.GetNextServiceDate(service, new DateOnly(2024, 9, 1));
+            var result = _bookingService.GetNextServiceDate(service, new DateOnly(2024, 9, 1));
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
@@ -130,7 +130,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday), new(DayOfWeek.Wednesday)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date, result.Result);
@@ -148,7 +148,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday), new(DayOfWeek.Sunday)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             var expectedDate = new DateOnly(2024, 9, 1); // First Sunday after date
 
@@ -168,7 +168,7 @@ namespace Core.Tests.Services
                 Repeats = [new(1), new(8), new(17)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date, result.Result);
@@ -186,7 +186,7 @@ namespace Core.Tests.Services
                 Repeats = [new(19), new(15), new(23), new(25)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             var expectedDate = new DateOnly(2024, 9, 15);
 
@@ -206,7 +206,7 @@ namespace Core.Tests.Services
                 Repeats = [new(10), new(19), new(27)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             var expectedDate = new DateOnly(2024, 8, 27);
 
@@ -226,7 +226,7 @@ namespace Core.Tests.Services
                 Repeats = [new(18), new(19), new(11), new(27)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             var expectedDate = new DateOnly(2024, 8, 11);
 
@@ -246,7 +246,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, -1)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date, result.Result);
@@ -264,7 +264,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday, 2), new(DayOfWeek.Wednesday, -1)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date, result.Result);
@@ -282,7 +282,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Tuesday, 3), new(DayOfWeek.Wednesday, -1)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date, result.Result);
@@ -300,7 +300,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, -1)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date, result.Result);
@@ -318,7 +318,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, -1), new(DayOfWeek.Friday, 1)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(date.AddDays(1), result.Result);
@@ -336,7 +336,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday, 2), new(DayOfWeek.Wednesday, -1), new(DayOfWeek.Friday, 2)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
             var expectedDate = new DateOnly(2024, 8, 9); // Second Monday of the month
 
             Assert.True(result.IsSuccess);
@@ -355,7 +355,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Tuesday, 3)]
             };
 
-            var result = BookingService.GetNextServiceDate(service, date);
+            var result = _bookingService.GetNextServiceDate(service, date);
             var expectedDate = new DateOnly(2024, 8, 20); // Third Tuesday
 
             Assert.True(result.IsSuccess);
@@ -373,12 +373,12 @@ namespace Core.Tests.Services
                 StartDate = endDate.AddDays(7).ToDateTime(new TimeOnly()),
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
 
             Assert.True(result.IsSuccess);
             Assert.Empty(result.Result!.Availability);
 
-            BookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>()), Times.Never);
+            _bookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>()), Times.Never);
         }
 
         [Fact]
@@ -392,7 +392,7 @@ namespace Core.Tests.Services
                 StartDate = startDate.AddMonths(-7).ToDateTime(new TimeOnly()),
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
             Assert.Contains(result.Errors, x => x.Contains("end date"));
@@ -404,7 +404,7 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 6, 20);
             var endDate = startDate.AddDays(10);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
 
             var service = new ServiceTypeDto()
             {
@@ -413,7 +413,7 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday)]
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(11, result.Result!.Availability.Count);
@@ -426,7 +426,7 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 8, 31); // Saturday
             var endDate = new DateOnly(2024, 9, 3); // Tuesday
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
 
             var service = new ServiceTypeDto()
             {
@@ -439,7 +439,7 @@ namespace Core.Tests.Services
                 Repeats = [new ServiceRepeaterDto(DayOfWeek.Monday), new ServiceRepeaterDto(DayOfWeek.Tuesday), new ServiceRepeaterDto(DayOfWeek.Friday)]
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
             var dates = result.Result;
 
             Assert.True(result.IsSuccess);
@@ -474,7 +474,7 @@ namespace Core.Tests.Services
                 Assert.Contains(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 3)).Times, x => x.Time == time);
             });
 
-            BookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate), Times.Once);
+            _bookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate), Times.Once);
 
         }
 
@@ -484,7 +484,7 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 6, 1);
             var endDate = new DateOnly(2024, 7, 1);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(
                 Task.FromResult<ICollection<Appointment>>([
                     new Appointment() // Clashes
                     {
@@ -537,7 +537,7 @@ namespace Core.Tests.Services
                 LatestTime = new TimeSpan(17, 0, 0)
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
 
             var expectedDates = new List<DateOnly>() { new(2024, 6, 3), new(2024, 6, 5), new(2024, 6, 7), new(2024, 6, 25), };
             var expectedTimes = new List<TimeOnly>() { new(9, 0), new(10, 0), new(11, 0), new(12, 0), new(13, 0), new(14, 0), new(15, 0), new(16, 0) };
@@ -567,7 +567,7 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 6, 1);
             var endDate = new DateOnly(2024, 6, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(
                 Task.FromResult<ICollection<Appointment>>([
                     new Appointment() // Clashes
                     {
@@ -613,7 +613,7 @@ namespace Core.Tests.Services
                 LatestTime = new TimeSpan(15, 0, 0)
             };
 
-            var res = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var res = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
             var result = res.Result!;
 
             var expectedDates = new List<DateOnly>() { new(2024, 6, 3), new(2024, 6, 19), new(2024, 6, 27), new(2024, 6, 28), };
@@ -649,7 +649,7 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 8, 31); // Saturday
             var endDate = new DateOnly(2024, 9, 3); // Tuesday
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
 
             var service = new ServiceTypeDto()
             {
@@ -662,7 +662,7 @@ namespace Core.Tests.Services
                 Repeats = [new ServiceRepeaterDto(DayOfWeek.Monday), new ServiceRepeaterDto(DayOfWeek.Tuesday), new ServiceRepeaterDto(DayOfWeek.Friday)]
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
             var dates = result.Result;
 
             Assert.True(result.IsSuccess);
@@ -697,7 +697,7 @@ namespace Core.Tests.Services
                 Assert.Contains(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 3)).Times, x => x.Time == time);
             });
 
-            BookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate), Times.Once);
+            _bookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate), Times.Once);
         }
 
         [Fact]
@@ -706,7 +706,7 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 6, 1);
             var endDate = new DateOnly(2024, 6, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Throws(new Exception("Something went wrong!"));
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Throws(new Exception("Something went wrong!"));
 
             var service = new ServiceTypeDto()
             {
@@ -715,9 +715,9 @@ namespace Core.Tests.Services
                 Repeats = [new(DayOfWeek.Monday)]
             };
 
-            var result = await BookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
+            var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
 
-            BookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>()), Times.Once);
+            _bookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>()), Times.Once);
 
             Assert.False(result.IsSuccess);
             Assert.Null(result.Result);
@@ -730,7 +730,7 @@ namespace Core.Tests.Services
 
             var dto = new BookingRequestDto(service, Guid.NewGuid(), new PersonDto(), DateOnly.MinValue);
 
-            var result = await BookingService.SendBookingRequest(dto, Guid.NewGuid());
+            var result = await _bookingService.SendBookingRequest(dto, Guid.NewGuid());
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
@@ -742,7 +742,7 @@ namespace Core.Tests.Services
         {
             var date = new DateOnly(2024, 08, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([]));
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([]));
 
             // Attempt to book 10:00 -> 11:30
             var service = new ServiceTypeDto()
@@ -760,7 +760,7 @@ namespace Core.Tests.Services
                 SelectedTime = new TimeOnly(10, 0),
             };
 
-            var result = await BookingService.SendBookingRequest(dto, Guid.NewGuid());
+            var result = await _bookingService.SendBookingRequest(dto, Guid.NewGuid());
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
@@ -773,7 +773,7 @@ namespace Core.Tests.Services
         {
             var date = new DateOnly(2024, 08, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
                 new Appointment() { // No Clashes
                     StartTime = new DateTime(date, new TimeOnly(9, 0)),
                     EndTime = new DateTime(date, new TimeOnly(9, 30))
@@ -804,7 +804,7 @@ namespace Core.Tests.Services
                 SelectedTime = new TimeOnly(10, 0),
             };
 
-            var result = await BookingService.SendBookingRequest(dto, Guid.NewGuid());
+            var result = await _bookingService.SendBookingRequest(dto, Guid.NewGuid());
 
             Assert.False(result.IsSuccess);
             Assert.False(result.IsSuccess);
@@ -817,7 +817,7 @@ namespace Core.Tests.Services
         {
             var date = new DateOnly(2024, 08, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
                 new Appointment() {
                     StartTime = new DateTime(date, new TimeOnly(9, 0)),
                     EndTime = new DateTime(date, new TimeOnly(10, 0))
@@ -833,7 +833,7 @@ namespace Core.Tests.Services
                 ]));
 
             Appointment appointment;
-            BookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Callback((Appointment app, Guid _) => appointment = app ).Returns(Task.FromResult(true));  
+            _bookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Callback((Appointment app, Guid _) => appointment = app ).Returns(Task.FromResult(true));  
 
             // Attempt to book 10:00 -> 11:30
             var service = new ServiceTypeDto()
@@ -854,7 +854,7 @@ namespace Core.Tests.Services
                 SelectedTime = new TimeOnly(10, 0),
             };
 
-            var result = await BookingService.SendBookingRequest(dto, Guid.NewGuid());
+            var result = await _bookingService.SendBookingRequest(dto, Guid.NewGuid());
 
             var expected = new AppointmentDto("Custom Service Name", person)
             {
@@ -874,7 +874,7 @@ namespace Core.Tests.Services
         {
             var date = new DateOnly(2024, 08, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
                 new Appointment() {
                     StartTime = new DateTime(date, new TimeOnly(9, 0)),
                     EndTime = new DateTime(date, new TimeOnly(10, 0))
@@ -889,7 +889,7 @@ namespace Core.Tests.Services
                 }
                 ]));
 
-            BookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Returns(Task.FromResult(false));
+            _bookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Returns(Task.FromResult(false));
 
             // Attempt to book 10:00 -> 11:30
             var service = new ServiceTypeDto()
@@ -910,7 +910,7 @@ namespace Core.Tests.Services
                 SelectedTime = new TimeOnly(10, 0),
             };
 
-            var result = await BookingService.SendBookingRequest(dto, Guid.NewGuid());
+            var result = await _bookingService.SendBookingRequest(dto, Guid.NewGuid());
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ServerError, result.ResultType);
@@ -922,7 +922,7 @@ namespace Core.Tests.Services
         {
             var date = new DateOnly(2024, 08, 30);
 
-            BookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), date, date)).Returns(Task.FromResult<ICollection<Appointment>>([
                 new Appointment() {
                     StartTime = new DateTime(date, new TimeOnly(9, 0)),
                     EndTime = new DateTime(date, new TimeOnly(10, 0))
@@ -937,7 +937,7 @@ namespace Core.Tests.Services
                 }
                 ]));
 
-            BookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Throws(new Exception());
+            _bookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Throws(new Exception());
 
             // Attempt to book 10:00 -> 11:30
             var service = new ServiceTypeDto()
@@ -958,7 +958,7 @@ namespace Core.Tests.Services
                 SelectedTime = new TimeOnly(10, 0),
             };
 
-            var result = await BookingService.SendBookingRequest(dto, Guid.NewGuid());
+            var result = await _bookingService.SendBookingRequest(dto, Guid.NewGuid());
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ServerError, result.ResultType);

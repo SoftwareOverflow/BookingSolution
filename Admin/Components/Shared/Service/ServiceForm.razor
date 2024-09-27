@@ -16,7 +16,7 @@
 @inject IServiceTypeService ServiceTypeService
 @inject StateContainerSingle<ServiceTypeDto> StateContainer
 
-<EditForm class="bg-light" @ref="Form" Spacing="4" Model="ServiceModel">
+<EditForm class="bg-light" @ref="_form" Spacing="4" Model="ServiceModel">
     <ObjectGraphDataAnnotationsValidator />
     <div class="flex-row-center">
         <div class="form-floating w-50">
@@ -242,7 +242,7 @@
     [Parameter, EditorRequired]
     public bool IsCreating { get; set; }
 
-    private EditForm Form;
+    private EditForm _form;
 
     protected override void OnParametersSet()
     {
@@ -283,7 +283,7 @@
 
     private async Task<bool> SaveChangesAsync()
     {
-        if (!Form!.EditContext!.Validate())
+        if (!_form!.EditContext!.Validate())
         {
             return false;
         }

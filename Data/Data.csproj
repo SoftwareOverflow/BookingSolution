@@ -25,4 +25,8 @@
     <ProjectReference Include="..\Auth\Auth.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="Data.Tests"/>
+	</ItemGroup>
+
 </Project>

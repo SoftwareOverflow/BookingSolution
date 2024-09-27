@@ -7,26 +7,26 @@ namespace Core.Services
 {
     internal class UserService : IUserObserver, IDisposable, Interfaces.IUserService, IUserServiceInternal
     {
-        private Auth.Interfaces.IUserService AuthUserService { get; set; }
+        private readonly Auth.Interfaces.IUserService _authUserService;
 
-        private IMessageService MessageService { get; set; }
+        private readonly IMessageService _messageService;
 
         /// <summary>
         /// Determines if the UserStateManager has up to date information.
         /// Call <seealso cref="UserService.Load"/> Load if this is false and up to date information is required
         /// </summary>
-        public bool IsUpToDate { get; private set; } = false;
+        private bool _isUpToDate = false;
 
-        private string UserId = "";
+        private string _userId = "";
 
-        private string UserName = "";
+        private string _userName = "";
 
         public UserService(Auth.Interfaces.IUserService userService, IMessageService messageService)
         {
-            AuthUserService = userService;
-            AuthUserService.AddUserListener(this);
+            _authUserService = userService;
+            _authUserService.AddUserListener(this);
 
-            MessageService = messageService;
+            _messageService = messageService;
         }
 
         public async void OnUserEvent(UserEvent userEvent, string userId)
@@ -40,17 +40,17 @@ namespace Core.Services
             if (userEvent == UserEvent.Created)
             {
 
-                name = await AuthUserService.GetUserNameFromId(userId);
+                name = await _authUserService.GetUserNameFromId(userId);
 
                 // TODO create BusinessUser in db
                 // TODO logging
-                MessageService.AddMessage(new MessageBase("User Created Successfully", MessageBase.MessageType.Success));
+                _messageService.AddMessage(new MessageBase("User Created Successfully", MessageBase.MessageType.Success));
             }
             else if (userEvent == UserEvent.SignIn)
             {
-                name = await AuthUserService.GetUserNameFromId(userId);
+                name = await _authUserService.GetUserNameFromId(userId);
 
-                MessageService.AddMessage(new MessageBase("User Signed In", MessageBase.MessageType.Success));
+                _messageService.AddMessage(new MessageBase("User Signed In", MessageBase.MessageType.Success));
 
                 // TODO logging
             }
@@ -58,61 +58,61 @@ namespace Core.Services
             {
                 userId = string.Empty;
 
-                MessageService.AddMessage(new MessageBase("Signed Out Successfully", MessageBase.MessageType.Success));
+                _messageService.AddMessage(new MessageBase("Signed Out Successfully", MessageBase.MessageType.Success));
                 // TODO logging
             }
 
-            UserId = userId;
-            UserName = name;
+            _userId = userId;
+            _userName = name;
 
-            IsUpToDate = true;
+            _isUpToDate = true;
         }
 
-        public string GetSignOutPage() => AuthUserService.GetSignOutPage();
+        public string GetSignOutPage() => _authUserService.GetSignOutPage();
 
         private async Task Load()
         {
-            if (IsUpToDate)
+            if (_isUpToDate)
             {
                 return;
             }
 
-            var id = await AuthUserService.GetCurrentUserIdAsync();
+            var id = await _authUserService.GetCurrentUserIdAsync();
             var name = string.Empty;
             if (!id.IsNullOrEmpty())
             {
-                name = await AuthUserService.GetUserNameFromId(id);
+                name = await _authUserService.GetUserNameFromId(id);
             }
 
-            UserId = id;
-            UserName = name;
+            _userId = id;
+            _userName = name;
 
-            IsUpToDate = true;
+            _isUpToDate = true;
         }
 
         public async Task<string?> GetUserNameAsync()
         {
-            if (!IsUpToDate)
+            if (!_isUpToDate)
             {
                 await Load();
             }
 
-            return UserName;
+            return _userName;
         }
 
         public async Task<string> GetUserIdAsync()
         {
-            if(!IsUpToDate)
+            if(!_isUpToDate)
             {
                 await Load();
             }
 
-            return UserId;
+            return _userId;
         }
 
         public void Dispose()
         {
-            AuthUserService.RemoveUserListener(this);
+            _authUserService.RemoveUserListener(this);
         }
     }
 }

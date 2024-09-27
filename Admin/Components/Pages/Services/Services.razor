@@ -10,7 +10,7 @@
 @inject StateContainerSingle<ServiceTypeDto> StateContainer
 @inject IServiceTypeService ServiceTypeService
 
-<LoadingSpinner Visible="Loading" />
+<LoadingSpinner Visible="_loading" />
 
 <h3>Manage The Services You Offer</h3>
 <p class="lead text-muted">Saved changes will affect future bookings!</p>
@@ -23,7 +23,7 @@
         </button>
     </div>
     <div class="row g-2 justify-content-start">
-        @foreach (var item in ServiceTypes)
+        @foreach (var item in _serviceTypes)
         {
             <div class="col col-md-4 col-sm-6">
                 <div class="card m-2 position-relative h-100 text-center">
@@ -46,18 +46,18 @@
 
 
 @code {
-    private bool Loading = true;
+    private bool _loading = true;
 
-    private List<ServiceTypeDto> ServiceTypes = [];
+    private List<ServiceTypeDto> _serviceTypes = [];
 
     protected override async Task OnParametersSetAsync()
     {
-        Loading = true;
+        _loading = true;
 
         var result = await ServiceTypeService.GetServiceTypes();
         if (result.IsSuccess)
         {
-            ServiceTypes = result.Result!;
+            _serviceTypes = result.Result!;
         }
         else
         {
@@ -66,7 +66,7 @@
 
         await base.OnParametersSetAsync();
 
-        Loading = false;
+        _loading = false;
     }
 
     private void EditServiceType(ServiceTypeDto item)

@@ -9,9 +9,9 @@ namespace Core.Services
 {
     internal class AppointmentService(IAppointmentRepo appointmentContext, IMapper mapper) : IAppointmentService
     {
-        private readonly IAppointmentRepo AppointmentContext = appointmentContext;
+        private readonly IAppointmentRepo _appointmentContext = appointmentContext;
 
-        private readonly IMapper Mapper = mapper;
+        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Get all <see cref="AppointmentDto"/> objects in a given date range.
@@ -23,8 +23,8 @@ namespace Core.Services
         {
             try
             {
-                var result = AppointmentContext.GetAppointmentsBetweenDates(start, end);
-                var dtos = Mapper.Map<ICollection<AppointmentDto>>(result);
+                var result = _appointmentContext.GetAppointmentsBetweenDates(start, end);
+                var dtos = _mapper.Map<ICollection<AppointmentDto>>(result);
 
                 return Task.FromResult(new ServiceResult<List<AppointmentDto>>([.. dtos]));
 
@@ -42,21 +42,21 @@ namespace Core.Services
         {
             try
             {
-                var entity = Mapper.Map<Appointment>(appointment);
+                var entity = _mapper.Map<Appointment>(appointment);
 
                 bool result = false;
                 if (entity.Guid == Guid.Empty)
                 {
-                    result = await AppointmentContext.Create(entity);
+                    result = await _appointmentContext.Create(entity);
                 }
                 else
                 {
-                    result = await AppointmentContext.Update(entity);
+                    result = await _appointmentContext.Update(entity);
                 }
 
                 if (result)
                 {
-                    appointment = Mapper.Map<AppointmentDto>(entity);
+                    appointment = _mapper.Map<AppointmentDto>(entity);
 
                     return new ServiceResult<AppointmentDto>(appointment);
                 }
@@ -73,7 +73,7 @@ namespace Core.Services
         {
             try
             {
-                var result = await AppointmentContext.DeleteAppointment(id);
+                var result = await _appointmentContext.DeleteAppointment(id);
 
                 if (result)
                 {

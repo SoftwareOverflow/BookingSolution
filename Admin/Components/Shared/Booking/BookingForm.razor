@@ -19,7 +19,7 @@
 
 @* TODO show error for Availability being null *@
 
-<LoadingSpinner Visible="Loading" />
+<LoadingSpinner Visible="_loading" />
 
 <div class="container">
     <EditForm Model="Model" OnValidSubmit="SaveBookingRequest">
@@ -34,7 +34,7 @@
 
         <div class="row">
             <div class="col col-xl-6 text-center">
-                <MudDatePicker @ref="DatePicker"
+                <MudDatePicker @ref="_datePicker"
                                PickerVariant="PickerVariant.Static"
                                Label="Select Date"
                                Date="Model.SelectedDateTime"
@@ -43,7 +43,7 @@
                                DateChanged="OnDateChange"
                                PickerMonthChanged="OnMonthChange"
                                Class="flex-row-center"
-                               MinDate="Today"
+                               MinDate="_today"
                                AdditionalDateClassesFunc="GetDateStyle">
                 </MudDatePicker>
 
@@ -149,15 +149,15 @@
     [Parameter, EditorRequired]
     public EventCallback OnRequestSent { get; set; }
 
-    private bool Loading = true;
+    private bool _loading = true;
 
-    private MudDatePicker DatePicker;
+    private MudDatePicker _datePicker;
 
-    public AvailabilityDto? TimesDto = null;
+    public AvailabilityDto? _timesDto = null;
 
-    private DateTime Today = DateTime.Now;
+    private DateTime _today = DateTime.Now;
 
-    private List<TimeAvailability> TimesByDate(DateOnly? date) => TimesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times ?? [];
+    private List<TimeAvailability> TimesByDate(DateOnly? date) => _timesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times ?? [];
 
     /*
     Potential performance improvements:
@@ -171,16 +171,16 @@
     protected override async Task OnParametersSetAsync()
     {
         var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
-        Today = localDate ?? Today;
+        _today = localDate ?? _today;
 
-        var next = BookingService.GetNextServiceDate(Model.BookingRequest.Service, DateOnly.FromDateTime(Today));
+        var next = BookingService.GetNextServiceDate(Model.BookingRequest.Service, DateOnly.FromDateTime(_today));
         if (next.IsSuccess)
         {
             Model.SelectedDateTime = next.Result.ToDateTime(new TimeOnly());
         }
-        else if (Model.SelectedDateTime < Today)
+        else if (Model.SelectedDateTime < _today)
         {
-            Model.SelectedDateTime = Today;
+            Model.SelectedDateTime = _today;
         }
 
         await base.OnParametersSetAsync();
@@ -188,7 +188,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await DatePicker.GoToDate(Model.SelectedDateTime ?? Today);
+        await _datePicker.GoToDate(Model.SelectedDateTime ?? _today);
 
         await base.OnAfterRenderAsync(firstRender);
     }
@@ -205,7 +205,7 @@
 
     private async Task OnMonthChange(DateTime? dt)
     {
-        Loading = true;
+        _loading = true;
 
         Model.SelectedDateTime = dt;
 
@@ -214,7 +214,7 @@
             await LoadMonth(dt.Value);
         }
 
-        Loading = false;
+        _loading = false;
     }
 
     private async Task LoadMonth(DateTime dt)
@@ -222,20 +222,20 @@
         var start = new DateOnly(dt.Year, dt.Month, 1);
         var end = start.AddMonths(1).AddDays(-1);
 
-        if (end.ToDateTime(new TimeOnly()) < Today)
+        if (end.ToDateTime(new TimeOnly()) < _today)
         {
             return;
         }
 
-        if (start < DateOnly.FromDateTime(Today))
+        if (start < DateOnly.FromDateTime(_today))
         {
-            start = DateOnly.FromDateTime(Today);
+            start = DateOnly.FromDateTime(_today);
         }
 
         var result = await BookingService.GetAvailabilityBetweenDates(Model.BookingRequest.Service, Model.BookingRequest.BusinessGuid, start, end);
         if (result.IsSuccess)
         {
-            TimesDto = result.Result!;
+            _timesDto = result.Result!;
         }
         else
         {
@@ -250,12 +250,12 @@
     {
         var date = DateOnly.FromDateTime(dt);
 
-        if (dt < (Model.BookingRequest.Service.StartDate?.Date ?? Today) || dt < Today)
+        if (dt < (Model.BookingRequest.Service.StartDate?.Date ?? _today) || dt < _today)
         {
             return true;
         }
 
-        var dateAvail = TimesDto?.Availability.SingleOrDefault(x => x.Date == date);
+        var dateAvail = _timesDto?.Availability.SingleOrDefault(x => x.Date == date);
 
         return dateAvail?.Times.Count == 0;
     }
@@ -264,9 +264,9 @@
     {
         var date = DateOnly.FromDateTime(dt);
 
-        if (IsDateDisabled(dt) && dt >= Today)
+        if (IsDateDisabled(dt) && dt >= _today)
         {
-            if (TimesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times.Count == 0)
+            if (_timesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times.Count == 0)
             {
                 return "red-important ";
             }
@@ -282,7 +282,7 @@
 
     private async Task SaveBookingRequest()
     {
-        Loading = true;
+        _loading = true;
 
         if (IsDemo)
         {
@@ -301,6 +301,6 @@
             }
         }
 
-        Loading = false;
+        _loading = false;
     }
 }

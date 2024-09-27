@@ -17,17 +17,17 @@
 
 @layout EmptyLayout
 
-<LoadingSpinner Visible="Loading" />
+<LoadingSpinner Visible="_loading" />
 
-<div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light @BgClass">
-    @if (IsError || BookingRequest == null)
+<div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light @_bgClass">
+    @if (_isError || _bookingRequest == null)
     {
         // TODO show error page
         <div class="container">
             <p class="pt-3">Something isnt right here!</p>
         </div>
     }
-    else if (RequestSent)
+    else if (_requestSent)
     {
         <div class="container flex-column-center text-center h-100">
             <h3>@(IsDemo ? "Example - " : "")Booking Request Sent</h3>
@@ -39,7 +39,7 @@
     }
     else
     {
-        <BookingForm Model="BookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
+        <BookingForm Model="_bookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
     }
     <div class="flex-grow-1" />
     <div class="d-flex position-relative flex-row fixed-bottom justify-content-end pe-3 pb-3">
@@ -64,19 +64,19 @@
     [SupplyParameterFromQuery]
     public Boolean IsDemo { get; set; } = false;
 
-    private bool Loading = true;
+    private bool _loading = true;
 
-    public bool IsError = false;
+    private bool _isError = false;
 
-    public bool RequestSent = false;
+    private bool _requestSent = false;
 
-    public string BgClass => IsDemo ? "watermark" : "";
+    private string _bgClass => IsDemo ? "watermark" : "";
 
-    public BookingRequestModel? BookingRequest;
+    private BookingRequestModel? _bookingRequest;
 
     protected override async Task OnParametersSetAsync()
     {
-        Loading = true;
+        _loading = true;
 
         if (BusinessGuid.HasValue && ServiceGuid.HasValue)
         {
@@ -84,7 +84,7 @@
 
             if (result.IsSuccess)
             {
-                BookingRequest = new BookingRequestModel(result.Result!);
+                _bookingRequest = new BookingRequestModel(result.Result!);
             }
             else
             {
@@ -93,7 +93,7 @@
 
         }
 
-        Loading = false;
+        _loading = false;
 
         await base.OnParametersSetAsync();
         StateHasChanged();
@@ -115,7 +115,7 @@
 
     private void OnRequestSent()
     {
-        RequestSent = true;
+        _requestSent = true;
     }
 
     private void OnMessage(MessageBase message)

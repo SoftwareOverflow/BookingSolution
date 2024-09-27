@@ -19,7 +19,7 @@
         </div>
         <div class="flex-row date-string-dropdown">
             <button class="date-button">
-                <MudDatePicker @ref="DatePicker" Mask="@(new DateMask(""))" @bind-Date="BackingDate" ShowToolbar="false" OpenTo="@(LayoutType == CalendarLayoutType.Month ? OpenTo.Month : OpenTo.Date)" />
+                <MudDatePicker @ref="_datePicker" Mask="@(new DateMask(""))" @bind-Date="BackingDate" ShowToolbar="false" OpenTo="@(LayoutType == CalendarLayoutType.Month ? OpenTo.Month : OpenTo.Date)" />
                 <div class="overlay flex-column-center">
                     <span class="">@DateLabel</span>
                 </div>
@@ -82,18 +82,18 @@
     [Parameter, EditorRequired]
     public EventCallback<DateTime> OnCreateAppointment { get; set; }
 
-    private MudDatePicker DatePicker = default!;
+    private MudDatePicker _datePicker = default!;
 
     private string DateLabel => DateHelpers.GetDateLabel(Date, LayoutType);
 
     private void JumpToNextDate(bool forward)
     {
-        DatePicker.GoToDate(DateHelpers.JumpToNext(LayoutType, Date, forward));
+        _datePicker.GoToDate(DateHelpers.JumpToNext(LayoutType, Date, forward));
     }
 
     private void GoToToday()
     {
-        DatePicker.GoToDate(ClientDate);
+        _datePicker.GoToDate(ClientDate);
     }
 
     private async Task CreateAppointment()

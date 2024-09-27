@@ -13,27 +13,27 @@
 @inject NavigationManager NavigationManager
 
 
-@if (Service != null)
+@if (_service != null)
 {
     <h1>Manage Your Service:</h1>
     <div class="container bg-light">
         <div class="row">
-            <ServiceForm Dto="Service" IsCreating="false" />
+            <ServiceForm Dto="_service" IsCreating="false" />
         </div>
         <div class="row">
-            <ServiceBookingSample Service="Service"/>
+            <ServiceBookingSample Service="_service"/>
         </div>
     </div>
 }
 
 @code {
-    private ServiceTypeDto Service = default!;
+    private ServiceTypeDto _service = default!;
 
     protected override void OnParametersSet()
     {
-        Service = StateContainer.GetItem();
+        _service = StateContainer.GetItem();
 
-        if (Service == null || string.IsNullOrEmpty(Service.Guid.ToString()))
+        if (_service == null || string.IsNullOrEmpty(_service.Guid.ToString()))
         {
             MessageService.AddMessage(new MessageBase(
                     message: "Unable to locate service type to edit",

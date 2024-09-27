@@ -15,7 +15,7 @@ namespace Data.Repository
                 throw new ArgumentException("Unable create appointment - Person details required");
             }
 
-            await ExecuteVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db, _) =>
             {
                 var businesId = await db.GetBusinessId();
                 appointment.BusinessId = businesId;
@@ -27,16 +27,8 @@ namespace Data.Repository
 
                 if (appointment.Service != null)
                 {
-                    var service = db.Services.SingleOrDefault(s => s.Guid == appointment.Service!.Guid);
-                    if (service != null)
-                    {
-                        appointment.Service = service; // Make sure the service matches, including Id, otherwise EF will try and create a new one.
-                    }
-                    else
-                    {
-                        appointment.Service = null;
-                        // TODO logging - shouldn't get to the position where we can't match the service
-                    }
+                    var service = db.Services.SingleOrDefault(s => s.Guid == appointment.Service!.Guid) ?? throw new ArgumentException("Cannot find linked service");
+                    appointment.Service = service;
                 }
 
                 db.Appointments.Add(appointment);
@@ -48,7 +40,12 @@ namespace Data.Repository
 
         public async Task<bool> Update(Appointment appointment)
         {
-            await ExecuteVoidAsync(async (db) =>
+            if (appointment.Person == null)
+            {
+                throw new ArgumentException("Unable create appointment - Person details required");
+            }
+
+            await ExecuteVoidAsync(async (db, _) =>
             {
                 var existing = await db.Appointments.Include(a => a.Person).SingleOrDefaultAsync(x => x.Guid == appointment.Guid) ?? throw new ArgumentException("Unable to find existing appointment");
 
@@ -71,8 +68,8 @@ namespace Data.Repository
 
                 // Handle the Person - need to update separately due to SetValues only applying to top level entity.
                 appointment.Person.Id = existing.PersonId;
-                db.Person.Entry(existing.Person).CurrentValues.SetValues(appointment.Person);
-                db.Person.Update(existing.Person);
+                db.People.Entry(existing.Person).CurrentValues.SetValues(appointment.Person);
+                db.People.Update(existing.Person);
 
                 db.Appointments.Entry(existing).CurrentValues.SetValues(appointment);
                 db.Appointments.Update(existing);
@@ -85,7 +82,7 @@ namespace Data.Repository
 
         public ICollection<Appointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate)
         {
-            return Execute<ICollection<Appointment>>((db) =>
+            return Execute<ICollection<Appointment>>((db, _) =>
             {
                 return db.Appointments.AsQueryable().BetweenDates(startDate, endDate).Include(a => a.Person).Include(a => a.Service).ToList();
             });
@@ -93,14 +90,16 @@ namespace Data.Repository
 
         public async Task<bool> DeleteAppointment(Guid id)
         {
-            await ExecuteVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db, _) =>
             {
-                var existing = await db.Appointments.SingleOrDefaultAsync(x => x.Guid == id) ?? throw new ArgumentException("Unable to find appointment");
+                var existing = await db.Appointments.Include(a => a.Person).SingleOrDefaultAsync(x => x.Guid == id) ?? throw new ArgumentException("Unable to find appointment");
 
                 db.Appointments.Remove(existing);
+                db.People.Remove(existing.Person);
                 await db.SaveChangesAsync();
 
             });
+
             return true;
         }
     }

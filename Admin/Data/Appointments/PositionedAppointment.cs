@@ -11,7 +11,7 @@ namespace Admin.Data.Events
         /// As events can span across multiple days, it is possible to have different
         /// clashes each day
         /// </summary>
-        private Dictionary<DateOnly, AppointmentClash> ClashDict = [];
+        private Dictionary<DateOnly, AppointmentClash> _clashDict = [];
 
         public PositionedAppointment(AppointmentDto booking)
         {
@@ -52,7 +52,7 @@ namespace Admin.Data.Events
 
         public int WidthPc(DateOnly date)
         {
-            if (ClashDict.TryGetValue(date, out var eventClash))
+            if (_clashDict.TryGetValue(date, out var eventClash))
             {
                 return (int)(AppointmentLayoutConsts.EventsWidthPc / (eventClash.Clashes + 1f));
             }
@@ -64,7 +64,7 @@ namespace Admin.Data.Events
 
         public int LeftPc(DateOnly date)
         {
-            if (ClashDict.TryGetValue(date, out var eventClash))
+            if (_clashDict.TryGetValue(date, out var eventClash))
             {
                 return WidthPc(date) * eventClash.Position;
             }
@@ -95,7 +95,7 @@ namespace Admin.Data.Events
 
         public void AddClash(DateOnly date, int position, int clashes)
         {
-            ClashDict[date] = new AppointmentClash
+            _clashDict[date] = new AppointmentClash
             {
                 Position = position,
                 Clashes = clashes
@@ -104,12 +104,12 @@ namespace Admin.Data.Events
 
         public void AddClash(DateOnly date)
         {
-            ClashDict.TryGetValue(date, out var clash);
+            _clashDict.TryGetValue(date, out var clash);
             clash ??= new AppointmentClash();
 
             clash.Clashes++;
 
-            ClashDict[date] = clash;
+            _clashDict[date] = clash;
         }
 
         /// <summary>

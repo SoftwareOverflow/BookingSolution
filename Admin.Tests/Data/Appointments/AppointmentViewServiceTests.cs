@@ -8,24 +8,24 @@ namespace Admin.Tests.Data.Events
 {
     public class AppointmentViewServiceTests
     {
-        private readonly Mock<IAppointmentService> DataMock = new();
-        private readonly Mock<IMessageService> MessageMock = new();
-        private AppointmentViewService ViewService;
+        private readonly Mock<IAppointmentService> _dataMock = new();
+        private readonly Mock<IMessageService> _messageMock = new();
+        private AppointmentViewService _viewService;
 
         public AppointmentViewServiceTests()
         {
 
-            ViewService = new AppointmentViewService(DataMock.Object, MessageMock.Object);
+            _viewService = new AppointmentViewService(_dataMock.Object, _messageMock.Object);
         }
 
         [Fact]
         public async Task AppointmentViewService_GetAppointments_EmptyList()
         {
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(new ServiceResult<List<AppointmentDto>>([])));
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(new ServiceResult<List<AppointmentDto>>([])));
 
             var date = new DateOnly(2024, 08, 25);
 
-            var result = await ViewService.GetEvents(date, date);
+            var result = await _viewService.GetEvents(date, date);
 
             Assert.Empty(result);
         }
@@ -66,12 +66,12 @@ namespace Admin.Tests.Data.Events
                         },
                     };
 
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
                     Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
-            var result = await ViewService.GetEvents(date, date);
+            var result = await _viewService.GetEvents(date, date);
 
             Assert.Equal(mockList[2], result[0].Appointment);
             Assert.Equal(mockList[0], result[1].Appointment);
@@ -117,11 +117,11 @@ namespace Admin.Tests.Data.Events
                         }
                     };
 
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
                     Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList)));
 
-            var result = await ViewService.GetEvents(date, date);
+            var result = await _viewService.GetEvents(date, date);
 
             Assert.Equal(mockList[0], result[0].Appointment);
             Assert.Equal(mockList[1], result[1].Appointment);
@@ -173,12 +173,12 @@ namespace Admin.Tests.Data.Events
                         }
                     };
 
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
                     Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
-            var result = await ViewService.GetEvents(date, date);
+            var result = await _viewService.GetEvents(date, date);
 
             Assert.Equal(mockList[0], result[0].Appointment);
             Assert.Equal(mockList[1], result[1].Appointment);
@@ -224,12 +224,12 @@ namespace Admin.Tests.Data.Events
                         }
                     };
 
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
                     Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
-            var result = await ViewService.GetEvents(date, date);
+            var result = await _viewService.GetEvents(date, date);
 
             Assert.Equal(mockList[0], result[0].Appointment);
             Assert.Equal(mockList[1], result[1].Appointment);
@@ -279,12 +279,12 @@ namespace Admin.Tests.Data.Events
             };
 
 
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                .Returns(
                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                );
 
-            var result = await ViewService.GetEvents(date, date);
+            var result = await _viewService.GetEvents(date, date);
 
             Assert.True(result.Count == mockList.Count);
             Assert.True(result.All(x => x.WidthPc(date) == (int)(AppointmentLayoutConsts.EventsWidthPc / 3f)));
@@ -371,12 +371,12 @@ namespace Admin.Tests.Data.Events
             };
 
 
-            DataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
                     Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
                 );
 
-            var result = await ViewService.GetEvents(day1, day1.AddDays(2));
+            var result = await _viewService.GetEvents(day1, day1.AddDays(2));
 
             Assert.True(result.Count == mockList.Count);
 

@@ -11,9 +11,9 @@ namespace Core.Services
 {
     internal class BookingService(IBookingRepo bookingContext, IMapper mapper) : IBookingService
     {
-        private readonly IBookingRepo BookingContext = bookingContext;
+        private readonly IBookingRepo _bookingContext = bookingContext;
 
-        private readonly IMapper Mapper = mapper;
+        private readonly IMapper _mapper = mapper;
 
         // TODO maybe cache some so we don't need to repeat the calls when the user moves back and forth through their date selection
 
@@ -79,8 +79,8 @@ namespace Core.Services
                     }).ToList()
                 };
 
-                var appointments = await BookingContext.GetBookingsBetweenDates(businessGuid, startDate, endDate);
-                var existingAppointments = Mapper.Map<ICollection<Appointment>, ICollection<AppointmentDto>>(appointments);
+                var appointments = await _bookingContext.GetBookingsBetweenDates(businessGuid, startDate, endDate);
+                var existingAppointments = _mapper.Map<ICollection<Appointment>, ICollection<AppointmentDto>>(appointments);
 
                 foreach (var dateAvailability in availabilityDto.Availability)
                 {
@@ -300,14 +300,14 @@ namespace Core.Services
         {
             try
             {
-                var service = await BookingContext.GetService(businessGuid, serviceGuid);
+                var service = await _bookingContext.GetService(businessGuid, serviceGuid);
 
                 if (service == null)
                 {
                     return new ServiceResult<BookingRequestDto>(null, ResultType.ClientError, ["Failed to find service for business"]);
                 }
 
-                var serviceDto = Mapper.Map<ServiceTypeDto>(service);
+                var serviceDto = _mapper.Map<ServiceTypeDto>(service);
 
                 var today = DateOnly.FromDateTime(DateTime.Now);
                 var nextAvailableDate = GetNextServiceDate(serviceDto, today);
@@ -356,13 +356,13 @@ namespace Core.Services
 
                     if(day.Times.Single(x => x.Time == dto.SelectedTime.Value).State == AvailabilityState.Available)
                     {
-                        var entity = Mapper.Map<Appointment>(appointment);
+                        var entity = _mapper.Map<Appointment>(appointment);
 
-                        bool result = await BookingContext.CreateBookingRequest(entity, dto.BusinessGuid);
+                        bool result = await _bookingContext.CreateBookingRequest(entity, dto.BusinessGuid);
 
                         if (result)
                         {
-                            appointment = Mapper.Map<AppointmentDto>(entity);
+                            appointment = _mapper.Map<AppointmentDto>(entity);
 
                             return new ServiceResult<AppointmentDto>(appointment);
                         }

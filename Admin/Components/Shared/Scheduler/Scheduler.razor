@@ -12,46 +12,46 @@
 @inject StateContainerSingle<DateTime> ClientDateContainer
 @inject NavigationManager NavigationManager
 
-<LoadingSpinner Visible="Loading" />
+<LoadingSpinner Visible="_loading" />
 
 <div class="scheduler-container" style="--scheduler-table-cell-height: @(AppointmentLayoutConsts.CellHeight)px">
-    <SchedulerHeader OnCreateAppointment="CreateAppointment" Date="@Date" LayoutType="@CalendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
-    @if (CalendarLayoutType == CalendarLayoutType.Month)
+    <SchedulerHeader OnCreateAppointment="CreateAppointment" Date="@_date" LayoutType="@_calendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
+    @if (_calendarLayoutType == CalendarLayoutType.Month)
     {
-        <SchedulerMonth StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
+        <SchedulerMonth StartDate="@(_dateRange.Item1)" EndDate="@(_dateRange.Item2)" Events="@_events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
     }
     else
     {
-        <SchedulerDays StartDate="@(DateRange.Item1)" EndDate="@(DateRange.Item2)" Events="@Events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
+        <SchedulerDays StartDate="@(_dateRange.Item1)" EndDate="@(_dateRange.Item2)" Events="@_events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
     }
 
-    @if (AppointmentToEdit != null)
+    @if (_appointmentToEdit != null)
     {
-        <AppointmentForm Appointment="AppointmentToEdit" OnClose="OnAppointmentFormClosed"/>
+        <AppointmentForm Appointment="_appointmentToEdit" OnClose="OnAppointmentFormClosed"/>
     }
 </div>
 
 @code {
 
-    private CalendarLayoutType CalendarLayoutType = CalendarLayoutType.Week;
+    private CalendarLayoutType _calendarLayoutType = CalendarLayoutType.Week;
 
-    private AppointmentDto? AppointmentToEdit = null;
+    private AppointmentDto? _appointmentToEdit = null;
 
     /// <summary>
     /// The selected date.
     /// Defaults to the server date as we're running on the server.
     /// </summary>
-    private DateTime Date = DateTime.Now;
+    private DateTime _date = DateTime.Now;
 
-    private Tuple<DateTime, DateTime> DateRange = default!;
+    private Tuple<DateTime, DateTime> _dateRange = default!;
 
-    private List<PositionedAppointment> Events = [];
+    private List<PositionedAppointment> _events = [];
 
-    private bool Loading = true;
+    private bool _loading = true;
 
     protected override void OnParametersSet()
     {
-        DateRange = DateHelpers.GetDateRange(CalendarLayoutType, Date);
+        _dateRange = DateHelpers.GetDateRange(_calendarLayoutType, _date);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -61,63 +61,67 @@
             var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
             if (localDate != null)
             {
-                Date = localDate.Value;
+                _date = localDate.Value;
             }
 
-            ClientDateContainer.SetItem(Date);
+            ClientDateContainer.SetItem(_date);
 
             // Load data in any case, defaulting to server
-            await OnCalendarStateChange(CalendarLayoutType, Date);
+            await OnCalendarStateChange(_calendarLayoutType, _date);
             StateHasChanged();
         }
     }
 
     private async Task OnCalendarStateChange(CalendarLayoutType layoutType, DateTime date)
     {
-        CalendarLayoutType = layoutType;
-        Date = date;
+        _calendarLayoutType = layoutType;
+        _date = date;
 
-        DateRange = DateHelpers.GetDateRange(layoutType, date);
-        Events = await LoadEvents();
+        _dateRange = DateHelpers.GetDateRange(layoutType, date);
+        _events = await LoadEvents();
 
         var today = ClientDateContainer.GetItem();
-        var nextApp = Events.FirstOrDefault(x => x.Appointment.StartTimePadded >= today);
+        var nextApp = _events.FirstOrDefault(x => x.Appointment.StartTimePadded >= today);
         if (nextApp != null)
         {
-            var startTime = TimeOnly.FromTimeSpan(nextApp.Appointment.StartTimePadded.TimeOfDay.Subtract(TimeSpan.FromHours(1)));
-            NavigationManager.NavigateTo($"/#time-{startTime:HH}00");
+            var timeOfDay = nextApp.Appointment.StartTimePadded.TimeOfDay.Subtract(TimeSpan.FromHours(1));
+            if (timeOfDay.Ticks < 0)
+            {
+                timeOfDay = TimeSpan.Zero;
+            }
+            var startTime = TimeOnly.FromTimeSpan(timeOfDay);
         }
         StateHasChanged();
     }
 
     private async Task<List<PositionedAppointment>> LoadEvents()
     {
-        Loading = true;
-        var result = await EventService.GetEvents(DateOnly.FromDateTime(DateRange.Item1), DateOnly.FromDateTime(DateRange.Item2));
+        _loading = true;
+        var result = await EventService.GetEvents(DateOnly.FromDateTime(_dateRange.Item1), DateOnly.FromDateTime(_dateRange.Item2));
         
-        Loading = false;
+        _loading = false;
 
         return result;
     }
 
     private void CreateAppointment(DateTime dt)
     {
-        AppointmentToEdit = new AppointmentDto("", new PersonDto())
+        _appointmentToEdit = new AppointmentDto("", new PersonDto())
             {
                 StartTime = dt,
                 EndTime = dt.AddHours(1)
             };
     }
 
-    private void EditAppointment(AppointmentDto dto) => AppointmentToEdit = dto;
+    private void EditAppointment(AppointmentDto dto) => _appointmentToEdit = dto;
 
     private async Task OnAppointmentFormClosed(bool didEdit)
     {
-        AppointmentToEdit = null;
+        _appointmentToEdit = null;
 
         if (didEdit)
         {
-            Events = await LoadEvents();
+            _events = await LoadEvents();
         }
     }
 }

@@ -5,38 +5,38 @@ namespace Core.Services
 {
     internal class MessageService : IMessageService
     {
-        private static readonly List<MessageBase> MessageCache = [];
+        private static readonly List<MessageBase> _messageCahce = [];
 
-        private Action<MessageBase>? OnMessage;
+        private Action<MessageBase>? _onMessage;
         public void AddMessage(MessageBase message)
         {
-            if (OnMessage != null)
+            if (_onMessage != null)
             {
-                OnMessage?.Invoke(message);
+                _onMessage?.Invoke(message);
             } else
             {
-                MessageCache.Add(message);
+                _messageCahce.Add(message);
             }
             
         }
 
         public void AddMessageListener(Action<MessageBase> listener)
         {
-            OnMessage -= listener;
-            OnMessage += listener;
+            _onMessage -= listener;
+            _onMessage += listener;
 
             // Send any unactioned messages
-            for (int i = MessageCache.Count - 1; i >= 0; i--)
+            for (int i = _messageCahce.Count - 1; i >= 0; i--)
             {
-                var message = MessageCache[i];
+                var message = _messageCahce[i];
                 listener.Invoke(message);
-                MessageCache.RemoveAt(i);
+                _messageCahce.RemoveAt(i);
             }
         }
 
         public void RemoveMessageListener(Action<MessageBase> listener)
         {
-            OnMessage -= listener;
+            _onMessage -= listener;
         }
     }
 }

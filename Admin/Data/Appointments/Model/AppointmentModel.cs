@@ -8,7 +8,7 @@ namespace Admin.Data.Appointments.Model
         [ValidateComplexType]
         public AppointmentDto Appointment { get; private set; }
 
-        private readonly List<ServiceTypeDto> Services;
+        private readonly List<ServiceTypeDto> _services;
 
         public Guid? ServiceGuid
         {
@@ -24,7 +24,7 @@ namespace Admin.Data.Appointments.Model
                 }
                 else
                 {
-                    Appointment.Service = Services.SingleOrDefault(s => s.Guid == value) ?? Appointment.Service;
+                    Appointment.Service = _services.SingleOrDefault(s => s.Guid == value) ?? Appointment.Service;
                     ValidateName();
                     ValidateTimes();
                 }
@@ -109,7 +109,7 @@ namespace Admin.Data.Appointments.Model
         public AppointmentModel(AppointmentDto dto, List<ServiceTypeDto> services)
         {
             Appointment = dto;
-            Services = services;
+            _services = services;
 
             ServiceGuid = Appointment.Service?.Guid;
             StartDate = Appointment.StartTime;

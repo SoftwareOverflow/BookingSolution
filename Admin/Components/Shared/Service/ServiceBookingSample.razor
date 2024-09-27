@@ -7,7 +7,7 @@
 @inject IMessageService MessageService
 @inject IBusinessService BusinessService
 
-@if (Service != null && !string.IsNullOrEmpty(BusinessGuid))
+@if (Service != null && !string.IsNullOrEmpty(_businessGuid))
 {
     <h4 class="mt-5 pt-5">Copy & Pate the following code block into your website:</h4>
     <section id="booking-form-embed" class="border-0 border-primary">
@@ -38,10 +38,10 @@
     [Parameter, EditorRequired]
     public ServiceTypeDto Service { get; set; }
 
-    private string BusinessGuid = "";
+    private string _businessGuid = "";
 
     // TODO change URL to config value
-    string BookingUrl => $"https://localhost:7141/book/{BusinessGuid}/{Service.Guid}";
+    string BookingUrl => $"https://localhost:7141/book/{_businessGuid}/{Service.Guid}";
 
     //Using four spaces instead of \t tab
     string EmbedCode => $"<div style=\"width: 100%; height: auto;\">\n    <iframe src=\"{BookingUrl}\" title=\"Book Online\" width=\"100%\" height=\"100%\" style=\"border: 0;\" referrerpolicy=\"origin\" onload=\"this.style.height=(this.contentWindow.document.body.scrollHeight+20)+'px';\"/>\n<div>";
@@ -51,7 +51,7 @@
         var result = await BusinessService.GetBusinessForUser();
         if (result.IsSuccess)
         {
-            BusinessGuid = result.Result!.Guid.ToString();
+            _businessGuid = result.Result!.Guid.ToString();
         }
         else
         {

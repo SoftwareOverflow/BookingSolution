@@ -5,11 +5,11 @@ namespace Core.Dto.Validation
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     internal class RequireMinDuration : ValidationAttribute
     {
-        private double MinMinutes;
+        private double _minMinutes;
 
         public RequireMinDuration(double minMinutes, string errorMessage)
         {
-            MinMinutes = minMinutes;
+            _minMinutes = minMinutes;
             ErrorMessage = errorMessage;
         }
 
@@ -22,7 +22,7 @@ namespace Core.Dto.Validation
 
             var span = (TimeSpan) value!;
 
-            return span.TotalMinutes >= MinMinutes;
+            return span.TotalMinutes >= _minMinutes;
         }
     }
 }

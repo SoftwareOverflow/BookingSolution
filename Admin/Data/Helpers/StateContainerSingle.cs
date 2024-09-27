@@ -2,23 +2,23 @@
 {
     public class StateContainerSingle<T>
     {
-        private T? Item = default;
+        private T? _item = default;
 
         public void SetItem(T item)
         {
-            Item = item;
+            _item = item;
             NotifyChangeListeners();
         }
 
-        public void RemoveItem() => Item = default;
+        public void RemoveItem() => _item = default;
 
-        public T? GetItem() => Item;
+        public T? GetItem() => _item;
 
         // TODO make some sort of object to contain the change data.
         // Especially for the normal events of cancel, save, delete etc.
         public event Action<T?>? OnChange;
 
-        private void NotifyChangeListeners() => OnChange?.Invoke(Item);
+        private void NotifyChangeListeners() => OnChange?.Invoke(_item);
 
         public void ForceNotify() => NotifyChangeListeners();
     }
