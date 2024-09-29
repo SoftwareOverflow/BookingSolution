@@ -9,23 +9,35 @@ namespace Core.Extensions
 {
     public static class IServiceCollectionExtensions
     {
-        public static void AddApplicationLayers(this IServiceCollection services)
+        public static void AddApplicationLayers(this IServiceCollection services, ApplicationLayers layers)
         {
-            services.AddAuthenticationLayer();
-            services.AddPersistanceLayer();
+            if (layers == ApplicationLayers.AdminConsole)
+            {
+                services.AddAuthenticationLayer();
+                services.AddAdminConsolePersistance();
 
-            services.AddAutoMapper(typeof(AutoMapperConfig));
-            
-            services.AddTransient<IAppointmentService, AppointmentService>();
-            services.AddTransient<IServiceTypeService, ServiceTypeService>();
-            services.AddTransient<IBusinessService, BusinessService>();
-            services.AddTransient<IBookingService, BookingService>();
+                services.AddAutoMapper(typeof(AutoMapperConfig));
 
-            services.AddScoped<IMessageService, MessageService>();
+                services.AddTransient<IAppointmentService, AppointmentService>();
+                services.AddTransient<IServiceTypeService, ServiceTypeService>();
+                services.AddTransient<IBusinessService, BusinessService>();
 
-            // Create UserService for both internal and external use
-            services.AddScoped<IUserServiceInternal, UserService>();
-            services.AddScoped<IUserService>(x => x.GetRequiredService<IUserServiceInternal>());
+                services.AddScoped<IMessageService, MessageService>();
+
+                // Create UserService for both internal and external use
+                services.AddScoped<IUserServiceInternal, UserService>();
+                services.AddScoped<IUserService>(x => x.GetRequiredService<IUserServiceInternal>());
+            }
+            else if (layers == ApplicationLayers.BookingService)
+            {
+                services.AddBookingServicePersistance();
+
+                services.AddAutoMapper(typeof(AutoMapperConfig));
+
+                services.AddTransient<IBookingService, BookingService>();
+
+                services.AddScoped<IMessageService, MessageService>();
+            }
         }
     }
 }

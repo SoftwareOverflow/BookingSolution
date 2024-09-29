@@ -26,25 +26,16 @@ namespace Data.Context
 
         public override int SaveChanges()
         {
-            SetGuidsOnAdd();
+            ContextCommon.SetGuidsOnAdd(ChangeTracker);
 
             return base.SaveChanges();
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            SetGuidsOnAdd();
+            ContextCommon.SetGuidsOnAdd(ChangeTracker);
 
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
-
-        private void SetGuidsOnAdd()
-        {
-            ChangeTracker.Entries().Where(x => x.Entity is BaseEntity && x.State == EntityState.Added)
-                .Select(x => (BaseEntity)x.Entity).ToList()
-                .ForEach(item =>
-                item.Guid = Guid.NewGuid()
-                );
         }
 
         private void LimitBusinessControlledResults(ModelBuilder modelBuilder)

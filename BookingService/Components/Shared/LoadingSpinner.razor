@@ -1,0 +1,10 @@
+﻿<MudOverlay Visible="Visible">
+    <div class="d-flex flex-column align-center justify-center">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+    </div>
+</MudOverlay>
+
+@code {
+    [Parameter, EditorRequired]
+    public bool Visible { get; set; }
+}

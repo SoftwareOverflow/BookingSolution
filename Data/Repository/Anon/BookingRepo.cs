@@ -5,13 +5,13 @@ using Data.Extensions;
 using Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Repository
+namespace Data.Repository.Anon
 {
-    internal class BookingRepo(IDbContextFactory<ApplicationDbContext> factory) : BaseRepo(factory), IBookingRepo
+    internal class BookingRepo(IDbContextFactory<BookingServiceDbContext> factory) : BaseAnonRepo<BookingServiceDbContext>(factory), IBookingRepo
     {
         public async Task<Service?> GetService(Guid businessGuid, Guid serviceGuid)
         {
-            return await ExecuteAnonymousAsync(async (db) =>
+            return await ExecuteAsync(async (db) =>
             {
                 var business = await db.Businesses.IgnoreQueryFilters().Where(x => x.Guid == businessGuid).Include(x => x.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync();
                 return business?.Services.SingleOrDefault(s => s.Guid == serviceGuid);
@@ -20,9 +20,8 @@ namespace Data.Repository
 
         public async Task<ICollection<Appointment>> GetBookingsBetweenDates(Guid businessGuid, DateOnly startDate, DateOnly endDate)
         {
-            return await ExecuteAnonymousAsync(async (db) =>
+            return await ExecuteAsync(async (db) =>
             {
-
                 // TODO write test for this, it should NOT return as I missed the imporant IgnoreQueryFilters
                 var business = await db.Businesses.SingleOrDefaultAsync(x => x.Guid == businessGuid);
                 var businessId = business?.Id ?? throw new ArgumentException("Cannot find business");
@@ -40,7 +39,7 @@ namespace Data.Repository
                 throw new ArgumentException("Unable create appointment - Person details required");
             }
 
-            await ExecuteAnonymousVoidAsync(async (db) =>
+            await ExecuteVoidAsync(async (db) =>
             {
                 //Ignore filter queries - not logged in here but need to match business and service.
                 var business = await db.Businesses.Where(x => x.Guid == businessGuid).Include(b => b.Services).IgnoreQueryFilters().SingleOrDefaultAsync();

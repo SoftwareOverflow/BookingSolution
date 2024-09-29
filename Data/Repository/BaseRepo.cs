@@ -4,6 +4,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Data.Repository
 {
+    /// <summary>
+    /// Base class for all repositories which require signed in user
+    /// </summary>
+    /// <param name="factory"></param>
     internal class BaseRepo(IDbContextFactory<ApplicationDbContext> factory)
     {
         private readonly IDbContextFactory<ApplicationDbContext> _factory = factory;
@@ -61,39 +65,6 @@ namespace Data.Repository
             }
 
             return task(context, userId);
-        }
-
-        /// <summary>
-        /// Execute an async method against the database context, without checking for a logged in user
-        /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
-        /// <param name="task">The method to execute, receiving the db context</param>
-        /// <returns>The result of the awaited task to be executed</returns>
-        public async Task<T?> ExecuteAnonymousAsync<T>(Func<ApplicationDbContext, Task<T?>> task) where T : class
-        {
-            using var context = await _factory.CreateDbContextAsync();
-            return await task(context);
-        }
-
-        /// <summary>
-        /// Execute a non-returning async method against the database context, without checking for a logged in user
-        /// </summary>
-        /// <param name="task">The method to execute, receiving the db context</param>
-        public async Task ExecuteAnonymousVoidAsync(Func<ApplicationDbContext, Task> task)
-        {
-            using var context = await _factory.CreateDbContextAsync();
-            await task(context);
-        }
-
-        /// <summary>
-        /// Execute async method against the database context, without checking for a logged in user
-        /// </summary>
-        /// <param name="task">The method to execute, receiving the db context</param>
-        /// <returns>The result awaited by the method</returns>
-        public T ExecuteAnonymous<T>(Func<ApplicationDbContext, T> task)
-        {
-            using var context = _factory.CreateDbContext();
-            return task(context);
         }
     }
 }
