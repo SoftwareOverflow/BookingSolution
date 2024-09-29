@@ -1,10 +1,10 @@
-﻿using Admin.Data.Events;
+﻿using Admin.Data.Appointments;
 using Core.Dto;
 using Core.Interfaces;
 using Core.Responses;
 using Moq;
 
-namespace Admin.Tests.Data.Events
+namespace Admin.Tests.Data.Appointments
 {
     public class AppointmentViewServiceTests
     {

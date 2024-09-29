@@ -1,5 +1,5 @@
 using Admin.Components;
-using Admin.Data.Events;
+using Admin.Data.Appointments;
 using Admin.Data.Helpers;
 using Core.Dto;
 using Core.Extensions;

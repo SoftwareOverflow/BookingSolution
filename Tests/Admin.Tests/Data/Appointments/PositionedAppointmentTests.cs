@@ -1,7 +1,7 @@
-﻿using Admin.Data.Events;
+﻿using Admin.Data.Appointments;
 using Core.Dto;
 
-namespace Admin.Tests.Data.Events
+namespace Admin.Tests.Data.Appointments
 {
     public class PositionedAppointmentTests
     {
@@ -106,7 +106,7 @@ namespace Admin.Tests.Data.Events
 
 
             // 3 hours and 45 mins
-            var expectedTop = (int)((AppointmentLayoutConsts.CellHeight * 2) * 3.75);
+            var expectedTop = (int)(AppointmentLayoutConsts.CellHeight * 2 * 3.75);
 
             Assert.Equal(expectedTop, booking.TopPx(date));
             Assert.Equal(expectedTop, booking.TopPx(date, true));
@@ -126,8 +126,8 @@ namespace Admin.Tests.Data.Events
                 });
 
             // 2h 35m (- 50 mins) => 2h 35m (1h 45m)
-            var expectedUnpadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * (2 + (35f / 60f)));
-            var expectedPaddedTop = (int)((AppointmentLayoutConsts.CellHeight * 2) * 1.75f);
+            var expectedUnpadded = (int)(AppointmentLayoutConsts.CellHeight * 2 * (2 + 35f / 60f));
+            var expectedPaddedTop = (int)(AppointmentLayoutConsts.CellHeight * 2 * 1.75f);
 
             Assert.Equal(expectedUnpadded, booking.TopPx(date, false));
             Assert.Equal(expectedPaddedTop, booking.TopPx(date, true));
@@ -148,7 +148,7 @@ namespace Admin.Tests.Data.Events
 
 
             // 3h 45m.
-            var expectedHeight = (int)((AppointmentLayoutConsts.CellHeight * 2) * 3.75);
+            var expectedHeight = (int)(AppointmentLayoutConsts.CellHeight * 2 * 3.75);
 
             Assert.Equal(expectedHeight, booking.HeightPx(date));
             Assert.Equal(expectedHeight, booking.TopPx(date, true));
@@ -170,8 +170,8 @@ namespace Admin.Tests.Data.Events
                 });
 
 
-            var expectedHeightUnpadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 3.75);
-            var expectedHeightPadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 4);
+            var expectedHeightUnpadded = (int)(AppointmentLayoutConsts.CellHeight * 2 * 3.75);
+            var expectedHeightPadded = AppointmentLayoutConsts.CellHeight * 2 * 4;
 
             Assert.Equal(expectedHeightUnpadded, booking.HeightPx(date));
             Assert.Equal(expectedHeightPadded, booking.HeightPx(date, true));
@@ -192,8 +192,8 @@ namespace Admin.Tests.Data.Events
                 });
 
 
-            var expectedHeightUnpadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 7.25);
-            var expectedHeightPadded = (int)((AppointmentLayoutConsts.CellHeight * 2) * 7.75);
+            var expectedHeightUnpadded = (int)(AppointmentLayoutConsts.CellHeight * 2 * 7.25);
+            var expectedHeightPadded = (int)(AppointmentLayoutConsts.CellHeight * 2 * 7.75);
 
             Assert.Equal(expectedHeightUnpadded, booking.HeightPx(date));
             Assert.Equal(expectedHeightPadded, booking.HeightPx(date, true));
@@ -251,7 +251,7 @@ namespace Admin.Tests.Data.Events
                 });
 
             // A full height day starts at 00:00 and ends at 23:59:59
-            var fullHeight = (int)((AppointmentLayoutConsts.CellHeight * 2) * new TimeOnly(23, 59, 59).ToTimeSpan().TotalHours);
+            var fullHeight = (int)(AppointmentLayoutConsts.CellHeight * 2 * new TimeOnly(23, 59, 59).ToTimeSpan().TotalHours);
 
             Assert.Equal(fullHeight, booking.HeightPx(startDate, true));
             Assert.NotEqual(fullHeight, booking.HeightPx(startDate, false));
@@ -304,7 +304,7 @@ namespace Admin.Tests.Data.Events
                 );
 
             Assert.Equal(AppointmentLayoutConsts.EventsWidthPc, booking.WidthPc(date));
-            
+
             booking.AddClash(date);
 
             Assert.True(AppointmentLayoutConsts.EventsWidthPc > booking.WidthPc(date));

@@ -1,6 +1,6 @@
 ﻿using Core.Dto;
 
-namespace Admin.Data.Events
+namespace Admin.Data.Appointments
 {
     public class PositionedAppointment
     {
@@ -123,9 +123,10 @@ namespace Admin.Data.Events
         /// </summary>
         /// <param name="date"></param>
         /// <returns></returns>
-        public int GetRelativeHeightPc(DateOnly date){
+        public int GetRelativeHeightPc(DateOnly date)
+        {
 
-            if(Appointment.GetEndTime(date, false) >= new TimeOnly(23, 59))
+            if (Appointment.GetEndTime(date, false) >= new TimeOnly(23, 59))
             {
                 return 100;
             }
@@ -133,7 +134,7 @@ namespace Admin.Data.Events
             double totalHeight = GetDurationMins(date, true);
             double unpadded = GetDurationMins(date, false);
 
-            return (int)((unpadded * 100f / (totalHeight * 100f)) * 100f);
+            return (int)(unpadded * 100f / (totalHeight * 100f) * 100f);
         }
 
         public TimeOnly GetStartTime(DateOnly date, bool padded) => Appointment.GetStartTime(date, padded);

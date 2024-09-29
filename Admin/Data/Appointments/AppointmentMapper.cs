@@ -1,6 +1,6 @@
 ﻿using Core.Dto;
 
-namespace Admin.Data.Events
+namespace Admin.Data.Appointments
 {
     internal static class AppointmentMapper
     {
@@ -8,7 +8,7 @@ namespace Admin.Data.Events
         {
             var positionedEvents = events.OrderBy(x => x.StartTimePadded).Select(x => new PositionedAppointment(x)).ToList();
 
-            if(positionedEvents.Count == 0)
+            if (positionedEvents.Count == 0)
             {
                 return positionedEvents;
             }
@@ -27,11 +27,11 @@ namespace Admin.Data.Events
                 {
                     var booking = positionedEvents[i];
 
-                    if(booking.HeightPx(currDate, true) == 0)
+                    if (booking.HeightPx(currDate, true) == 0)
                     {
                         continue;
                     }
-                    
+
 
                     var totalClashes = rowEventMap.Values.ToList()
                         .Sum(l =>

@@ -1,4 +1,4 @@
-﻿namespace Admin.Data.Events
+﻿namespace Admin.Data.Appointments
 {
     /// <summary>
     /// Holds information to help layout with clashing events.

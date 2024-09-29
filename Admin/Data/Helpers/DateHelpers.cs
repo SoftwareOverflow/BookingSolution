@@ -1,4 +1,4 @@
-﻿using Admin.Data.Events;
+﻿using Admin.Data.Appointments;
 using MudBlazor.Extensions;
 
 namespace Admin.Data.Helpers

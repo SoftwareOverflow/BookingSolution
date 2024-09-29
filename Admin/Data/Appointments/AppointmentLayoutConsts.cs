@@ -1,4 +1,4 @@
-﻿namespace Admin.Data.Events
+﻿namespace Admin.Data.Appointments
 {
     public static class AppointmentLayoutConsts
     {
