@@ -14,7 +14,7 @@
 
 <LoadingSpinner Visible="_loading" />
 
-<div class="d-flex flex-column bg-light border-1 border-opacity-10 border-primary bg-light @_bgClass">
+<div class="d-flex p-2 px-md-5 position-relative flex-column bg-light border-1 border-opacity-10 border-primary bg-light @_bgClass">
     @if (_isError || _bookingRequest == null)
     {
         // TODO show error page
@@ -29,15 +29,14 @@
             <p class="lead">Your booking request has been sent to the business</p>
             <p>You'll get an email once they confirm your booking</p>
             <small>If you have any questions about your booking you should contact the business directly</small>
-
         </div>
     }
     else
     {
         <BookingForm Model="_bookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
     }
-    <div class="flex-grow-1" />
-    <div class="d-flex position-relative flex-row fixed-bottom justify-content-end pe-3 pb-3">
+
+    <div class="d-flex position-absolute bottom-0 end-0 pe-3 pb-3">
         <small>Powered by IndeBook</small>
     </div>
 </div>
