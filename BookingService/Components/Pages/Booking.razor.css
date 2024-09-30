@@ -2,3 +2,9 @@
     background-image: url(/images/sample_watermark.png);
     background-repeat: repeat;
 }
+
+.fix-aspect-ratio {
+    padding-bottom: calc(45% - 2px);
+    height: 0px;
+    overflow-y: scroll;
+}

@@ -13,7 +13,8 @@
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-<body>
+@* Set the body to hide any overflow to remove an unwanted scrollbar. Doesn't remove if set at any lower level. *@
+<body class="overflow-hidden">
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>

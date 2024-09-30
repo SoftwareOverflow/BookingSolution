@@ -17,7 +17,7 @@
 
 <LoadingSpinner Visible="_loading" />
 
-<div class="text-center">
+<div class="text-center p-2 py-md-3 px-md-5">
     <EditForm Model="Model" OnValidSubmit="SaveBookingRequest">
         <ObjectGraphDataAnnotationsValidator />
         <div class="d-flex justify-content-center align-items-center">
@@ -28,8 +28,8 @@
             <h3 class="text-muted">Price: @Model.BookingRequest.Service.Price.ToString("C")</h3>
         </div>
 
-        <div class="row m-2">
-            <div class="col col-lg-6 d-flex text-center align-items-center flex-row justify-content-center">
+        <div class="row mx-2">
+            <div class="col col-lg-6 d-flex text-center align-items-center flex-row justify-content-center mt-2">
 
                 <MudDatePicker @ref="_datePicker"
                                PickerVariant="PickerVariant.Static"
@@ -45,7 +45,7 @@
                 </MudDatePicker>
             </div>
 
-            <div class="d-flex col-lg-6 text-center flex-column justify-content-center">
+            <div class="d-flex col-lg-6 text-center flex-column justify-content-center mt-2">
                 @if (TimesByDate(Model.BookingRequest.SelectedDate) is var times && times.Any())
                 {
                     if (times.All(x => x.State == AvailabilityState.AlreadyBooked))
@@ -93,22 +93,21 @@
             </div>
         </div>
         <div class="row d-flex justify-content-evenly m-2 px-md-0 mx-md-0 px-lg-5 mx-lg-5">
-            <div class="col col-6 col-md-4 col-lg-3">
+            <div class="col col-6 col-lg-3">
                 <div class="form-floating mx-1 mb-3">
                     <InputText @bind-Value="Model.BookingRequest.Person.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="Name" />
                     <label for="name">First Name</label>
                     <ValidationMessage For="() => Model.BookingRequest.Person.FirstName" class="text-danger" />
                 </div>
             </div>
-            <div class="col col-6 col-md-4 col-lg-3">
+            <div class="col col-6 col-lg-3">
                 <div class="form-floating mx-1 mb-3">
                     <InputText @bind-Value="Model.BookingRequest.Person.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Name" />
                     <label for="name">Last Name</label>
                     <ValidationMessage For="() => Model.BookingRequest.Person.LastName" class="text-danger" />
                 </div>
             </div>
-
-            <div class="col col-6 col-md-4 col-lg-3">
+            <div class="col col-6 col-lg-3">
                 <div class="form-floating mx-1 mb-3">
                     <InputText @bind-Value="Model.BookingRequest.Person.EmailAddress" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                     <label for="email" class="form-label">Email</label>
@@ -116,14 +115,13 @@
                 </div>
             </div>
 
-            <div class="col col-6 col-md-4 col-lg-3">
+            <div class="col col-6 col-lg-3">
                 <div class="form-floating mx-1 mb-3">
                     <InputText @bind-Value="Model.BookingRequest.Person.PhoneNumber" class="form-control" autocomplete="phone" aria-required="true" placeholder="name@example.com" />
                     <label for="email" class="form-label">Phone</label>
                     <ValidationMessage For="() => Model.BookingRequest.Person.PhoneNumber" class="text-danger" />
                 </div>
             </div>
-
         </div>
 
         <button class="m-2 btn btn-outline-secondary btn-lg" type="submit">Send Booking Request</button>
