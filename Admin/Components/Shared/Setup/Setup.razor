@@ -1,0 +1,46 @@
+﻿@using Admin.Components.Shared.Business
+@using Admin.Components.Shared.Loading
+@using Admin.Data.Setup
+@using Core.Dto
+
+<div class="w-100">
+    <h2>Let's get setup:</h2>
+</div>
+
+<div class="mx-0 d-flex">
+    <ul class="nav nav-pills flex-column d-inline-flex w-fit-content">
+        <SetupNavItem IsComplete="Model.GetSteps()[SetupStep.CreateAccount]" Text="Create Account" IsActive="Model.CurrentStep == SetupStep.CreateAccount" />
+        <SetupNavItem IsComplete="Model.GetSteps()[SetupStep.RegisterBusiness]" Text="Register Business" IsActive="Model.CurrentStep == SetupStep.RegisterBusiness" />
+        <SetupNavItem IsComplete="Model.GetSteps()[SetupStep.Billing]" Text="Setup Billing" IsActive="Model.CurrentStep == SetupStep.Billing" />
+        <SetupNavItem IsComplete="Model.GetSteps()[SetupStep.CreateService]" Text="Offer A Service" IsActive="Model.CurrentStep == SetupStep.CreateService" />
+    </ul>
+
+    <div class="flex-grow-1 flex-row-center bg-opacity-10 border-primary border-1 bg-secondary bg-opacity-10">
+        <div class="w-75">
+            @if (Model.CurrentStep == SetupStep.RegisterBusiness)
+            {
+                <BusinessForm Business="new BusinessDto()" IsNewBusiness="true" OnComplete="OnBusinessRegistered" />
+            }
+            else if (Model.CurrentStep == SetupStep.Billing)
+            {
+                <Admin.Components.Shared.Pricing.BillingSetup />
+            } else if (Model.CurrentStep == SetupStep.CreateService)
+            {
+                <Admin.Components.Pages.Services.CreateService />
+            }
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SetupModel Model { get; set; } = default!;
+
+
+    private void OnBusinessRegistered(BusinessDto _)
+    {
+        Model.SetStepComplete(SetupStep.RegisterBusiness);
+        StateHasChanged();
+    }
+}

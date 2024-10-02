@@ -17,10 +17,6 @@
 
 
 @code {
-    private string? Username = null;
-
-    protected override async Task OnInitializedAsync()
-    {
-        Username = await UserService.GetUserNameAsync();
-    }
+    [CascadingParameter]
+    public string? Username { get; set; }
 }

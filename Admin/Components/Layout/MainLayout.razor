@@ -29,14 +29,9 @@
 </header>
 
 <main>
-    @if (IsAccountRoute)
-    {
+    <CascadingValue Value="Username">
         @Body
-    }
-    else
-    {
-        @Body
-    }
+    </CascadingValue>
 
     <MudThemeProvider />
     <MudPopoverProvider />
@@ -58,12 +53,20 @@
     [CascadingParameter]
     protected bool IsAccountRoute { get; set; }
 
+    private string? Username = null;
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (!IsAccountRoute && firstRender)
         {
             MessageService.AddMessageListener(OnMessage);
         }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Username = await UserService.GetUserNameAsync();
+        await base.OnParametersSetAsync();
     }
 
     private void OnMessage(MessageBase message)

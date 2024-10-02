@@ -2,12 +2,14 @@
 @using Admin.Components.Shared.Business
 @using Admin.Components.Shared.Loading
 @using Admin.Components.Shared.Setup
+@using Admin.Data.Setup
 @using Core.Dto
 @using Core.Interfaces
+@using Core.Responses
 
-@inject IBusinessService BusinessService
-@inject NavigationManager NavigationManager
-@inject IMessageService MessageService
+@inject ISetupService SetupService
+
+<LoadingSpinner Visible="_loading" />
 
 @if (_isSetupComplete)
 {
@@ -15,27 +17,9 @@
 }
 else
 {
-    <LoadingSpinner Visible="_loading" />
-
-    <div class="w-100">
-        <h2>Let's get setup:</h2>
-    </div>
-
-    <div class="mx-0 d-flex">
-        <ul class="nav nav-pills flex-column d-inline-flex w-fit-content">
-            <SetupNavItem IsComplete="_isAccountRegistered" Text="Create Account" />
-            <SetupNavItem IsComplete="_isBusinessRegistered" Text="Register Business" IsActive="true" />
-            <SetupNavItem IsComplete="_isBillingSetup" Text="Setup Billing" />
-            <SetupNavItem IsComplete="_isServiceOffered" Text="Offer A Service" />
-        </ul>
-
-        <div class="flex-grow-1 flex-row-center bg-opacity-10 border-primary border-1 bg-secondary bg-opacity-10">
-            <div class="w-75">
-                <BusinessForm Business="new BusinessDto()" IsNewBusiness="true" OnValidFormSubmittedAsync="RegisterBusiness" />
-            </div>
-        </div>
-
-    </div>
+    <CascadingValue Value="_isSetupComplete">
+        <Setup Model="_setupModel" />
+    </CascadingValue>
 }
 
 
@@ -43,41 +27,48 @@ else
     [Parameter, EditorRequired]
     public RenderFragment SetupComplete { get; set; } = default!;
 
-    private bool _isSetupComplete => true;// IsAccountRegistered && IsBusinessRegistered && IsBillingSetup && IsServiceOffered;
+    [CascadingParameter]
+    public string? Username { get; set; }
 
-    private bool _isAccountRegistered = true; // Should always be registered to get this far
+    private SetupModel _setupModel = new SetupModel();
 
-    private bool _isBusinessRegistered = false;
-
-    private bool _isBillingSetup = false;
-
-    private bool _isServiceOffered = false;
+    private bool _isSetupComplete => _setupModel.IsSetupComplete;
 
     private bool _loading = true;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
-        if (firstRender)
+        _loading = true;
+
+        if (!string.IsNullOrEmpty(Username))
         {
-            _loading = true;
-
-            var result = await BusinessService.GetBusinessForUser();
-
-            if (!result.IsSuccess)
-            {
-                MessageService.AddMessage(new MessageBase("An error occured whilst loading.", MessageBase.MessageType.Error));
-            }
-            else if (result.Result == null)
-            {
-                NavigationManager.NavigateTo("/Business/Create");
-            }
-
-            _loading = false;
+            _setupModel.SetStepComplete(SetupStep.CreateAccount);
         }
+
+        var isBusinessRegistered = await SetupService.IsBusinessRegistered();
+        var isBillingSetup = await SetupService.IsBillingSetup();
+        var isServiceCreated = await SetupService.IsServiceCreated();
+
+        ValidateSetupStep(SetupStep.RegisterBusiness, isBusinessRegistered);
+        ValidateSetupStep(SetupStep.Billing, isBillingSetup);
+        ValidateSetupStep(SetupStep.CreateService, isServiceCreated);
+
+        _loading = false;
+        await base.OnParametersSetAsync();
     }
 
-    private async Task RegisterBusiness(BusinessDto dto)
+    private void ValidateSetupStep(SetupStep step, ServiceResult<bool> result)
     {
-
+        if (result.IsSuccess)
+        {
+            if(result.Result)
+            {
+                _setupModel.SetStepComplete(step);
+            }
+        }
+        else
+        {
+            // TODO logging & error messages
+        }
     }
 }

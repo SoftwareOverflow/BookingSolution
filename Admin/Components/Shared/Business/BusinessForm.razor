@@ -2,6 +2,9 @@
 @using System.ComponentModel.DataAnnotations
 @using Core.Interfaces
 
+@inject IMessageService MessageService
+@inject IBusinessService BusinessService
+
 <EditForm Model="Business" OnValidSubmit="OnValidSubmit">
     <ObjectGraphDataAnnotationsValidator />
     <div class="row justify-content-center w-lg-60">
@@ -67,7 +70,7 @@
             </div>
         </div>
         <!-- #endregion -->
-            <button type="submit" class="btn btn-lg btn-primary mt-4 mb-5 float-end w-50">@(IsNewBusiness ?  "Register Business" : "Save Changes")</button>
+        <button type="submit" class="btn btn-lg btn-primary mt-4 mb-5 float-end w-50">@(IsNewBusiness ? "Register Business" : "Save Changes")</button>
     </div>
 </EditForm>
 
@@ -79,13 +82,23 @@
     public bool IsNewBusiness { get; set; } = false;
 
     [Parameter, EditorRequired]
-    public Func<BusinessDto, Task> OnValidFormSubmittedAsync { get; set; }
+    public EventCallback<BusinessDto> OnComplete { get; set; }
 
     private async Task OnValidSubmit()
     {
-        if(OnValidFormSubmittedAsync != null)
+        var result = await BusinessService.RegisterBusiness(Business);
+
+        if (!result.IsSuccess)
         {
-            await OnValidFormSubmittedAsync(Business);
+            result.Errors.ForEach(x =>
+            {
+                MessageService.AddMessage(new MessageBase(x, MessageBase.MessageType.Error));
+            });
+        }
+        else
+        {
+            MessageService.AddMessage(new MessageBase("Business registered succesfully", MessageBase.MessageType.Success));
+            await OnComplete.InvokeAsync(result.Result);
         }
     }
 }

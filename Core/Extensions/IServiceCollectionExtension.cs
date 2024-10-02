@@ -21,6 +21,7 @@ namespace Core.Extensions
                 services.AddTransient<IAppointmentService, AppointmentService>();
                 services.AddTransient<IServiceTypeService, ServiceTypeService>();
                 services.AddTransient<IBusinessService, BusinessService>();
+                services.AddTransient<ISetupService, SetupService>();
 
                 services.AddScoped<IMessageService, MessageService>();
 
