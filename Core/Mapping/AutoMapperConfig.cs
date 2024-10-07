@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Core.Dto;
+using Core.Dto.Appointment;
 using Data.Entity;
 using Data.Entity.Appointments;
 
@@ -19,7 +20,7 @@ namespace Core.Mapping
             CreateMap<AddressDto, Address>().ReverseMap();
 
             CreateMap<ServiceTypeDto, Service>().ReverseMap();
-            CreateMap<ServiceRepeaterDto, ServiceRepeater>().ReverseMap();
+            CreateMap<RepeaterDto, ServiceRepeater>().ReverseMap();
 
             CreateMap<AppointmentDto, Appointment>().ReverseMap();
             CreateMap<PersonDto, Person>().ReverseMap();

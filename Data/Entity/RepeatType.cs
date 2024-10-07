@@ -1,6 +1,6 @@
 ﻿namespace Data.Entity
 {
-    public enum ServiceRepeatType
+    public enum RepeatType : byte  // use byte as parent to ensure EF maps it to tinyint instead of int
     {
         /// <summary>
         /// Repeats on the same weekday every week

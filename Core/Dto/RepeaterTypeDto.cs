@@ -1,6 +1,6 @@
-﻿namespace Core.Dto.Services
+﻿namespace Core.Dto
 {
-    public enum ServiceRepeaterTypeDto
+    public enum RepeaterTypeDto
     {
         Weekly,
         MonthlyAbsolute,

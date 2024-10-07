@@ -1,4 +1,4 @@
-﻿using Core.Dto;
+﻿using Core.Dto.Appointment;
 using Core.Responses;
 
 namespace Core.Interfaces

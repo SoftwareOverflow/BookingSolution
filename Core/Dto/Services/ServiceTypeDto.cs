@@ -1,5 +1,4 @@
-﻿using Core.Dto.Services;
-using Core.Dto.Validation;
+﻿using Core.Dto.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Dto
@@ -76,9 +75,9 @@ namespace Core.Dto
         [Range(0.00, double.MaxValue, ErrorMessage = "Enter valid price")]
         public decimal Price { get; set; }
 
-        public ServiceRepeaterTypeDto RepeatType { get; set; } = ServiceRepeaterTypeDto.Weekly;
+        public RepeaterTypeDto RepeatType { get; set; } = RepeaterTypeDto.Weekly;
 
-        public ICollection<ServiceRepeaterDto> Repeats { get; set; } = [];
+        public ICollection<RepeaterDto> Repeats { get; set; } = [];
 
         #region mappings
         public int PaddingStartMins

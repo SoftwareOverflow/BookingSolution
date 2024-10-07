@@ -1,8 +1,6 @@
-﻿using Data.Entity;
-
-namespace Core.Dto
+﻿namespace Core.Dto
 {
-    public record ServiceRepeaterDto : DtoBase
+    public record RepeaterDto : DtoBase
     {
         /// <summary>
         /// Identifies the day for this repeat (0-Sunday through 6-Saturday), or the day of the month in case of MonthlyAbsolute
@@ -14,13 +12,13 @@ namespace Core.Dto
         /// </summary>
         public int? Index { get; set; } = null;
 
-        public ServiceRepeaterDto(int dayIdentifier, int? index = null)
+        public RepeaterDto(int dayIdentifier, int? index = null)
         {
             DayIdentifier = dayIdentifier;
             Index = index;
         }
 
-        public ServiceRepeaterDto(DayOfWeek dayIdentifier, int? index = null)
+        public RepeaterDto(DayOfWeek dayIdentifier, int? index = null)
         {
             DayIdentifier = (int)dayIdentifier;
             Index = index;

@@ -1,4 +1,4 @@
-﻿using Core.Dto;
+﻿using Core.Dto.Appointment;
 
 namespace Admin.Data.Appointments
 {

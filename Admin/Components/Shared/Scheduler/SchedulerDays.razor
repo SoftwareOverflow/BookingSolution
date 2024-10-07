@@ -1,5 +1,5 @@
 ﻿@using Admin.Data.Appointments
-@using Core.Dto
+@using Core.Dto.Appointment
 
 @inherits ClientDateComponent
 
@@ -85,9 +85,9 @@
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public EventCallback<AppointmentDto> OnEditAppointment { get; set; }
+    public EventCallback<AppointmentDtoBase> OnEditAppointment { get; set; }
 
-    private async Task EditAppointment(AppointmentDto appointment)
+    private async Task EditAppointment(AppointmentDtoBase appointment)
     {
         await OnEditAppointment.InvokeAsync(appointment);
     }

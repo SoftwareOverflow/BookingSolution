@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Core.Dto;
-using Core.Dto.Services;
 using Core.Interfaces;
 using Core.Mapping;
 using Core.Responses;
@@ -122,11 +121,11 @@ namespace Core.Tests.Services
                 PaddingStartMins = 17,
                 PaddingEndMins = 27,
                 Price = 23.29m,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [
-                    new ServiceRepeaterDto(3),
-                    new ServiceRepeaterDto(17),
-                    new ServiceRepeaterDto(29),
+                    new RepeaterDto(3),
+                    new RepeaterDto(17),
+                    new RepeaterDto(29),
                     ]
             });
 
@@ -149,7 +148,7 @@ namespace Core.Tests.Services
             Assert.Equal(17, createdService.PaddingStartMins);
             Assert.Equal(27, createdService.PaddingEndMins);
             Assert.Equal(23.29m, createdService.Price);
-            Assert.Equal(ServiceRepeatType.MonthlyAbsolute, createdService.RepeatType);
+            Assert.Equal(RepeatType.MonthlyAbsolute, createdService.RepeatType);
             Assert.Equal(3, createdService.Repeats.Count);
             Assert.Contains(createdService.Repeats, x => x.DayIdentifier == 3 && x.Index == null);
             Assert.Contains(createdService.Repeats, x => x.DayIdentifier == 17 && x.Index == null);

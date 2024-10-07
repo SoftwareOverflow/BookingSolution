@@ -1,5 +1,6 @@
 ﻿using Admin.Data.Appointments.Model;
 using Core.Dto;
+using Core.Dto.Appointment;
 
 namespace Admin.Tests.Data.Appointments.Model
 {

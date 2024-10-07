@@ -17,5 +17,6 @@
 
   <ItemGroup>
 	<InternalsVisibleTo Include="Data.Tests" />
+	<InternalsVisibleTo Include="Admin.Tests" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Core.Dto;
+using Core.Dto.Appointment;
 using Core.Interfaces;
 using Core.Responses;
 using Data.Entity.Appointments;

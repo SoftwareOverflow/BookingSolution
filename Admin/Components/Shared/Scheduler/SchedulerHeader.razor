@@ -7,13 +7,13 @@
 
 <div class="flex-row-center bg-light justify-content-between">
     <div class="flex-row-center ps-1">
-        <div>
-            <button class="flex-row" onclick="@(() => JumpToNextDate(false))">
+        <div class="d-none d-md-block">
+            <button class="px-2" onclick="@(() => JumpToNextDate(false))">
                 <span class="material-icons">keyboard_arrow_left</span>
             </button>
         </div>
-        <div>
-            <button class="flex-row" onclick="@(() => JumpToNextDate(true))">
+        <div class="d-none d-md-block">
+            <button class="px-2" onclick="@(() => JumpToNextDate(true))">
                 <span class="material-icons">keyboard_arrow_right</span>
             </button>
         </div>
@@ -26,11 +26,20 @@
             </button>
         </div>
     </div>
-    <div class="flex-row-center">
-        <button class="d-flex btn btn-outline-primary" @onclick="CreateAppointment">
-            <span class="material-symbols-outlined me-2">assignment_add</span>
-            Create Appointment
-        </button>
+    <div class="d-flex flex-row justify-content-center flex-grow-1">
+        <div class="flex-row-center mx-2">
+            <button class="d-flex btn btn-outline-primary" @onclick="CreateAppointment">
+                <span class="material-symbols-outlined me-2">assignment_add</span>
+                Create Appointment
+            </button>
+        </div>
+        <span class="vertical-divider" />
+        <div class="flex-row-center mx-2">
+            <button class="d-flex btn btn-outline-primary" @onclick="CreateTimeBlock">
+                <span class="material-symbols-outlined me-2">event_busy</span>
+                Add Time Block
+            </button>
+        </div>
     </div>
     <div class="flex-row-center pe-1">
         <button class="scheduler-view-button" @onclick="GoToToday">
@@ -38,14 +47,16 @@
         </button>
         <span class="vertical-divider" />
 
-        @foreach (var layoutType in CalendarLayoutType.Types)
-        {
-            var activeClass = (LayoutType == layoutType) ? "active" : "";
+        <div class="col">
+            @foreach (var layoutType in CalendarLayoutType.Types)
+            {
+                var activeClass = (LayoutType == layoutType) ? "active" : "";
 
-            <button class="scheduler-view-button @activeClass" @onclick="@(() => OnCalendarStateChange(layoutType, Date ?? DateTime.Now))">
-                @layoutType.Name
-            </button>
-        }
+                <button class="d-block d-md-inline-flex scheduler-view-button @activeClass" @onclick="@(() => OnCalendarStateChange(layoutType, Date ?? DateTime.Now))">
+                    @layoutType.Name
+                </button>
+            }
+        </div>
     </div>
 </div>
 
@@ -82,6 +93,9 @@
     [Parameter, EditorRequired]
     public EventCallback<DateTime> OnCreateAppointment { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<DateTime> OnCreateTimeBlock { get; set; }
+
     private MudDatePicker _datePicker = default!;
 
     private string DateLabel => DateHelpers.GetDateLabel(Date, LayoutType);
@@ -99,6 +113,11 @@
     private async Task CreateAppointment()
     {
         await OnCreateAppointment.InvokeAsync(Date.Value);
+    }
+
+    private async Task CreateTimeBlock()
+    {
+        await OnCreateTimeBlock.InvokeAsync(Date.Value);
     }
 
     // TODO write tests using bUnit.

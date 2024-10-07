@@ -20,6 +20,8 @@ namespace Data.Entity
 
         public virtual ICollection<Appointment> Appointments { get; set; } = [];
 
+        public virtual ICollection<TimeBlock> TimeBlocks { get; set; } = [];
+
         public virtual ICollection<Service> Services { get; set; } = [];
 
         public virtual ICollection<BusinessUser> Users { get; set; } = [];

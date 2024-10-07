@@ -1,11 +1,11 @@
-﻿namespace Data.Entity
+﻿namespace Data.Entity.Appointments
 {
-    public class ServiceRepeater : BaseEntity
+    public class TimeBlockRepeater : BaseEntity
     {
         /// <summary>
-        /// Foreign key to the <see cref="Service"/>
+        /// Foreign key to the <see cref="TimeBlock"/>
         /// </summary>
-        public int ServiceId { get; set; }
+        public int TimeBlockId { get; set; }
 
         /// <summary>
         /// Identifies the day on which to repeat.

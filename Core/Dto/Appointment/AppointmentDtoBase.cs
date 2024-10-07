@@ -1,27 +1,15 @@
 ﻿using Core.Dto.Validation;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Core.Dto
+namespace Core.Dto.Appointment
 {
-    public record AppointmentDto(string Name, PersonDto Person) : DtoBase
+    public record AppointmentDtoBase(string Name) : DtoBase
     {
         /// <summary>
-        /// Name of the booked service
+        /// Name of the booking, usually the name of the booked service
         /// </summary>
         [Required]
         public string Name { get; set; } = Name;
-
-        /// <summary>
-        /// The person who made the booking
-        /// </summary>
-        [ValidateComplexType]
-        public PersonDto Person { get; set; } = Person;
-
-        /// <summary>
-        /// The service which was booked, or null if it can no longer be found
-        /// </summary>
-        public ServiceTypeDto? Service { get; set; } = null;
 
         /// <summary>
         /// The StartTime of the booking, excluding any padding
@@ -35,22 +23,34 @@ namespace Core.Dto
         public DateTime EndTime { get; set; }
 
         /// <summary>
-        /// Time padding to be added before the event starts
+        /// CURRENTLY UNUSED - Time padding to be added before the event starts
         /// </summary>
         public TimeSpan PaddingStart { get; set; } = TimeSpan.Zero;
 
         /// <summary>
-        /// Time padding to be added after the event finishes
+        /// CURRENTLY UNUSED - Time padding to be added after the event finishes
         /// </summary>
         public TimeSpan PaddingEnd { get; set; } = TimeSpan.Zero;
 
-        public BookingTypeDto BookingType { get; set; }
 
         #region unmapped utility properties / methods
+        
+        /// <summary>
+        /// The start time, accounting for padding
+        /// </summary>
         public DateTime StartTimePadded => StartTime.Subtract(PaddingStart);
 
+        /// <summary>
+        /// The end time, accounting for padding
+        /// </summary>
         public DateTime EndTimePadded => EndTime.Add(PaddingEnd);
 
+        /// <summary>
+        /// Get the StartTime for this booking on the requested date
+        /// </summary>
+        /// <param name="date">Date to get the start time.</param>
+        /// <param name="padded">Wheter to include padding in the timing</param>
+        /// <returns>The time of day at which this appointment starts on the requested date</returns>
         public TimeOnly GetStartTime(DateOnly date, bool padded)
         {
             var start = padded ? StartTimePadded : StartTime;
@@ -67,6 +67,12 @@ namespace Core.Dto
             }
         }
 
+        /// <summary>
+        /// Get the EndTime for this booking on the requested date
+        /// </summary>
+        /// <param name="date">Date to get the end time.</param>
+        /// <param name="padded">Wheter to include padding in the timing</param>
+        /// <returns>The time of day at which this appointment ends on the requested date</returns>
         public TimeOnly GetEndTime(DateOnly date, bool padded)
         {
             var end = padded ? EndTimePadded : EndTime;

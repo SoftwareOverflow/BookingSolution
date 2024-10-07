@@ -1,5 +1,5 @@
 ﻿@using Admin.Data.Appointments;
-@using Core.Dto;
+@using Core.Dto.Appointment;
 
 <div class="day-col-container">
     <table class="scheduler-inner-table">
@@ -41,7 +41,7 @@
     public List<PositionedAppointment> Events { get; set; } = new List<PositionedAppointment>();
 
     [Parameter, EditorRequired]
-    public EventCallback<AppointmentDto> OnAppointmentClick { get; set; }
+    public EventCallback<AppointmentDtoBase> OnAppointmentClick { get; set; }
 
     private async Task EditAppointment(PositionedAppointment dto)
     {

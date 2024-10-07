@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Core.Dto.Appointment;
 
 namespace Core.Dto.BookingRequest
 {

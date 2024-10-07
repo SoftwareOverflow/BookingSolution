@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Core.Dto;
+using Core.Dto.Appointment;
 using Core.Dto.BookingRequest;
-using Core.Dto.Services;
 using Core.Interfaces;
 using Core.Mapping;
 using Core.Responses;
@@ -90,7 +90,7 @@ namespace Core.Tests.Services
         {
             var service = new ServiceTypeDto()
             {
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = []
             };
 
@@ -106,7 +106,7 @@ namespace Core.Tests.Services
         {
             var service = new ServiceTypeDto()
             {
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [new(17)],
                 StartDate = new DateTime(2024, 9, 2)
             };
@@ -126,7 +126,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.Weekly,
+                RepeatType = RepeaterTypeDto.Weekly,
                 Repeats = [new(DayOfWeek.Monday), new(DayOfWeek.Wednesday)]
             };
 
@@ -144,7 +144,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.Weekly,
+                RepeatType = RepeaterTypeDto.Weekly,
                 Repeats = [new(DayOfWeek.Monday), new(DayOfWeek.Sunday)]
             };
 
@@ -164,7 +164,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [new(1), new(8), new(17)]
             };
 
@@ -182,7 +182,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [new(19), new(15), new(23), new(25)]
             };
 
@@ -202,7 +202,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [new(10), new(19), new(27)]
             };
 
@@ -222,7 +222,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [new(18), new(19), new(11), new(27)]
             };
 
@@ -242,7 +242,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, -1)]
             };
 
@@ -260,7 +260,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Monday, 2), new(DayOfWeek.Wednesday, -1)]
             };
 
@@ -278,7 +278,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Tuesday, 3), new(DayOfWeek.Wednesday, -1)]
             };
 
@@ -296,7 +296,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, -1)]
             };
 
@@ -314,7 +314,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, -1), new(DayOfWeek.Friday, 1)]
             };
 
@@ -332,7 +332,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Monday, 2), new(DayOfWeek.Wednesday, -1), new(DayOfWeek.Friday, 2)]
             };
 
@@ -351,7 +351,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Tuesday, 3)]
             };
 
@@ -409,7 +409,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = startDate.AddDays(5).ToDateTime(new TimeOnly()),
-                RepeatType = ServiceRepeaterTypeDto.Weekly,
+                RepeatType = RepeaterTypeDto.Weekly,
                 Repeats = [new(DayOfWeek.Monday)]
             };
 
@@ -430,13 +430,13 @@ namespace Core.Tests.Services
 
             var service = new ServiceTypeDto()
             {
-                StartDate = DateTime.Now.AddMonths(-1),
+                StartDate = new DateTime(startDate.AddMonths(-1), new TimeOnly(0, 0)),
                 EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(17, 0, 0),
                 DurationMins = 120,
                 BookingFrequencyMins = 60,
-                RepeatType = Dto.Services.ServiceRepeaterTypeDto.Weekly,
-                Repeats = [new ServiceRepeaterDto(DayOfWeek.Monday), new ServiceRepeaterDto(DayOfWeek.Tuesday), new ServiceRepeaterDto(DayOfWeek.Friday)]
+                RepeatType = RepeaterTypeDto.Weekly,
+                Repeats = [new RepeaterDto(DayOfWeek.Monday), new RepeaterDto(DayOfWeek.Tuesday), new RepeaterDto(DayOfWeek.Friday)]
             };
 
             var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
@@ -529,7 +529,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute,
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = [new(3), new(5), new(7), new(25)],
                 DurationMins = 60,
                 BookingFrequencyMins = 60,
@@ -605,7 +605,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
-                RepeatType = ServiceRepeaterTypeDto.MonthlyRelative,
+                RepeatType = RepeaterTypeDto.MonthlyRelative,
                 Repeats = [new(DayOfWeek.Monday, 1), new(DayOfWeek.Wednesday, 3), new(DayOfWeek.Thursday, -1), new(DayOfWeek.Friday, -1)],
                 DurationMins = 30,
                 BookingFrequencyMins = 45,
@@ -653,13 +653,13 @@ namespace Core.Tests.Services
 
             var service = new ServiceTypeDto()
             {
-                StartDate = DateTime.Now.AddMonths(-1),
+                StartDate = new DateTime(startDate.AddMonths(-1), new TimeOnly(0, 0)),
                 EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(17, 0, 0),
                 DurationMins = 120,
                 BookingFrequencyMins = 60,
-                RepeatType = Dto.Services.ServiceRepeaterTypeDto.Weekly,
-                Repeats = [new ServiceRepeaterDto(DayOfWeek.Monday), new ServiceRepeaterDto(DayOfWeek.Tuesday), new ServiceRepeaterDto(DayOfWeek.Friday)]
+                RepeatType = RepeaterTypeDto.Weekly,
+                Repeats = [new RepeaterDto(DayOfWeek.Monday), new RepeaterDto(DayOfWeek.Tuesday), new RepeaterDto(DayOfWeek.Friday)]
             };
 
             var result = await _bookingService.GetAvailabilityBetweenDates(service, Guid.NewGuid(), startDate, endDate);
@@ -711,7 +711,7 @@ namespace Core.Tests.Services
             var service = new ServiceTypeDto()
             {
                 StartDate = startDate.ToDateTime(new TimeOnly()),
-                RepeatType = ServiceRepeaterTypeDto.Weekly,
+                RepeatType = RepeaterTypeDto.Weekly,
                 Repeats = [new(DayOfWeek.Monday)]
             };
 
@@ -752,8 +752,8 @@ namespace Core.Tests.Services
                 BookingFrequencyMins = 30,
                 EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(15, 0, 0),
-                Repeats = [new ServiceRepeaterDto(1)],
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute
+                Repeats = [new RepeaterDto(1)],
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute
             };
             var dto = new BookingRequestDto(service, Guid.NewGuid(), new PersonDto(), date)
             {
@@ -796,8 +796,8 @@ namespace Core.Tests.Services
                 BookingFrequencyMins = 30, 
                 EarliestTime = new TimeSpan(9, 0, 0), 
                 LatestTime = new TimeSpan(15, 0, 0),
-                Repeats = [new ServiceRepeaterDto(30)],
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute
+                Repeats = [new RepeaterDto(30)],
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute
             };
             var dto = new BookingRequestDto(service, Guid.NewGuid(), new PersonDto(), date)
             {
@@ -845,8 +845,8 @@ namespace Core.Tests.Services
                 BookingFrequencyMins = 30,
                 EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(15, 0, 0),
-                Repeats = [new ServiceRepeaterDto(30)],
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute
+                Repeats = [new RepeaterDto(30)],
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute
             };
             var person = new PersonDto() { FirstName = "Bob", LastName = "Smith", EmailAddress = "bob.smith@hotmail.com", PhoneNumber = "07123456789" };
             var dto = new BookingRequestDto(service, Guid.NewGuid(), person, date)
@@ -861,7 +861,7 @@ namespace Core.Tests.Services
                 StartTime = new DateTime(date, new TimeOnly(10, 0)),
                 EndTime = new DateTime(date, new TimeOnly(11, 30)),
                 Service = service,
-                BookingType = BookingTypeDto.ONLINE,
+                BookingType = BookingTypeDto.Online,
             };
 
             Assert.True(result.IsSuccess);
@@ -901,8 +901,8 @@ namespace Core.Tests.Services
                 BookingFrequencyMins = 30,
                 EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(15, 0, 0),
-                Repeats = [new ServiceRepeaterDto(30)],
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute
+                Repeats = [new RepeaterDto(30)],
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute
             };
             var person = new PersonDto() { FirstName = "Bob", LastName = "Smith", EmailAddress = "bob.smith@hotmail.com", PhoneNumber = "07123456789" };
             var dto = new BookingRequestDto(service, Guid.NewGuid(), person, date)
@@ -949,8 +949,8 @@ namespace Core.Tests.Services
                 BookingFrequencyMins = 30,
                 EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(15, 0, 0),
-                Repeats = [new ServiceRepeaterDto(30)],
-                RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute
+                Repeats = [new RepeaterDto(30)],
+                RepeatType = RepeaterTypeDto.MonthlyAbsolute
             };
             var person = new PersonDto() { FirstName = "Bob", LastName = "Smith", EmailAddress = "bob.smith@hotmail.com", PhoneNumber = "07123456789" };
             var dto = new BookingRequestDto(service, Guid.NewGuid(), person, date)

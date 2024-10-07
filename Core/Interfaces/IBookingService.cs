@@ -1,4 +1,5 @@
 ﻿using Core.Dto;
+using Core.Dto.Appointment;
 using Core.Dto.BookingRequest;
 using Core.Responses;
 

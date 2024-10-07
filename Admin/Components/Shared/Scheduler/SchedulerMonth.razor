@@ -1,6 +1,6 @@
 ﻿@using Admin.Data.Appointments
 @using Admin.Data.Helpers
-@using Core.Dto
+@using Core.Dto.Appointment
 
 @inherits ClientDateComponent
 
@@ -42,7 +42,7 @@
                                     if (startTime != endTime)
                                     {
                                         <div role="button" class="flex-row-center justify-content-start overflow-hidden rounded-pill text-nowrap bg-primary text-white m-1 pe-1 pointer-event"
-                                            @onclick=@(async () => await EditAppointment(item.Appointment))>
+                                             @onclick=@(async () => await EditAppointment(item.Appointment))>
                                             @if (item.GetStartDate(true) < DateOnly.FromDateTime(date))
                                             {
                                                 <MudTooltip Text="Event starts on previous day" Class="material-icons-tooltip">
@@ -94,9 +94,9 @@
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public EventCallback<AppointmentDto> OnEditAppointment { get; set; }
+    public EventCallback<AppointmentDtoBase> OnEditAppointment { get; set; }
 
-    private async Task EditAppointment(AppointmentDto appointment)
+    private async Task EditAppointment(AppointmentDtoBase appointment)
     {
         await OnEditAppointment.InvokeAsync(appointment);
     }

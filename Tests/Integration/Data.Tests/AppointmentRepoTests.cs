@@ -377,7 +377,7 @@ namespace Data.Tests
 
                 // Change other params
                 toUpdate.Name = "My new custom name";
-                toUpdate.BookingType = BookingType.ONLINE;
+                toUpdate.BookingType = BookingType.Online;
                 toUpdate.EndTime = DateTime.Now.AddYears(5);
                 toUpdate.StartTime = DateTime.Now.AddYears(5);
                 toUpdate.Person.PhoneNumber = "01234546789";
@@ -414,7 +414,7 @@ namespace Data.Tests
 
                 // Change other params
                 toUpdate.Name = "New name";
-                toUpdate.BookingType = BookingType.MANUAL;
+                toUpdate.BookingType = BookingType.Manual;
                 toUpdate.EndTime = DateTime.Now.AddYears(4);
                 toUpdate.StartTime = DateTime.Now.AddYears(4);
                 toUpdate.Person.PhoneNumber = "0112233445566778899";

@@ -1,10 +1,10 @@
-﻿using Core.Dto;
+﻿using Core.Dto.Appointment;
 
 namespace Admin.Data.Appointments
 {
     public class PositionedAppointment
     {
-        public AppointmentDto Appointment { get; set; }
+        public AppointmentDtoBase Appointment { get; set; }
 
         /// <summary>
         /// Contains clash information for each date of the event.
@@ -13,7 +13,7 @@ namespace Admin.Data.Appointments
         /// </summary>
         private Dictionary<DateOnly, AppointmentClash> _clashDict = [];
 
-        public PositionedAppointment(AppointmentDto booking)
+        public PositionedAppointment(AppointmentDtoBase booking)
         {
             Appointment = booking;
         }

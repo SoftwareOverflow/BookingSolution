@@ -137,7 +137,7 @@ namespace Data.Tests
                 LatestTime = new TimeOnly(17, 30),
                 Name = "Original Service Name",
                 Price = 29.9900m, // Price scale saves as 4dp in db
-                RepeatType = ServiceRepeatType.Weekly,
+                RepeatType = RepeatType.Weekly,
                 Repeats = [new() { DayIdentifier = 1}, new() { DayIdentifier = 3}],
                 StartDate = new DateOnly(2024, 09, 20)
             };
@@ -152,7 +152,7 @@ namespace Data.Tests
             service.LatestTime = new TimeOnly(18, 0);
             service.Name = "Update Service Name";
             service.Price = 14.4900m; // Price scale saves as 4dp in db
-            service.RepeatType = ServiceRepeatType.MonthlyAbsolute;
+            service.RepeatType = RepeatType.MonthlyAbsolute;
             service.Repeats = [new() { DayIdentifier = 2 }, new() { DayIdentifier = 5 }, new() { DayIdentifier = 10 }];
 
             result = await _repo.Update(service);

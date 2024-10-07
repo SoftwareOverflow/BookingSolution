@@ -94,7 +94,7 @@ namespace Data.Tests.Fixtures
             .RuleFor(s => s.EarliestTime, o => new TimeOnly(Random.Shared.Next(24), Random.Shared.Next(3) * 15))
             .RuleFor(s => s.LatestTime, (faker, s) => faker.Date.BetweenTimeOnly(s.EarliestTime, new TimeOnly(23, 59)))
             .RuleFor(s => s.StartDate, o => o.Date.BetweenDateOnly(DateOnly.FromDateTime(DateTime.Now).AddMonths(-6), DateOnly.FromDateTime(DateTime.Now).AddMonths(6)))
-            .RuleFor(s => s.RepeatType, o => o.PickRandom<ServiceRepeatType>())
+            .RuleFor(s => s.RepeatType, o => o.PickRandom<RepeatType>())
             .RuleFor(s => s.Repeats, (faker, t) => GetRepeats(t.RepeatType, Random.Shared.Next(6) + 1))
             .UseSeed(_seed);
         }
@@ -123,18 +123,18 @@ namespace Data.Tests.Fixtures
             .RuleFor(p => p.EmailAddress, (faker, p) => faker.Internet.Email())
             .UseSeed(_seed);
 
-        private static List<ServiceRepeater> GetRepeats(ServiceRepeatType repeatType, int count) {
+        private static List<ServiceRepeater> GetRepeats(RepeatType repeatType, int count) {
             var picks = new Dictionary<int, List<int>>();
 
-            if (repeatType == ServiceRepeatType.Weekly)
+            if (repeatType == RepeatType.Weekly)
             {
                 picks.Add(0, Enumerable.Range(0, 6).ToList());
             }
-            else if (repeatType == ServiceRepeatType.MonthlyAbsolute)
+            else if (repeatType == RepeatType.MonthlyAbsolute)
             {
                 picks.Add(0, Enumerable.Range(0, 31).ToList());
             }
-            else if (repeatType == ServiceRepeatType.MonthlyRelative)
+            else if (repeatType == RepeatType.MonthlyRelative)
             {
                 picks.Add(-1, Enumerable.Range(0, 6).ToList());
                 picks.Add(1, Enumerable.Range(0, 6).ToList());
@@ -165,20 +165,20 @@ namespace Data.Tests.Fixtures
             return result;
         }
 
-        private static Faker<ServiceRepeater> GetServiceRepeaterFaker(ServiceRepeatType type, Dictionary<int, List<int>> picks)
+        private static Faker<ServiceRepeater> GetServiceRepeaterFaker(RepeatType type, Dictionary<int, List<int>> picks)
         {
-            if(type == ServiceRepeatType.Weekly)
+            if(type == RepeatType.Weekly)
             {
                 return new Faker<ServiceRepeater>()
                    .RuleFor(r => r.DayIdentifier, o => o.PickRandom(picks[0]))
                    .UseSeed(_seed);
-            } else if (type == ServiceRepeatType.MonthlyAbsolute)
+            } else if (type == RepeatType.MonthlyAbsolute)
             {
                 return new Faker<ServiceRepeater>()
                     .RuleFor(r => r.Index, o => o.PickRandom<int>(picks.Keys))
                     .RuleFor(r => r.DayIdentifier, (faker, t) => faker.PickRandom(picks[0]))
                     .UseSeed(_seed);
-            } else if (type == ServiceRepeatType.MonthlyRelative)
+            } else if (type == RepeatType.MonthlyRelative)
             {
                 return new Faker<ServiceRepeater>()
                    .RuleFor(r => r.Index, o => o.PickRandom<int>(picks.Keys))

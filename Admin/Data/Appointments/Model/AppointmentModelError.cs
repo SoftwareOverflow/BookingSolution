@@ -2,7 +2,7 @@
 
 namespace Admin.Data.Appointments.Model
 {
-    public class AppointmentModelError(string message, Action<AppointmentModel>? fix = null, Severity severity = Severity.Info)
+    internal class AppointmentModelError(string message, Action<AppointmentModel>? fix = null, Severity severity = Severity.Info)
     {
         public string Message { get; private set; } = message;
 

@@ -18,22 +18,9 @@
 
     <div class="container text-center position-relative bg-white bg-opacity-75 border-1 border-primary py-5">
         <button class="btn-lg material-symbols-outlined position-absolute top-0 end-0" @onclick="ShowUnsavedChangesDialog">close</button>
-        <h2>@(Appointment.Guid == Guid.Empty ? "Create New Appointment" : "Manage Appointment")</h2>
+        <h2>@(Appointment.Guid == Guid.Empty ? "Create New Time Block" : "Manage Time Block")</h2>
         <EditForm Model="_model" class="flex-column-center" OnValidSubmit="SaveChangesAsync">
             <ObjectGraphDataAnnotationsValidator />
-
-            <div class="flex-row-center w-50 justify-content-start my-2">
-
-                <span class="lead text-muted mx-2 mw-50 text-nowrap text-end">Link to a Service:</span>
-
-                <InputSelect @bind-Value="_model.ServiceGuid" class="form-select" aria-label="Service selection">
-                    <option value="">None</option>
-                    @foreach (var service in _services)
-                    {
-                        <option value="@service.Guid">@service.Name</option>
-                    }
-                </InputSelect>
-            </div>
 
             <div class="row w-50 flex-row-center">
                 <div class="form-floating px-0">
@@ -74,47 +61,8 @@
                 </div>
             </div>
 
-            <div class="row mt-5">
-                <div class="w-100">
-                    <h5>Who is attending?</h5>
-                </div>
-                <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="_model.Appointment!.Person.FirstName" class="form-control" aria-required="true" placeholder="First Name" />
-                    <label for="given-name">First Name</label>
-                    <ValidationMessage For="() => _model.Appointment.Person.FirstName" class="text-danger" />
-                </div>
-                <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="_model.Appointment.Person.LastName" class="form-control" aria-required="true" placeholder="Last Name" />
-                    <label for="family-name">Last Name</label>
-                    <ValidationMessage For="() => _model.Appointment.Person.LastName" class="text-danger" />
-                </div>
-                <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="_model.Appointment.Person.EmailAddress" class="form-control" aria-required="true" placeholder="name@example.com" />
-                    <label for="email">Email</label>
-                    <ValidationMessage For="() => _model.Appointment.Person.EmailAddress" class="text-danger" />
-                </div>
-                <div class="form-floating col-12 col-lg-6 my-1">
-                    <InputText @bind-Value="_model.Appointment.Person.PhoneNumber" class="form-control" aria-required="true" placeholder="Phone" />
-                    <label for="phone">Phone</label>
-                    <ValidationMessage For="() => _model.Appointment.Person.PhoneNumber" class="text-danger" />
-                </div>
-            </div>
-
-            <div class="my-1">
-                @foreach (var error in _model.Errors)
-                {
-                    @* TODO CSS to fill width of MudAlert? *@
-                    <MudAlert Class="m-2" Severity="@error.Severity" Variant="Variant.Outlined">
-                        <div class="d-flex flex-row">
-                            @error.Message
-                            @if (error.Fix != null)
-                            {
-                                <button type="button" class="ms-5" @onclick="@(() => FixError(error))">Fix</button>
-                            }
-                        </div>
-                    </MudAlert>
-                }
-            </div>
+            @* TODO add section for repeater selction -> use the one from the ServiceForm, BUT enable a one-off approach *@
+            @* TODO change text from Appointment to TimeBlock *@
 
             <div class="flex-row-center my-5 py-5">
                 <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" @onclick="ShowUnsavedChangesDialog">
@@ -122,7 +70,7 @@
                     Cancel
                 </button>
 
-                <div style="@(_model.Appointment.Guid == Guid.Empty ? "display: none;" : "")">
+                <div style="@(_model.Appointment!.Guid == Guid.Empty ? "display: none;" : "")">
                     <button type="button" class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
                         <span class="mx-2 material-symbols-outlined">delete</span>
                         Delete Appointment
@@ -143,37 +91,11 @@
     public EventCallback<bool> OnClose { get; set; }
 
     [Parameter, EditorRequired]
-    public AppointmentDto Appointment { get; set; } = new AppointmentDto(string.Empty, new PersonDto());
+    public TimeBlockDto Appointment { get; set; } = new(string.Empty);
 
-    private AppointmentModel _model = new(new AppointmentDto(string.Empty, new PersonDto()), []);
+    private TimeBlockModel _model = new(new TimeBlockDto(string.Empty));
 
-    private List<ServiceTypeDto> _services = [];
-
-    private bool _loading = true;
-
-    protected override async Task OnParametersSetAsync()
-    {
-        _loading = true;
-        var result = await ServiceTypeService.GetServiceTypes();
-        if (result.IsSuccess && result.Result != null)
-        {
-            _services = result.Result;
-        }
-
-        _model = new AppointmentModel(Appointment, _services);
-
-        await base.OnParametersSetAsync();
-
-        _loading = false;
-    }
-
-    private void FixError(AppointmentModelError error)
-    {
-        error.Fix?.Invoke(_model);
-        _model.Errors.Remove(error);
-
-        StateHasChanged();
-    }
+    private bool _loading = true; // TODO remove
 
 
     private async Task CloseOverlay(bool didEdit = false)
@@ -251,23 +173,8 @@
 
             var isCreating = _model.Appointment.Guid == Guid.Empty;
 
-            var saveResult = await AppointmentService.CreateOrUpdateAppointment(_model.Appointment);
-            if (saveResult.IsSuccess)
-            {
-                var message = isCreating ? "New Service Created" : "Changes Saved Succesfully";
+            // TODO save TimeBlock
 
-                MessageService.AddMessage(new MessageBase(
-                       message,
-                        MessageBase.MessageType.Success));
-
-                await CloseOverlay(true);
-            }
-            else
-            {
-                // TODO logging
-                MessageService.AddMessage(new MessageBase("Failed to save changes", MessageBase.MessageType.Warning));
-                saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
-            }
             _loading = false;
             StateHasChanged();
         }

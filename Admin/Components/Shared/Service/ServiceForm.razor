@@ -1,9 +1,9 @@
 ﻿@using Admin.Components.Shared.Dialog
+@using Admin.Components.Shared.Repeats
 @using Admin.Components.Shared.Scheduler
 @using Admin.Data.Helpers
 @using Admin.Data.ServiceTypes
 @using Core.Dto;
-@using Core.Dto.Services
 @using Core.Interfaces
 @using System.Globalization
 @using System.ComponentModel.DataAnnotations
@@ -90,125 +90,7 @@
 
         <div class="container">
             <div class="mx-5 my-2 border-1 border-primary">
-                <div class="flex-row-center">
-                    <div class="btn-group" role="group" aria-label="repeat type">
-                        <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-weekly" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.Weekly)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.Weekly)" />
-                        <label class="btn btn-outline-primary" for="btn-repeat-weekly">Weekly</label>
-
-                        <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-monthly-exact" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.MonthlyAbsolute)" />
-                        <label class="btn btn-outline-primary" for="btn-repeat-monthly-exact">Monthly (By Date)</label>
-
-                        <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-monthly-relative" autocomplete="off" checked="@(ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)" @onchange="@(() => ServiceModel.Service.RepeatType = ServiceRepeaterTypeDto.MonthlyRelative)" />
-                        <label class="btn btn-outline-primary" for="btn-repeat-monthly-relative">Monthly (By Weekday)</label>
-                    </div>
-                </div>
-
-                @if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.Weekly)
-                {
-                    <div id="availability-weekly text-center" class="">
-                        <p class="text-center mb-0 mt-1">
-                            <small class="my-1">Offer this service every week on the days selected</small>
-                        </p>
-                        <div class="flex-row-center justify-content-evenly">
-
-                            @for (int i = 0; i < 7; i++)
-                            {
-                                var day = DateHelpers.StartOfWeek(ClientDate).AddDays(i);
-                                <span class="flex-row-center">
-                                    <MudCheckBox @bind-Value="ServiceModel.WeeklyRepeat[day.DayOfWeek]" />
-                                    @day.ToString("ddd")
-                                </span>
-                            }
-                        </div>
-                    </div>
-                }
-                else if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)
-                {
-                    <div id="availability-monthly-exact">
-                        <div class="text-center mb-0 mt-1">
-                            <small class="my-1">Offer this service every month on the same day (e.g. 7th of every month)</small>
-
-                            <div class="container">
-                                @for (int i = 1; i < 31;)
-                                {
-                                    <div class="flex-row-center justify-content-around">
-                                        @for (int j = 1; j <= 7; j++)
-                                        {
-                                            var index = i - 1;
-                                            var selected = index <= 30 ? ServiceModel.MonthlyAbsoluteRepeat[index] : false;
-                                            var bgClass = selected ? "bg-primary text-white" : "text-muted";
-                                            <div class="m-1 w-100 text-center">
-
-                                                <span class="lead badge border-1 @bgClass" style="cursor: pointer"
-                                                      @onclick="@(() => {
-                                                          if(index <= 30) {
-                                                              ServiceModel.MonthlyAbsoluteRepeat[index] = !ServiceModel.MonthlyAbsoluteRepeat[index];
-                                                              StateHasChanged();
-                                                          }
-                                                      })">
-                                                    @(i <= 31 ? i.ToString("00") : "")
-                                                </span>
-                                            </div>
-
-                                            i++;
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-                else if (ServiceModel.Service.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)
-                {
-                    <div id="availability-monthly-by-week">
-                        <div class="text-center mb-0 mt-1">
-                            <small class="my-1">Offer this service on the same week of every month (e.g. the second Thursday of every month)</small>
-                            <div class="container text-end">
-                                @for (int i = 1; i <= 4; i++)
-                                {
-                                    int index = i;
-                                    string occuranceName = "";
-                                    if (i == 1)
-                                    {
-                                        occuranceName = "first";
-                                    }
-                                    else if (i == 2)
-                                    {
-                                        occuranceName = "second";
-                                    }
-                                    else if (i == 3)
-                                    {
-                                        occuranceName = "third";
-                                    }
-                                    else if (i == 4)
-                                    {
-                                        index = -1;
-                                        occuranceName = "last";
-                                    }
-                                    var occuranceString = $"On the {occuranceName} occurance:";
-
-                                    <div class="row align-items-center">
-
-                                        <p class="my-0 col-3 text-align-end">@occuranceString</p>
-
-                                        <div class="flex-row-center col-9 justify-content-start">
-                                            @for (int j = 0; j < 7; j++)
-                                            {
-                                                var day = DateHelpers.StartOfWeek(ClientDate).AddDays(j);
-                                                <span class="flex-row-center justify-content-between">
-                                                    <MudCheckBox @bind-Value="ServiceModel.MonthlyRelativeRepeat[index][day.DayOfWeek]" />
-                                                    @day.ToString("ddd")
-                                                </span>
-                                            }
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-
-
-                        </div>
-                    </div>
-                }
+                <RepeaterForm AllowNull="false" Repeater="ServiceModel.Repeater" />
             </div>
         </div>
     </div>
@@ -237,7 +119,7 @@
     [Parameter, EditorRequired]
     public ServiceTypeDto Dto { get; set; } = default!;
 
-    public ServiceTypeModel ServiceModel { get; set; } = default!;
+    internal ServiceTypeModel ServiceModel { get; set; } = default!;
 
     [Parameter, EditorRequired]
     public bool IsCreating { get; set; }
@@ -312,7 +194,6 @@
 
         if (!result?.Canceled ?? false)
         {
-            // TODO Save changes
             var dto = ServiceModel.MapToDto();
             var saveResult = await ServiceTypeService.CreateOrUpdateServiceType(dto);
 

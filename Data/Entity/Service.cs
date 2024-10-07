@@ -57,7 +57,7 @@ namespace Data.Entity
         /// <summary>
         /// RepeatType for this Service
         /// </summary>
-        public ServiceRepeatType RepeatType { get; set; }
+        public RepeatType RepeatType { get; set; }
 
         /// <summary>
         /// All the Repeats for this Service

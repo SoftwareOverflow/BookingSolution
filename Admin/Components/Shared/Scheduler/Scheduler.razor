@@ -4,6 +4,8 @@
 @using Admin.Data.Appointments
 @using Admin.Data.Helpers
 @using Core.Dto
+@using Core.Dto.Appointment
+@using Core.Extensions
 @using Microsoft.AspNetCore.Components.Rendering
 @using MudBlazor.Extensions
 
@@ -15,7 +17,7 @@
 <LoadingSpinner Visible="_loading" />
 
 <div class="scheduler-container" style="--scheduler-table-cell-height: @(AppointmentLayoutConsts.CellHeight)px">
-    <SchedulerHeader OnCreateAppointment="CreateAppointment" Date="@_date" LayoutType="@_calendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
+    <SchedulerHeader OnCreateAppointment="CreateAppointment" OnCreateTimeBlock="CreateTimeBlock" Date="@_date" LayoutType="@_calendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
     @if (_calendarLayoutType == CalendarLayoutType.Month)
     {
         <SchedulerMonth StartDate="@(_dateRange.Item1)" EndDate="@(_dateRange.Item2)" Events="@_events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
@@ -27,7 +29,17 @@
 
     @if (_appointmentToEdit != null)
     {
-        <AppointmentForm Appointment="_appointmentToEdit" OnClose="OnAppointmentFormClosed"/>
+       var apt = _appointmentToEdit as AppointmentDto;
+        if (apt != null)
+        {
+            <AppointmentForm Appointment="apt" OnClose="OnAppointmentFormClosed" />
+        }
+
+        var timeBlock = _appointmentToEdit as TimeBlockDto;
+        if(timeBlock != null)
+        {
+            <TimeBlockForm Appointment="timeBlock" OnClose="OnAppointmentFormClosed" />
+        }
     }
 </div>
 
@@ -35,7 +47,7 @@
 
     private CalendarLayoutType _calendarLayoutType = CalendarLayoutType.Week;
 
-    private AppointmentDto? _appointmentToEdit = null;
+    private AppointmentDtoBase? _appointmentToEdit = null;
 
     /// <summary>
     /// The selected date.
@@ -98,7 +110,7 @@
     {
         _loading = true;
         var result = await EventService.GetEvents(DateOnly.FromDateTime(_dateRange.Item1), DateOnly.FromDateTime(_dateRange.Item2));
-        
+
         _loading = false;
 
         return result;
@@ -113,7 +125,16 @@
             };
     }
 
-    private void EditAppointment(AppointmentDto dto) => _appointmentToEdit = dto;
+    private void CreateTimeBlock(DateTime dt)
+    {
+        _appointmentToEdit = new TimeBlockDto("")
+            {
+                StartTime = dt,
+                EndTime = dt.AddHours(1),
+            };
+    }
+
+    private void EditAppointment(AppointmentDtoBase dto) => _appointmentToEdit = dto;
 
     private async Task OnAppointmentFormClosed(bool didEdit)
     {

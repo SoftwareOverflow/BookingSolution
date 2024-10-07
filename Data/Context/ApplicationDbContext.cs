@@ -11,6 +11,8 @@ namespace Data.Context
     {
         public DbSet<Service> Services { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+
+        public DbSet<TimeBlock> TimeBlocks { get; set; }
         public DbSet<Person> People { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessUser> BusinessUsers { get; set; }

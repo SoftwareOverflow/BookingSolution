@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Core.Dto;
+using Core.Dto.Appointment;
 using Core.Dto.BookingRequest;
-using Core.Dto.Services;
 using Core.Interfaces;
 using Core.Responses;
 using Data.Entity.Appointments;
@@ -156,15 +156,15 @@ namespace Core.Services
                 }
 
                 var currentDate = startDate;
-                if (dto.RepeatType == ServiceRepeaterTypeDto.Weekly)
+                if (dto.RepeatType == RepeaterTypeDto.Weekly)
                 {
                     return GetNextWeeklyDate(dto, currentDate);
                 }
-                else if (dto.RepeatType == ServiceRepeaterTypeDto.MonthlyAbsolute)
+                else if (dto.RepeatType == RepeaterTypeDto.MonthlyAbsolute)
                 {
                     return GetNextMonthlyAbsoluteDate(dto, currentDate);
                 }
-                else if (dto.RepeatType == ServiceRepeaterTypeDto.MonthlyRelative)
+                else if (dto.RepeatType == RepeaterTypeDto.MonthlyRelative)
                 {
                     return GetNextMonthlyRelativeDate(dto, currentDate);
                 }
@@ -340,7 +340,7 @@ namespace Core.Services
                     Service = dto.Service,
                     StartTime = requestStart,
                     EndTime = requestStart.Add(dto.Service.Duration),
-                    BookingType = BookingTypeDto.ONLINE,
+                    BookingType = BookingTypeDto.Online,
                 };
 
                 // TODO check for clashes
