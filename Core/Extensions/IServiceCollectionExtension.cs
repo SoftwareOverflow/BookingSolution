@@ -19,6 +19,7 @@ namespace Core.Extensions
                 services.AddAutoMapper(typeof(AutoMapperConfig));
 
                 services.AddTransient<IAppointmentService, AppointmentService>();
+                services.AddTransient<ITimeBlockService, TimeBlockService>();
                 services.AddTransient<IServiceTypeService, ServiceTypeService>();
                 services.AddTransient<IBusinessService, BusinessService>();
                 services.AddTransient<ISetupService, SetupService>();

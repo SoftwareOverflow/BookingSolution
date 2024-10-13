@@ -16,12 +16,10 @@ namespace Data.Repository
 
                 if (existing != null)
                 {
-                    throw new DuplicateNameException($"Id {service.Guid} already exists in the database. Call Update to update this record");
+                    throw new ArgumentException($"Id {service.Guid} already exists in the database. Call Update to update this record");
                 }
 
-                var businessId = (await db.BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId))?.BusinessId
-                    ?? throw new ArgumentException($"Unable to locate business for user with id {userId}");
-
+                var businessId = await db.GetBusinessId();
                 service.BusinessId = businessId;
 
                 db.Services.Add(service);
@@ -35,8 +33,7 @@ namespace Data.Repository
         {
             await ExecuteVoidAsync(async (db, userId) =>
             {
-                var businessId = (await db.BusinessUsers.SingleOrDefaultAsync(x => x.UserId == userId))?.BusinessId
-                    ?? throw new ArgumentException($"Unable to locate business for user with id {userId}");
+                var businessId = await db.GetBusinessId();
 
                 var existingService = await db.Services.Include(s => s.Repeats).SingleOrDefaultAsync(x => x.Guid == service.Guid);
 

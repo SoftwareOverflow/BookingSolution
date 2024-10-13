@@ -89,8 +89,8 @@
         </div>
 
         <div class="container">
-            <div class="mx-5 my-2 border-1 border-primary">
-                <RepeaterForm AllowNull="false" Repeater="ServiceModel.Repeater" />
+            <div class="mx-2 my-2">
+                <RepeaterForm AllowOneOff="false" Repeater="ServiceModel.Repeater" />
             </div>
         </div>
     </div>
@@ -205,7 +205,7 @@
                        message,
                         MessageBase.MessageType.Success));
 
-                if(IsCreating)
+                if (IsCreating)
                 {
                     StateContainer.SetItem(saveResult.Result!);
                     NavigationManager.NavigateTo("/services/edit#booking-form-embed");

@@ -1,5 +1,4 @@
 ﻿using Admin.Data.Helpers;
-using Core.Dto;
 using Core.Interfaces;
 
 namespace Admin.Data.Appointments

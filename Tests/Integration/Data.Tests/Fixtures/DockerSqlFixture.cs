@@ -2,8 +2,6 @@
 using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NuGet.Configuration;
-using System.Linq;
 using Testcontainers.MsSql;
 
 namespace Data.Tests.Fixtures

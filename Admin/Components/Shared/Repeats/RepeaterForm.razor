@@ -5,13 +5,13 @@
 
 @inherits ClientDateComponent
 
-<div class="mx-5 my-2 border-1 border-primary">
+<div class="border-1 border-primary">
     <div class="flex-row-center">
         <div class="btn-group" role="group" aria-label="repeat type">
-            @if (AllowNull)
+            @if (AllowOneOff)
             {
                 <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-none" autocomplete="off" checked="@(Repeater.RepeatType == null)" @onchange="@(() => Repeater.RepeatType = null)" />
-                <label class="btn btn-outline-primary" for="btn-repeat-none">None</label>
+                <label class="btn btn-outline-primary" for="btn-repeat-none">One-Off</label>
             }
 
             <input type="radio" class="btn-check" name="btn-repeat-type" id="btn-repeat-weekly" autocomplete="off" checked="@(Repeater.RepeatType == RepeaterTypeDto.Weekly)" @onchange="@(() => Repeater.RepeatType = RepeaterTypeDto.Weekly)" />
@@ -25,18 +25,13 @@
         </div>
     </div>
 
-    @if(AllowNull && Repeater.RepeatType == null)
+    <div class="flex-row-center">
+        <small class="py-1">@GetHeader()</small>
+    </div>
+
+    @if (Repeater.RepeatType == RepeaterTypeDto.Weekly)
     {
-        <div class="text-center">
-            <small>One time, without repeats</small>
-        </div>
-    }
-    else if (Repeater.RepeatType == RepeaterTypeDto.Weekly)
-    {
-        <div id="availability-weekly text-center" class="">
-            <p class="text-center mb-0 mt-1">
-                <small class="my-1">Offer this service every week on the days selected</small>
-            </p>
+        <div id="availability-weekly" class="availability text-center">
             <div class="flex-row-center justify-content-evenly">
 
                 @for (int i = 0; i < 7; i++)
@@ -52,10 +47,8 @@
     }
     else if (Repeater.RepeatType == RepeaterTypeDto.MonthlyAbsolute)
     {
-        <div id="availability-monthly-exact">
+        <div id="availability-monthly-exact" class="availability text-center">
             <div class="text-center mb-0 mt-1">
-                <small class="my-1">Offer this service every month on the same day (e.g. 7th of every month)</small>
-
                 <div class="container">
                     @for (int i = 1; i < 31;)
                     {
@@ -88,9 +81,8 @@
     }
     else if (Repeater.RepeatType == RepeaterTypeDto.MonthlyRelative)
     {
-        <div id="availability-monthly-by-week">
+        <div id="availability-monthly-by-week" class="availability text-center">
             <div class="text-center mb-0 mt-1">
-                <small class="my-1">Offer this service on the same week of every month (e.g. the second Thursday of every month)</small>
                 <div class="container text-end">
                     @for (int i = 1; i <= 4; i++)
                     {
@@ -117,9 +109,9 @@
 
                         <div class="row align-items-center">
 
-                            <p class="my-0 col-3 text-align-end">@occuranceString</p>
+                            <p class="my-0 col-4 col-md-3 text-align-end">@occuranceString</p>
 
-                            <div class="flex-row-center col-9 justify-content-start">
+                            <div class="flex-row-center col-8 col-md-9 justify-content-start">
                                 @for (int j = 0; j < 7; j++)
                                 {
                                     var day = DateHelpers.StartOfWeek(ClientDate).AddDays(j);
@@ -144,5 +136,25 @@
     public RepeaterModel Repeater { get; set; }
 
     [Parameter, EditorRequired]
-    public bool AllowNull { get; set; }
+    public bool AllowOneOff { get; set; }
+
+    private string GetHeader()
+    {
+        switch (Repeater.RepeatType)
+        {
+            case null:
+                return "One time, without repeats";
+
+            case RepeaterTypeDto.Weekly:
+                return "Offer this service every week on the days selected";
+
+            case RepeaterTypeDto.MonthlyAbsolute:
+                return "Offer this service every month on the same day (e.g. 7th of every month)";
+
+            case RepeaterTypeDto.MonthlyRelative:
+                return "Offer this service on the same week of every month (e.g. the second Thursday of every month)";
+
+            default: return "";
+        }
+    }
 }

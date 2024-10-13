@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Admin.Data.Appointments.Model
 {
-    internal abstract class BaseAppointmentModel<T>(T Appointment) where T : AppointmentDtoBase
+    internal abstract class BaseAppointmentModel<T> where T : AppointmentDtoBase
     {
         [ValidateComplexType]
-        public T Appointment { get; private set; } = Appointment;
+        public T Appointment { get; private set; }
 
         private DateTime? _startDate, _endDate;
 
@@ -81,6 +81,16 @@ namespace Admin.Data.Appointments.Model
                 Appointment.Name = value;
                 ValidateName();
             }
+        }
+
+        protected BaseAppointmentModel(T dto)
+        {
+            Appointment = dto;
+
+            StartDate = Appointment.StartTime;
+            EndDate = Appointment.EndTime;
+            StartTime = Appointment.StartTime.TimeOfDay;
+            EndTime = Appointment.EndTime.TimeOfDay;
         }
 
         protected virtual void ValidateTimes() { }

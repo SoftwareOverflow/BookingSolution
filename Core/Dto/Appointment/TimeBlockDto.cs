@@ -1,6 +1,4 @@
-﻿using Data.Entity.Appointments;
-
-namespace Core.Dto.Appointment
+﻿namespace Core.Dto.Appointment
 {
     public record TimeBlockDto(string Name) : AppointmentDtoBase(Name)
     {

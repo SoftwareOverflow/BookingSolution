@@ -34,10 +34,6 @@ namespace Admin.Data.Appointments.Model
             _services = services;
 
             ServiceGuid = Appointment.Service?.Guid;
-            StartDate = Appointment.StartTime;
-            EndDate = Appointment.EndTime;
-            StartTime = Appointment.StartTime.TimeOfDay;
-            EndTime = Appointment.EndTime.TimeOfDay;
         }
 
         protected override void ValidateName()

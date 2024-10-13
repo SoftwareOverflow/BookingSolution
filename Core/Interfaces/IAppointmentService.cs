@@ -5,7 +5,7 @@ namespace Core.Interfaces
 {
     public interface IAppointmentService
     {
-        public Task<ServiceResult<List<AppointmentDto>>> GetAppointmentsBetweenDates(DateOnly start, DateOnly end);
+        public Task<ServiceResult<List<AppointmentDtoBase>>> GetAppointmentsBetweenDates(DateOnly start, DateOnly end);
 
         public Task<ServiceResult<AppointmentDto>> CreateOrUpdateAppointment(AppointmentDto appointment);
 

@@ -14,5 +14,13 @@ namespace Admin.Data.Appointments.Model
                 Appointment.Exceptions = value;
             }
         }
+
+        public TimeBlockDto MapRepeats()
+        {
+            Appointment.Repeats = Repeater.MapToDto();
+            Appointment.RepeatType = Repeater.RepeatType!.Value;
+
+            return Appointment;
+        }
     }
 }

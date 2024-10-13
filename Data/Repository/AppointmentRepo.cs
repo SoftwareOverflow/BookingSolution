@@ -80,11 +80,18 @@ namespace Data.Repository
             return true;
         }
 
-        public ICollection<Appointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate)
+        public ICollection<BaseAppointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate)
         {
-            return Execute<ICollection<Appointment>>((db, _) =>
+            return Execute<ICollection<BaseAppointment>>((db, _) =>
             {
-                return db.Appointments.AsQueryable().BetweenDates(startDate, endDate).Include(a => a.Person).Include(a => a.Service).ToList();
+                var apts = db.Appointments.AsQueryable().BetweenDates(startDate, endDate).Include(a => a.Person).Include(a => a.Service);
+                var timeBlocks = db.TimeBlocks.AsQueryable().BetweenDates(startDate, endDate).Include(tb => tb.Repeats).Include(tb => tb.Exceptions);
+
+                var result = new List<BaseAppointment>();
+                result.AddRange(apts);
+                result.AddRange(timeBlocks);
+
+                return result;
             });
         }
 
@@ -101,6 +108,35 @@ namespace Data.Repository
             });
 
             return true;
+        }
+
+        public async Task<bool> Create(TimeBlock timeBlock)
+        {
+            await ExecuteVoidAsync(async (db, _) =>
+            {
+                var businesId = await db.GetBusinessId();
+                timeBlock.BusinessId = businesId;
+
+                if (await db.TimeBlocks.AnyAsync(x => x.Guid == timeBlock.Guid))
+                {
+                    throw new ArgumentException("Unable to create appointment - id already exists");
+                }
+
+                db.TimeBlocks.Add(timeBlock);
+                await db.SaveChangesAsync();
+            });
+
+            return true;
+        }
+
+        public Task<bool> Update(TimeBlock timeBlock)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DeleteTimeBlock(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

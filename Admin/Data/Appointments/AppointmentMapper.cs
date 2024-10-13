@@ -4,7 +4,7 @@ namespace Admin.Data.Appointments
 {
     internal static class AppointmentMapper
     {
-        internal static List<PositionedAppointment> GetPositionedEventBookings(this List<AppointmentDto> events)
+        internal static List<PositionedAppointment> GetPositionedEventBookings(this List<AppointmentDtoBase> events)
         {
             var positionedEvents = events.OrderBy(x => x.StartTimePadded).Select(x => new PositionedAppointment(x)).ToList();
 

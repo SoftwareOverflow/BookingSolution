@@ -118,20 +118,22 @@
 
     private void CreateAppointment(DateTime dt)
     {
-        _appointmentToEdit = new AppointmentDto("", new PersonDto())
+        var apt = new AppointmentDto("", new PersonDto())
             {
                 StartTime = dt,
                 EndTime = dt.AddHours(1)
             };
+        _appointmentToEdit = apt;
     }
 
     private void CreateTimeBlock(DateTime dt)
     {
-        _appointmentToEdit = new TimeBlockDto("")
+        var tb = new TimeBlockDto("")
             {
                 StartTime = dt,
                 EndTime = dt.AddHours(1),
             };
+        _appointmentToEdit = tb;
     }
 
     private void EditAppointment(AppointmentDtoBase dto) => _appointmentToEdit = dto;

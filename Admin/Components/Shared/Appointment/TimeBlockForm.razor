@@ -1,14 +1,14 @@
 ﻿@using Admin.Components.Pages
 @using Admin.Components.Shared.Dialog
 @using Admin.Components.Shared.Loading
+@using Admin.Components.Shared.Repeats
 @using Admin.Data.Appointments.Model
 @using Core.Dto
 @using Core.Dto.Appointment
 @using Core.Interfaces
 @using Microsoft.AspNetCore.Components.Rendering
 
-@inject IAppointmentService AppointmentService
-@inject IServiceTypeService ServiceTypeService
+@inject ITimeBlockService TimeBlockService
 @inject IDialogService DialogService
 @inject IMessageService MessageService
 
@@ -25,7 +25,7 @@
             <div class="row w-50 flex-row-center">
                 <div class="form-floating px-0">
                     <InputText @bind-Value="_model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
-                    <label for="name">Appointment Name</label>
+                    <label for="name">Name</label>
                     <ValidationMessage For="() => _model.Name" class="text-danger" />
                 </div>
             </div>
@@ -61,8 +61,11 @@
                 </div>
             </div>
 
-            @* TODO add section for repeater selction -> use the one from the ServiceForm, BUT enable a one-off approach *@
-            @* TODO change text from Appointment to TimeBlock *@
+            <div class="container">
+                <div class="mx-2 my-2">
+                    <RepeaterForm AllowOneOff="true" Repeater="_model.Repeater" />
+                </div>
+            </div>
 
             <div class="flex-row-center my-5 py-5">
                 <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" @onclick="ShowUnsavedChangesDialog">
@@ -76,6 +79,9 @@
                         Delete Appointment
                     </button>
                 </div>
+
+                @* TODO work out why the dates on Add Time Block are incorrect initially. It seems to bind OK, but does not start with the correct information. *@
+                @* TODO copy serviceForm razor.css to style the base part of the form the same. *@
 
                 <button type="submit" class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5">
                     <span class="mx-2 material-symbols-outlined">save</span>
@@ -95,8 +101,13 @@
 
     private TimeBlockModel _model = new(new TimeBlockDto(string.Empty));
 
-    private bool _loading = true; // TODO remove
+    private bool _loading = false;
 
+    protected override void OnParametersSet()
+    {
+        _model = new TimeBlockModel(Appointment);
+        base.OnParametersSet();
+    }
 
     private async Task CloseOverlay(bool didEdit = false)
     {
@@ -120,22 +131,22 @@
 
         if (!result?.Canceled ?? false)
         {
-            var deleteResult = await AppointmentService.DeleteAppointment(_model.Appointment.Guid);
-            if (deleteResult.IsSuccess)
-            {
-                MessageService.AddMessage(new MessageBase(
-                       message: "Appointment deleted succesfully",
-                       severity: MessageBase.MessageType.Normal
-               ));
-            }
-            else
-            {
-                MessageService.AddMessage(new MessageBase(message: "Failed to delete appointment", severity: MessageBase.MessageType.Error));
-                deleteResult.Errors.ForEach(e =>
-                {
-                    MessageService.AddMessage(new MessageBase(message: e, severity: MessageBase.MessageType.Error));
-                });
-            }
+            // var deleteResult = await TimeBlockService.DeleteAppointment(_model.Appointment.Guid);
+            // if (deleteResult.IsSuccess)
+            // {
+            //     MessageService.AddMessage(new MessageBase(
+            //            message: "Appointment deleted succesfully",
+            //            severity: MessageBase.MessageType.Normal
+            //    ));
+            // }
+            // else
+            // {
+            //     MessageService.AddMessage(new MessageBase(message: "Failed to delete appointment", severity: MessageBase.MessageType.Error));
+            //     deleteResult.Errors.ForEach(e =>
+            //     {
+            //         MessageService.AddMessage(new MessageBase(message: e, severity: MessageBase.MessageType.Error));
+            //     });
+            // }
 
 
             await CloseOverlay(true);
@@ -159,6 +170,8 @@
 
     public async Task SaveChangesAsync()
     {
+        _model.MapRepeats();
+
         var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, new DialogOptions()
             {
                 NoHeader = true
@@ -173,8 +186,23 @@
 
             var isCreating = _model.Appointment.Guid == Guid.Empty;
 
-            // TODO save TimeBlock
+            var saveResult = await TimeBlockService.CreateOrUpdateTimeBlock(_model.Appointment);
+            if (saveResult.IsSuccess)
+            {
+                var message = isCreating ? "New Time Block Created" : "Changes Saved Succesfully";
 
+                MessageService.AddMessage(new MessageBase(
+                       message,
+                        MessageBase.MessageType.Success));
+
+                await CloseOverlay(true);
+            }
+            else
+            {
+                // TODO logging
+                MessageService.AddMessage(new MessageBase("Failed to save changes", MessageBase.MessageType.Warning));
+                saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
+            }
             _loading = false;
             StateHasChanged();
         }

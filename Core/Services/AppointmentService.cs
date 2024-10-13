@@ -19,22 +19,21 @@ namespace Core.Services
         /// <param name="start">The start date of the range (inclusive)</param>
         /// <param name="end">The end date of the range (inclusive)</param>
         /// <returns>Any events which occur in whole or part within the specified range</returns>
-        public Task<ServiceResult<List<AppointmentDto>>> GetAppointmentsBetweenDates(DateOnly start, DateOnly end)
+        public Task<ServiceResult<List<AppointmentDtoBase>>> GetAppointmentsBetweenDates(DateOnly start, DateOnly end)
         {
             try
             {
                 var result = _appointmentContext.GetAppointmentsBetweenDates(start, end);
-                var dtos = _mapper.Map<ICollection<AppointmentDto>>(result);
+                var dtos = _mapper.Map<ICollection<AppointmentDtoBase>>(result);
 
-                return Task.FromResult(new ServiceResult<List<AppointmentDto>>([.. dtos]));
-
+                return Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>([.. dtos]));
             }
             catch (Exception)
             {
                 // TODO logging
             }
 
-            return Task.FromResult(ServiceResult<List<AppointmentDto>>.DefaultServerFailure());
+            return Task.FromResult(ServiceResult<List<AppointmentDtoBase>>.DefaultServerFailure());
         }
 
 

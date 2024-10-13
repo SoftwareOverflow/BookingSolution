@@ -8,7 +8,7 @@ namespace Admin.Data.ServiceTypes
         [ValidateComplexType]
         public ServiceTypeDto Service { get; private set; }
 
-        public RepeaterModel Repeater { get; private set; }
+        public RepeaterModel Repeater { get; set; }
 
         public ServiceTypeModel(ServiceTypeDto dto)
         {
