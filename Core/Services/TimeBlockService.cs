@@ -47,5 +47,57 @@ namespace Core.Services
 
             return ServiceResult<TimeBlockDto>.DefaultServerFailure();
         }
+
+        public Task<ServiceResult<ICollection<TimeBlockInstanceDto>>> GetTimeBlocksBetweenDates(DateOnly start, DateOnly end)
+        {
+            try
+            {
+                var timeBlockResult = _appointmentContext.GetTimeBlocks();
+                var timeBlocks = _mapper.Map<ICollection<TimeBlockDto>>(timeBlockResult);
+
+                var timeBlockInstances = new List<TimeBlockInstanceDto>();
+
+                foreach (var timeBlock in timeBlocks)
+                {
+                    if(end < DateOnly.FromDateTime(timeBlock.StartTime))
+                    {
+                        continue;
+                    }
+
+                    var days = timeBlock.EndTime.Subtract(timeBlock.StartTime).Days;
+                    var startTime = TimeOnly.FromDateTime(timeBlock.StartTime);
+                    var endTime = TimeOnly.FromDateTime(timeBlock.EndTime);
+
+                    var date = start;
+                    while (date <= end)
+                    {
+                        var result = RepeaterService.GetNextRepeaterDate(timeBlock, date);
+                        if (result.IsSuccess)
+                        {
+                            date = result.Result;
+
+
+                            var timeBlockInstance = new TimeBlockInstanceDto(timeBlock.Guid, timeBlock.Name, date)
+                            {
+                                StartTime = new DateTime(date, startTime),
+                                EndTime = new DateTime(date, endTime).AddDays(days),
+                            };
+
+                            timeBlockInstances.Add(timeBlockInstance);
+                        }
+
+                        date = date.AddDays(1);
+                    }
+                }
+
+                return Task.FromResult(new ServiceResult<ICollection<TimeBlockInstanceDto>>(timeBlockInstances));
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return Task.FromResult(ServiceResult<ICollection<TimeBlockInstanceDto>>.DefaultServerFailure());
+        }
     }
 }

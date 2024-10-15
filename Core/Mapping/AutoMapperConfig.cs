@@ -22,7 +22,7 @@ namespace Core.Mapping
             CreateMap<ServiceTypeDto, Service>().ReverseMap();
             CreateMap<RepeaterDto, ServiceRepeater>().ReverseMap();
 
-            CreateMap<AppointmentDtoBase, BaseAppointment>().Include<AppointmentDto, Appointment>().Include<TimeBlockDto, TimeBlock>().ReverseMap();
+            CreateMap<AppointmentDtoBase, BaseAppointment>().Include<AppointmentDto, Appointment>().ReverseMap();
 
             CreateMap<AppointmentDto, Appointment>().ReverseMap();
             CreateMap<PersonDto, Person>().ReverseMap();

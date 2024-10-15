@@ -80,18 +80,11 @@ namespace Data.Repository
             return true;
         }
 
-        public ICollection<BaseAppointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate)
+        public ICollection<Appointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate)
         {
-            return Execute<ICollection<BaseAppointment>>((db, _) =>
+            return Execute<ICollection<Appointment>>((db, _) =>
             {
-                var apts = db.Appointments.AsQueryable().BetweenDates(startDate, endDate).Include(a => a.Person).Include(a => a.Service);
-                var timeBlocks = db.TimeBlocks.AsQueryable().BetweenDates(startDate, endDate).Include(tb => tb.Repeats).Include(tb => tb.Exceptions);
-
-                var result = new List<BaseAppointment>();
-                result.AddRange(apts);
-                result.AddRange(timeBlocks);
-
-                return result;
+                return db.Appointments.AsQueryable().BetweenDates(startDate, endDate).Include(a => a.Person).Include(a => a.Service).ToList();
             });
         }
 

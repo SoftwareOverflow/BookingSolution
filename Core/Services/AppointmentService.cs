@@ -7,8 +7,9 @@ using Data.Interfaces;
 
 namespace Core.Services
 {
-    internal class AppointmentService(IAppointmentRepo appointmentContext, IMapper mapper) : IAppointmentService
+    internal class AppointmentService(ITimeBlockService timeBlockService, IAppointmentRepo appointmentContext, IMapper mapper) : IAppointmentService
     {
+        private readonly ITimeBlockService _timeBlockService = timeBlockService;
         private readonly IAppointmentRepo _appointmentContext = appointmentContext;
 
         private readonly IMapper _mapper = mapper;
@@ -19,21 +20,34 @@ namespace Core.Services
         /// <param name="start">The start date of the range (inclusive)</param>
         /// <param name="end">The end date of the range (inclusive)</param>
         /// <returns>Any events which occur in whole or part within the specified range</returns>
-        public Task<ServiceResult<List<AppointmentDtoBase>>> GetAppointmentsBetweenDates(DateOnly start, DateOnly end)
+        public async Task<ServiceResult<List<AppointmentDtoBase>>> GetAppointmentsBetweenDates(DateOnly start, DateOnly end)
         {
             try
             {
-                var result = _appointmentContext.GetAppointmentsBetweenDates(start, end);
-                var dtos = _mapper.Map<ICollection<AppointmentDtoBase>>(result);
+                var appointmentResult = _appointmentContext.GetAppointmentsBetweenDates(start, end);
 
-                return Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>([.. dtos]));
+                var appointments = _mapper.Map<ICollection<AppointmentDto>>(appointmentResult);
+                var timeBlockResult = await _timeBlockService.GetTimeBlocksBetweenDates(start, end);
+
+                if (timeBlockResult.IsSuccess)
+                {
+                    var timeBlockInstances = timeBlockResult.Result!;
+
+                    var allAppointments = new List<AppointmentDtoBase>();
+                    allAppointments.AddRange(appointments);
+                    allAppointments.AddRange(timeBlockInstances);
+
+                    var dtos = _mapper.Map<ICollection<AppointmentDtoBase>>(allAppointments);
+
+                    return new ServiceResult<List<AppointmentDtoBase>>([.. dtos]);
+                }
             }
             catch (Exception)
             {
                 // TODO logging
             }
 
-            return Task.FromResult(ServiceResult<List<AppointmentDtoBase>>.DefaultServerFailure());
+            return ServiceResult<List<AppointmentDtoBase>>.DefaultServerFailure();
         }
 
 

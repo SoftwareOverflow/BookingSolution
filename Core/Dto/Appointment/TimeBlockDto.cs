@@ -1,6 +1,9 @@
-﻿namespace Core.Dto.Appointment
+﻿using Core.Dto.Validation;
+using System.ComponentModel.DataAnnotations;
+
+namespace Core.Dto.Appointment
 {
-    public record TimeBlockDto(string Name) : AppointmentDtoBase(Name)
+    public record TimeBlockDto(string Name) : AppointmentDtoBase(Name), IRepeatable
     {
         /// <summary>
         /// RepeatType for this TimeBlock.

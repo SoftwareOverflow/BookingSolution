@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Dto
 {
-    public record ServiceTypeDto : DtoBase
+    public record ServiceTypeDto : DtoBase, IRepeatable
     {
         /// <summary>
         /// The name of the service selected by the user
@@ -75,7 +75,7 @@ namespace Core.Dto
         [Range(0.00, double.MaxValue, ErrorMessage = "Enter valid price")]
         public decimal Price { get; set; }
 
-        public RepeaterTypeDto RepeatType { get; set; } = RepeaterTypeDto.Weekly;
+        public RepeaterTypeDto? RepeatType { get; set; } = RepeaterTypeDto.Weekly;
 
         public ICollection<RepeaterDto> Repeats { get; set; } = [];
 

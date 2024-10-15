@@ -4,7 +4,7 @@ namespace Data.Interfaces
 {
     public interface IAppointmentRepo
     {
-        public ICollection<BaseAppointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate);
+        public ICollection<Appointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate);
 
         public Task<bool> Create(Appointment appointment);
 
