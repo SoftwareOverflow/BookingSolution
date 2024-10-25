@@ -35,44 +35,7 @@
                 </InputSelect>
             </div>
 
-            <div class="row w-50 flex-row-center">
-                <div class="form-floating px-0">
-                    <InputText @bind-Value="_model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
-                    <label for="name">Appointment Name</label>
-                    <ValidationMessage For="() => _model.Name" class="text-danger" />
-                </div>
-            </div>
-
-            <div class="row flex-row-center">
-                <div class="col-12 col-lg-6">
-                    <div class="flex-row-center">
-                        <span class="mud-form-label lead text-muted ms-2 text-end w-25">Start:</span>
-                        <div class="me-5 w-fit-content">
-                            <MudDatePicker @bind-Date="_model.StartDate" />
-                        </div>
-                        <div class="mx-5 w-fit-content">
-                            <MudTimePicker @bind-Time="_model.StartTime" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-lg-6">
-                    <div class="flex-row-center">
-                        <span class="mud-form-label lead text-muted ms-2 text-end w-25">End:</span>
-                        <div class="me-5 w-fit-content">
-                            <MudDatePicker @bind-Date="_model.EndDate" />
-                        </div>
-                        <div class="mx-5 w-fit-content">
-                            <MudTimePicker @bind-Time="_model.EndTime" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex-row-center">
-                    <!-- This covers both start and end times ('end must be after start') so is on its own row -->
-                    <ValidationMessage For="@(() => _model.Appointment!.EndTime)" />
-                </div>
-            </div>
+            <BaseAppointmentForm Model="_model" />
 
             <div class="row mt-5">
                 <div class="w-100">
@@ -175,10 +138,10 @@
         StateHasChanged();
     }
 
-
-    private async Task CloseOverlay(bool didEdit = false)
+    private async Task CloseOverlay()
     {
-        await OnClose.InvokeAsync(didEdit);
+        // Force a reload as we may have changed the underlying appointment without saving.
+        await OnClose.InvokeAsync(true);
     }
 
     public async Task Delete()
@@ -216,7 +179,7 @@
             }
 
 
-            await CloseOverlay(true);
+            await CloseOverlay();
         }
     }
 
@@ -260,7 +223,7 @@
                        message,
                         MessageBase.MessageType.Success));
 
-                await CloseOverlay(true);
+                await CloseOverlay();
             }
             else
             {

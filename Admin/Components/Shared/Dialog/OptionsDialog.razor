@@ -1,0 +1,52 @@
+﻿
+<MudDialog>
+    <DialogContent>
+        <div class="card border-2 border-dark">
+            <div class="card-header px-5 py-3 text-center">
+                <h6>
+                    @Title
+                </h6>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Content))
+            {
+                <div class="card-body my-1 mx-5">
+                    <p class="text-muted">@Content </p>
+                </div>
+            }
+
+            <div class="card-footer">
+                <div class="d-flex flex-column">
+                    @foreach (var option in Options)
+                    {
+                        <button class="btn btn-secondary m-1" data-dismiss="modal" @onclick=@(() => OptionSelected(option.Value))>
+                            @option.Key
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance DialogInstance { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "Choose Your Selection:";
+
+    [Parameter]
+    public string Content { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public Dictionary<string, Action> Options { get; set; } = [];
+
+    private void OptionSelected(Action callback)
+    {
+        callback.Invoke();
+        DialogInstance.Close();
+    }
+
+}

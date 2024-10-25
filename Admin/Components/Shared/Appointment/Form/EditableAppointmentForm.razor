@@ -1,0 +1,37 @@
+﻿@using Admin.Components.Shared.Appointment.Form
+@using Admin.Components.Shared.Scheduler
+@using Core.Dto.Appointment
+
+@if (AppointmentToEdit != null)
+{
+    var apt = AppointmentToEdit as AppointmentDto;
+    if (apt != null)
+    {
+        <AppointmentForm Appointment="apt" OnClose="HandleFormClose" />
+    }
+
+    var timeBlockInstance = AppointmentToEdit as TimeBlockInstanceDto;
+    if (timeBlockInstance != null)
+    {
+        <TimeBlockForm Instance="timeBlockInstance" OnClose="HandleFormClose" />
+    }
+}
+
+
+@code {
+    [Parameter, EditorRequired]
+    public required AppointmentDtoBase? AppointmentToEdit { get; set; } = null;
+
+    [CascadingParameter] 
+    public required Scheduler Scheduler { get; set; }
+
+    public async Task HandleFormClose(bool didEdit)
+    {
+        Scheduler.SetAppointmentToEdit(null);
+
+        if(didEdit)
+        {
+            await Scheduler.LoadEvents();
+        }
+    }
+}

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Admin.Data.Appointments.Model
 {
-    internal abstract class BaseAppointmentModel<T> where T : AppointmentDtoBase
+    public abstract class BaseAppointmentModel<T> where T : AppointmentDtoBase
     {
         [ValidateComplexType]
         public T Appointment { get; private set; }

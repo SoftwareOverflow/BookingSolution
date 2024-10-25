@@ -12,10 +12,18 @@ namespace Data.Interfaces
 
         public Task<bool> DeleteAppointment(Guid id);
 
+        public Task<ICollection<TimeBlock>> GetTimeBlocks();
+
+        public Task<TimeBlock?> GetTimeBlock(Guid guid);
+
         public Task<bool> Create(TimeBlock timeBlock);
 
         public Task<bool> Update(TimeBlock timeBlock);
 
         public Task<bool> DeleteTimeBlock(Guid id);
+
+        public Task<bool> Create(TimeBlockException exception);
+        public Task<bool> Update(TimeBlockException exception);
+        public Task<bool> DeleteException(TimeBlockException exception);
     }
 }

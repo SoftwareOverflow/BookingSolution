@@ -36,59 +36,6 @@
     </DialogContent>
 </MudDialog>
 
-
-@* <div class="modal fade" tabindex="-1" id="@Id" role="dialog" aria-hidden="true" aria-labelledby="modal-title">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title" id="modal-title">@Title</h6>
-            </div>
-            <div class="modal-body">
-                @if (!string.IsNullOrEmpty(Content))
-                {
-                    <p class="text-muted">@Content</p>
-                }
-
-                @if (!string.IsNullOrEmpty(Warning))
-                {
-                    <div class="alert alert-danger" role="alert">
-                        @Warning
-                    </div>
-                }
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal" @onclick=Cancel>
-                        No, Go Back
-                    </button>
-                    <button class="btn btn-primary" @onclick=Submit>
-                        Yes, Continue
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> *@
-
-@*
-    <MudDialog>
-    <TitleContent>
-    Are You Sure?
-    </TitleContent>
-    <DialogContent>
-    <div>@Content</div>
-
-    @if(Warning != "")
-    {
-    <MudAlert Severity="Severity.Error">This cannot be undone!</MudAlert>
-    }
-    </DialogContent>
-    <DialogActions>
-    <MudButton OnClick="Cancel">No, Cancel</MudButton>
-    <MudButton Color="Color.Primary" OnClick="Submit">Yes</MudButton>
-    </DialogActions>
-</MudDialog>
-    *@
-
 @code {
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }

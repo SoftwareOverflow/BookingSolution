@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Dto.Appointment
 {
-    public record AppointmentDtoBase(string Name) : DtoBase
+    public abstract record AppointmentDtoBase(string Name) : DtoBase
     {
         /// <summary>
         /// Name of the booking, usually the name of the booked service

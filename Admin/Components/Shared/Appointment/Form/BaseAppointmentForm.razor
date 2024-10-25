@@ -1,0 +1,48 @@
+﻿@using Admin.Data.Appointments.Model
+@using Core.Dto.Appointment
+
+@typeparam T where T : AppointmentDtoBase
+
+<div class="row w-50 flex-row-center">
+    <div class="form-floating px-0">
+        <InputText @bind-Value="Model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
+        <label for="name">Name</label>
+        <ValidationMessage For="() => Model.Name" class="text-danger" />
+    </div>
+</div>
+
+<div class="row flex-row-center">
+    <div class="col-12 col-lg-6">
+        <div class="flex-row-center">
+            <span class="mud-form-label lead text-muted ms-2 text-end w-25">Start:</span>
+            <div class="me-5 w-fit-content">
+                <MudDatePicker @bind-Date="Model.StartDate" />
+            </div>
+            <div class="mx-5 w-fit-content">
+                <MudTimePicker @bind-Time="Model.StartTime" />
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="flex-row-center">
+            <span class="mud-form-label lead text-muted ms-2 text-end w-25">End:</span>
+            <div class="me-5 w-fit-content">
+                <MudDatePicker @bind-Date="Model.EndDate" />
+            </div>
+            <div class="mx-5 w-fit-content">
+                <MudTimePicker @bind-Time="Model.EndTime" />
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-row-center">
+        <!-- This covers both start and end times ('end must be after start') so is on its own row -->
+        <ValidationMessage For="@(() => Model.Appointment!.EndTime)" />
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public BaseAppointmentModel<T> Model { get; set; }
+}

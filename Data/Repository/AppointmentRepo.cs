@@ -1,4 +1,5 @@
 ﻿using Data.Context;
+using Data.Entity;
 using Data.Entity.Appointments;
 using Data.Extensions;
 using Data.Interfaces;
@@ -55,13 +56,14 @@ namespace Data.Repository
                 appointment.PersonId = existing.PersonId;
 
                 // Handle the Service
-                if(appointment.Service != null)
+                if (appointment.Service != null)
                 {
                     var service = await db.Services.SingleOrDefaultAsync(s => s.Guid == appointment.Service.Guid) ?? throw new ArgumentException("Unable to find linked service");
 
                     appointment.ServiceId = service.Id;
                     appointment.Service = null;
-                } else
+                }
+                else
                 {
                     appointment.ServiceId = null;
                 }
@@ -103,6 +105,19 @@ namespace Data.Repository
             return true;
         }
 
+        public async Task<ICollection<TimeBlock>> GetTimeBlocks()
+        {
+            return await ExecuteAsync<ICollection<TimeBlock>>(async (db, _) =>
+            {
+                return await db.TimeBlocks.Include(tb => tb.Repeats).Include(tb => tb.Exceptions).ToListAsync();
+            }) ?? [];
+        }
+
+        public Task<TimeBlock?> GetTimeBlock(Guid guid)
+        {
+            return ExecuteAsync(async (db, _) => await db.TimeBlocks.Include(tb => tb.Repeats).SingleOrDefaultAsync(x => x.Guid == guid));
+        }
+
         public async Task<bool> Create(TimeBlock timeBlock)
         {
             await ExecuteVoidAsync(async (db, _) =>
@@ -122,12 +137,49 @@ namespace Data.Repository
             return true;
         }
 
-        public Task<bool> Update(TimeBlock timeBlock)
+        public async Task<bool> Update(TimeBlock timeBlock)
+        {
+            await ExecuteVoidAsync(async (db, _) =>
+            {
+                var existing = await db.TimeBlocks.Include(tb => tb.Repeats).Include(tb => tb.Exceptions).SingleOrDefaultAsync(tb => tb.Guid == timeBlock.Guid) ?? throw new ArgumentException("Cannot find Time Block to update");
+
+                // Check the repeats
+                if (existing.RepeatType != timeBlock.RepeatType || !timeBlock.Repeats.Equals(existing.Repeats))
+                {
+                    timeBlock.Exceptions = [];
+                }
+
+                // Manually map the foreign keys first to ensure we don't try and create any new objects
+                timeBlock.Id = existing.Id;
+                timeBlock.BusinessId = existing.BusinessId;
+
+                // The nested repeat objects do NOT get updated by default. Manually copy them
+                existing.Repeats = timeBlock.Repeats;
+
+                db.TimeBlocks.Entry(existing).CurrentValues.SetValues(timeBlock);
+
+                await db.SaveChangesAsync();
+            });
+
+            return true;
+        }
+
+        public Task<bool> DeleteTimeBlock(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> DeleteTimeBlock(Guid id)
+        public Task<bool> Create(TimeBlockException exception)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Update(TimeBlockException exception)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DeleteException(TimeBlockException exception)
         {
             throw new NotImplementedException();
         }

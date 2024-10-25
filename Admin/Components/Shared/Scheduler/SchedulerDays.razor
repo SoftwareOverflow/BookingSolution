@@ -5,7 +5,6 @@
 
 @inject AppointmentViewService EventService
 
-
 <div class="scheduler-outer-container">
     <div class="flex-row-center header-row">
         <div class="left-indent" />
@@ -57,7 +56,7 @@
                                 date = StartDate;
                                 while (date <= EndDate)
                                 {
-                                    <SchedulerInnerDayTableContents Date="@DateOnly.FromDateTime(date)" Events="@Events" OnAppointmentClick="EditAppointment" />
+                                    <SchedulerInnerDayTableContents Date="@DateOnly.FromDateTime(date)" Events="@Events" />
                                     date = date.AddDays(1);
                                 }
                             }
@@ -83,12 +82,4 @@
 
     [Parameter, EditorRequired]
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
-
-    [Parameter, EditorRequired]
-    public EventCallback<AppointmentDtoBase> OnEditAppointment { get; set; }
-
-    private async Task EditAppointment(AppointmentDtoBase appointment)
-    {
-        await OnEditAppointment.InvokeAsync(appointment);
-    }
 }

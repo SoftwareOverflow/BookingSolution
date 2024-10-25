@@ -8,9 +8,7 @@ namespace Admin.Data.Appointments
         public async Task<List<PositionedAppointment>> GetEvents(DateOnly start, DateOnly end)
         {
             // TODO error handling in more generic ways so that errors are always shown
-            var result = await HandleServiceRequest(() =>
-                dataService.GetAppointmentsBetweenDates(start, end)
-                );
+            var result = await HandleServiceRequest(() => dataService.GetAppointmentsBetweenDates(start, end));
 
             if (result == null)
             {

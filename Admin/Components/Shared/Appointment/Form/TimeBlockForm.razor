@@ -18,54 +18,29 @@
 
     <div class="container text-center position-relative bg-white bg-opacity-75 border-1 border-primary py-5">
         <button class="btn-lg material-symbols-outlined position-absolute top-0 end-0" @onclick="ShowUnsavedChangesDialog">close</button>
-        <h2>@(Appointment.Guid == Guid.Empty ? "Create New Time Block" : "Manage Time Block")</h2>
+        <h2>@(_model.Appointment!.Guid == Guid.Empty ? "Create New Time Block" : "Manage Time Block")</h2>
         <EditForm Model="_model" class="flex-column-center" OnValidSubmit="SaveChangesAsync">
             <ObjectGraphDataAnnotationsValidator />
 
-            <div class="row w-50 flex-row-center">
-                <div class="form-floating px-0">
-                    <InputText @bind-Value="_model.Name" class="form-control bg-light" aria-required="true" placeholder="Name" />
-                    <label for="name">Name</label>
-                    <ValidationMessage For="() => _model.Name" class="text-danger" />
-                </div>
-            </div>
+            <BaseAppointmentForm Model="_model" />
 
-            <div class="row flex-row-center">
-                <div class="col-12 col-lg-6">
-                    <div class="flex-row-center">
-                        <span class="mud-form-label lead text-muted ms-2 text-end w-25">Start:</span>
-                        <div class="me-5 w-fit-content">
-                            <MudDatePicker @bind-Date="_model.StartDate" />
-                        </div>
-                        <div class="mx-5 w-fit-content">
-                            <MudTimePicker @bind-Time="_model.StartTime" />
-                        </div>
+            @if (!Instance.IsException)
+            {
+                <div class="container">
+                    <div class="mx-2 my-2">
+                        <RepeaterForm Repeater="_model.Repeater" AllowOneOff="true" />
                     </div>
                 </div>
 
-                <div class="col-12 col-lg-6">
-                    <div class="flex-row-center">
-                        <span class="mud-form-label lead text-muted ms-2 text-end w-25">End:</span>
-                        <div class="me-5 w-fit-content">
-                            <MudDatePicker @bind-Date="_model.EndDate" />
+                @if (Instance.TimeBlockGuid != Guid.Empty)
+                {
+                    <MudAlert Class="m-2" Severity="Severity.Warning" Variant="Variant.Outlined">
+                        <div class="d-flex flex-row">
+                            Changes to repeats will reset any existing exceptions to the sequence!
                         </div>
-                        <div class="mx-5 w-fit-content">
-                            <MudTimePicker @bind-Time="_model.EndTime" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex-row-center">
-                    <!-- This covers both start and end times ('end must be after start') so is on its own row -->
-                    <ValidationMessage For="@(() => _model.Appointment!.EndTime)" />
-                </div>
-            </div>
-
-            <div class="container">
-                <div class="mx-2 my-2">
-                    <RepeaterForm AllowOneOff="true" Repeater="_model.Repeater" />
-                </div>
-            </div>
+                    </MudAlert>
+                }
+            }
 
             <div class="flex-row-center my-5 py-5">
                 <button type="button" class="btn btn-lg btn-outline-secondary border-0 d-flex align-items-center mx-5" @onclick="ShowUnsavedChangesDialog">
@@ -73,19 +48,16 @@
                     Cancel
                 </button>
 
-                <div style="@(_model.Appointment!.Guid == Guid.Empty ? "display: none;" : "")">
+                <div style="@(Instance.TimeBlockGuid == Guid.Empty ? "display: none;" : "")">
                     <button type="button" class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
                         <span class="mx-2 material-symbols-outlined">delete</span>
                         Delete Appointment
                     </button>
                 </div>
 
-                @* TODO work out why the dates on Add Time Block are incorrect initially. It seems to bind OK, but does not start with the correct information. *@
-                @* TODO copy serviceForm razor.css to style the base part of the form the same. *@
-
                 <button type="submit" class="btn btn-lg btn-outline-success border-0 d-flex align-items-center mx-5">
                     <span class="mx-2 material-symbols-outlined">save</span>
-                    @(_model.Appointment.Guid == Guid.Empty ? "Save" : "Save Changes")
+                    @(Instance.TimeBlockGuid == Guid.Empty ? "Save" : "Save Changes")
                 </button>
             </div>
         </EditForm>
@@ -97,21 +69,42 @@
     public EventCallback<bool> OnClose { get; set; }
 
     [Parameter, EditorRequired]
-    public TimeBlockDto Appointment { get; set; } = new(string.Empty);
+    public required TimeBlockInstanceDto Instance { get; set; }
 
     private TimeBlockModel _model = new(new TimeBlockDto(string.Empty));
 
-    private bool _loading = false;
+    private bool _loading = true;
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        _model = new TimeBlockModel(Appointment);
-        base.OnParametersSet();
-    }
+        if (Instance.TimeBlockGuid != Guid.Empty)
+        {
+            var result = await TimeBlockService.GetTimeBlock(Instance.TimeBlockGuid);
 
-    private async Task CloseOverlay(bool didEdit = false)
-    {
-        await OnClose.InvokeAsync(didEdit);
+            if (result.IsSuccess)
+            {
+                _model = new(result.Result!);
+            }
+            else
+            {
+                MessageService.AddMessage(new MessageBase("Failed to load Time Block", MessageBase.MessageType.Error));
+                _loading = false;
+
+                await CloseOverlay();
+            }
+        }
+        else
+        {
+            _model = new(new TimeBlockDto(Instance.Name)
+                {
+                    StartTime = Instance.StartTime,
+                    EndTime = Instance.EndTime
+                });
+        }
+
+        await base.OnParametersSetAsync();
+
+        _loading = false;
     }
 
     public async Task Delete()
@@ -149,7 +142,7 @@
             // }
 
 
-            await CloseOverlay(true);
+            await CloseOverlay();
         }
     }
 
@@ -184,27 +177,51 @@
             _loading = true;
             StateHasChanged();
 
-            var isCreating = _model.Appointment.Guid == Guid.Empty;
-
-            var saveResult = await TimeBlockService.CreateOrUpdateTimeBlock(_model.Appointment);
-            if (saveResult.IsSuccess)
+            if (!Instance.IsException)
             {
-                var message = isCreating ? "New Time Block Created" : "Changes Saved Succesfully";
-
-                MessageService.AddMessage(new MessageBase(
-                       message,
-                        MessageBase.MessageType.Success));
-
-                await CloseOverlay(true);
+                await SaveTimeBlock();
             }
             else
             {
-                // TODO logging
-                MessageService.AddMessage(new MessageBase("Failed to save changes", MessageBase.MessageType.Warning));
-                saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
+                await SaveTimeBlockException();
             }
+
             _loading = false;
             StateHasChanged();
         }
+    }
+
+    private async Task SaveTimeBlock()
+    {
+        var isCreating = Instance.TimeBlockGuid == Guid.Empty;
+
+        var saveResult = await TimeBlockService.CreateOrUpdateTimeBlock(_model.Appointment);
+        if (saveResult.IsSuccess)
+        {
+            var message = isCreating ? "New Time Block Created" : "Changes Saved Succesfully";
+
+            MessageService.AddMessage(new MessageBase(
+                   message,
+                    MessageBase.MessageType.Success));
+
+            await CloseOverlay();
+        }
+        else
+        {
+            // TODO logging
+            MessageService.AddMessage(new MessageBase("Failed to save changes", MessageBase.MessageType.Warning));
+            saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
+        }
+    }
+
+    private async Task SaveTimeBlockException()
+    {
+        // TODO
+    }
+
+    private async Task CloseOverlay()
+    {
+        // Assume we have changed the underlying object in some way (e.g. setting IsException), so force a reload.
+        await OnClose.InvokeAsync(true);
     }
 }

@@ -1,0 +1,74 @@
+﻿@using Admin.Components.Shared.Appointment.Form
+@using Admin.Components.Shared.Scheduler
+@using Admin.Components.Shared.Dialog
+@using Admin.Data.Appointments
+@using Core.Dto.Appointment
+
+@inject IDialogService DialogService
+
+
+@foreach (var item in Appointments.OrderBy(x => x.GetStartTime(DateOnly.FromDateTime(Date), true)))
+{
+    var shouldDisplay = item.HeightPx(DateOnly.FromDateTime(Date), true) > 0;
+    @if (shouldDisplay)
+    {
+        <div role="button" @onclick="@(async () => await EditAppointment(item.Appointment))">
+            @AppointmentTemplate(item)
+        </div>
+    }
+}
+
+@code {
+    [CascadingParameter]
+    public required Scheduler Scheduler { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<PositionedAppointment> AppointmentTemplate { get; set; }
+
+    [Parameter, EditorRequired]
+    public required DateTime Date { get; set; }
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<PositionedAppointment> Appointments { get; set; } = default!;
+
+    public async Task EditAppointment(AppointmentDtoBase appointment)
+    {
+        var timeBlockInstance = appointment as TimeBlockInstanceDto;
+        if (timeBlockInstance != null)
+        {
+            // If the instance is part of the sequence, offer the option to edit just this instance or all occurances.
+            if (!timeBlockInstance.IsException)
+            {
+                var options = new Dictionary<string, Action>();
+                options.Add("abc", () => { });
+
+                var parameters = new DialogParameters<OptionsDialog>
+                {
+                    { x => x.Title, "Instance is part of a recurring sequence" },
+                    { x => x.Content, "Would you like to edit the whole series or just this instance?" },
+                    { x => x.Options, new Dictionary<string, Action>(){
+                        { "Whole series", () => { timeBlockInstance.IsException = false; } },
+                        { "This instance", () => { timeBlockInstance.IsException = true; } },
+                    }}
+                };
+                var dialog = await DialogService.ShowAsync<OptionsDialog>(null, parameters);
+                var dialogResult = await dialog.Result;
+
+                if (!dialogResult?.Canceled ?? false)
+                {
+                    Scheduler.SetAppointmentToEdit(timeBlockInstance);
+                }
+            }
+            else
+            {
+                Scheduler.SetAppointmentToEdit(timeBlockInstance);
+            }
+        }
+
+        var aptInstance = appointment as AppointmentDto;
+        if(aptInstance != null)
+        {
+            Scheduler.SetAppointmentToEdit(aptInstance);
+        }
+    }
+}

@@ -60,7 +60,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Address");
+                    b.ToTable("Address", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.Appointment", b =>
@@ -105,7 +105,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.Person", b =>
@@ -142,7 +142,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("People");
+                    b.ToTable("People", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.TimeBlock", b =>
@@ -177,7 +177,7 @@ namespace Data.Migrations
 
                     b.HasIndex("BusinessId");
 
-                    b.ToTable("TimeBlocks");
+                    b.ToTable("TimeBlocks", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.TimeBlockException", b =>
@@ -217,7 +217,7 @@ namespace Data.Migrations
 
                     b.HasIndex("TimeBlockId");
 
-                    b.ToTable("TimeBlockException");
+                    b.ToTable("TimeBlockException", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.TimeBlockRepeater", b =>
@@ -245,7 +245,7 @@ namespace Data.Migrations
 
                     b.HasIndex("TimeBlockId");
 
-                    b.ToTable("TimeBlockRepeater");
+                    b.ToTable("TimeBlockRepeater", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Business", b =>
@@ -275,7 +275,7 @@ namespace Data.Migrations
 
                     b.HasIndex("AddressId");
 
-                    b.ToTable("Businesses");
+                    b.ToTable("Businesses", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.BusinessUser", b =>
@@ -290,7 +290,7 @@ namespace Data.Migrations
 
                     b.HasIndex("BusinessId");
 
-                    b.ToTable("BusinessUsers");
+                    b.ToTable("BusinessUsers", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Service", b =>
@@ -344,7 +344,7 @@ namespace Data.Migrations
 
                     b.HasIndex("BusinessId");
 
-                    b.ToTable("Services");
+                    b.ToTable("Services", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.ServiceRepeater", b =>
@@ -372,7 +372,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("ServiceRepeater");
+                    b.ToTable("ServiceRepeater", (string)null);
                 });
 
             modelBuilder.Entity("Data.Entity.Appointments.Appointment", b =>

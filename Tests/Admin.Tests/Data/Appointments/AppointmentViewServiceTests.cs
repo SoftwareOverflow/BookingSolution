@@ -22,7 +22,7 @@ namespace Admin.Tests.Data.Appointments
         [Fact]
         public async Task AppointmentViewService_GetAppointments_EmptyList()
         {
-            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(new ServiceResult<List<AppointmentDto>>([])));
+            _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>([])));
 
             var date = new DateOnly(2024, 08, 25);
 
@@ -69,7 +69,7 @@ namespace Admin.Tests.Data.Appointments
 
             _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>(new List<AppointmentDtoBase>(mockList)))
                 );
 
             var result = await _viewService.GetEvents(date, date);
@@ -98,7 +98,7 @@ namespace Admin.Tests.Data.Appointments
 
             var mockList = new List<AppointmentDto>
                     {
-                        new("Event #1", new PersonDto()) {
+                        new ("Event #1", new PersonDto()) {
                             StartTime = new DateTime(date, new TimeOnly(1, 30)),
                             EndTime = new DateTime(date, new TimeOnly(3, 30)),
                             PaddingEnd = TimeSpan.FromMinutes(0),
@@ -120,7 +120,7 @@ namespace Admin.Tests.Data.Appointments
 
             _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList)));
+                    Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>(new List<AppointmentDtoBase>(mockList))));
 
             var result = await _viewService.GetEvents(date, date);
 
@@ -176,7 +176,7 @@ namespace Admin.Tests.Data.Appointments
 
             _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>(new List<AppointmentDtoBase>(mockList)))
                 );
 
             var result = await _viewService.GetEvents(date, date);
@@ -227,7 +227,7 @@ namespace Admin.Tests.Data.Appointments
 
             _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>(new List<AppointmentDtoBase>(mockList)))
                 );
 
             var result = await _viewService.GetEvents(date, date);
@@ -282,7 +282,7 @@ namespace Admin.Tests.Data.Appointments
 
             _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                .Returns(
-                   Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>(new List<AppointmentDtoBase>(mockList)))
                );
 
             var result = await _viewService.GetEvents(date, date);
@@ -374,7 +374,7 @@ namespace Admin.Tests.Data.Appointments
 
             _dataMock.Setup(x => x.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
                 .Returns(
-                    Task.FromResult(new ServiceResult<List<AppointmentDto>>(mockList))
+                    Task.FromResult(new ServiceResult<List<AppointmentDtoBase>>(new List<AppointmentDtoBase>(mockList)))
                 );
 
             var result = await _viewService.GetEvents(day1, day1.AddDays(2));

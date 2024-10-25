@@ -90,6 +90,7 @@ namespace Core.Tests.Services
         {
             var service = new ServiceTypeDto()
             {
+                StartDate = new DateTime(2024, 9, 1),
                 RepeatType = RepeaterTypeDto.MonthlyAbsolute,
                 Repeats = []
             };

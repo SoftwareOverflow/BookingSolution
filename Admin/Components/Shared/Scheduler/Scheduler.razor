@@ -1,5 +1,6 @@
 ﻿@using Admin.Components.Pages
 @using Admin.Components.Shared.Appointment
+@using Admin.Components.Shared.Appointment.Form
 @using Admin.Components.Shared.Loading
 @using Admin.Data.Appointments
 @using Admin.Data.Helpers
@@ -18,33 +19,26 @@
 
 <div class="scheduler-container" style="--scheduler-table-cell-height: @(AppointmentLayoutConsts.CellHeight)px">
     <SchedulerHeader OnCreateAppointment="CreateAppointment" OnCreateTimeBlock="CreateTimeBlock" Date="@_date" LayoutType="@_calendarLayoutType" OnCalendarStateChange="OnCalendarStateChange" />
-    @if (_calendarLayoutType == CalendarLayoutType.Month)
-    {
-        <SchedulerMonth StartDate="@(_dateRange.Item1)" EndDate="@(_dateRange.Item2)" Events="@_events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
-    }
-    else
-    {
-        <SchedulerDays StartDate="@(_dateRange.Item1)" EndDate="@(_dateRange.Item2)" Events="@_events" OnCalendarStateChange="OnCalendarStateChange" OnEditAppointment="EditAppointment" />
-    }
 
-    @if (_appointmentToEdit != null)
-    {
-       var apt = _appointmentToEdit as AppointmentDto;
-        if (apt != null)
+    <CascadingValue Value="this">
+        @if (_calendarLayoutType == CalendarLayoutType.Month)
         {
-            <AppointmentForm Appointment="apt" OnClose="OnAppointmentFormClosed" />
+
+            <SchedulerMonth StartDate="@(_dateRange.Item1)" EndDate="@(_dateRange.Item2)" Events="@_events" OnCalendarStateChange="OnCalendarStateChange" />
+        }
+        else
+        {
+            <SchedulerDays StartDate="@(_dateRange.Item1)"
+                           EndDate="@(_dateRange.Item2)"
+                           Events="@_events"
+                           OnCalendarStateChange="OnCalendarStateChange" />
         }
 
-        var timeBlock = _appointmentToEdit as TimeBlockDto;
-        if(timeBlock != null)
-        {
-            <TimeBlockForm Appointment="timeBlock" OnClose="OnAppointmentFormClosed" />
-        }
-    }
+        <EditableAppointmentForm AppointmentToEdit="_appointmentToEdit" />
+    </CascadingValue>
 </div>
 
 @code {
-
     private CalendarLayoutType _calendarLayoutType = CalendarLayoutType.Week;
 
     private AppointmentDtoBase? _appointmentToEdit = null;
@@ -90,7 +84,7 @@
         _date = date;
 
         _dateRange = DateHelpers.GetDateRange(layoutType, date);
-        _events = await LoadEvents();
+        await LoadEvents();
 
         var today = ClientDateContainer.GetItem();
         var nextApp = _events.FirstOrDefault(x => x.Appointment.StartTimePadded >= today);
@@ -106,14 +100,18 @@
         StateHasChanged();
     }
 
-    private async Task<List<PositionedAppointment>> LoadEvents()
+    /// <summary>
+    /// Reload the calendar events from the server
+    /// </summary>
+    public async Task LoadEvents()
     {
         _loading = true;
-        var result = await EventService.GetEvents(DateOnly.FromDateTime(_dateRange.Item1), DateOnly.FromDateTime(_dateRange.Item2));
+        StateHasChanged();
+
+        _events = await EventService.GetEvents(DateOnly.FromDateTime(_dateRange.Item1), DateOnly.FromDateTime(_dateRange.Item2));
 
         _loading = false;
-
-        return result;
+        StateHasChanged();
     }
 
     private void CreateAppointment(DateTime dt)
@@ -128,7 +126,7 @@
 
     private void CreateTimeBlock(DateTime dt)
     {
-        var tb = new TimeBlockDto("")
+        var tb = new TimeBlockInstanceDto(Guid.Empty, "", DateOnly.FromDateTime(dt), IsException: false)
             {
                 StartTime = dt,
                 EndTime = dt.AddHours(1),
@@ -136,15 +134,9 @@
         _appointmentToEdit = tb;
     }
 
-    private void EditAppointment(AppointmentDtoBase dto) => _appointmentToEdit = dto;
-
-    private async Task OnAppointmentFormClosed(bool didEdit)
+    public void SetAppointmentToEdit(AppointmentDtoBase? dto)
     {
-        _appointmentToEdit = null;
-
-        if (didEdit)
-        {
-            _events = await LoadEvents();
-        }
+        _appointmentToEdit = dto;
+        StateHasChanged();
     }
 }

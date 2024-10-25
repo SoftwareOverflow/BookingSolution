@@ -1,8 +1,13 @@
-﻿@using Admin.Data.Appointments
+﻿@using Admin.Components.Shared.Appointment
+@using Admin.Components.Shared.Dialog
+@using Admin.Data.Appointments
 @using Admin.Data.Helpers
 @using Core.Dto.Appointment
+@using Microsoft.AspNetCore.Components.Web
 
 @inherits ClientDateComponent
+
+@inject IDialogService DialogService
 
 <table class="w-100 position-relative scheduler-table-container">
     <thead>
@@ -34,16 +39,10 @@
                                     @(date.Day == 1 ? date.ToString("MMM ") : "")@date.Day
                                 </a>
 
-                                @foreach (var item in Events.OrderBy(x => x.GetStartTime(DateOnly.FromDateTime(date), true)))
-                                {
-                                    var startTime = item.GetStartTime(DateOnly.FromDateTime(date), true);
-                                    var endTime = item.GetEndTime(DateOnly.FromDateTime(date), true);
-
-                                    if (startTime != endTime)
-                                    {
-                                        <div role="button" class="flex-row-center justify-content-start overflow-hidden rounded-pill text-nowrap bg-primary text-white m-1 pe-1 pointer-event"
-                                             @onclick=@(async () => await EditAppointment(item.Appointment))>
-                                            @if (item.GetStartDate(true) < DateOnly.FromDateTime(date))
+                                <TemplatedAppointments Appointments="Events" Date="currentDate" Context="item" >
+                                    <AppointmentTemplate>
+                                        <div class="flex-row-center justify-content-start overflow-hidden rounded-pill text-nowrap bg-primary text-white m-1 pe-1 pointer-event">
+                                            @if (item.GetStartDate(true) < DateOnly.FromDateTime(currentDate))
                                             {
                                                 <MudTooltip Text="Event starts on previous day" Class="material-icons-tooltip">
                                                     <div class="icon-tooltip">
@@ -53,9 +52,9 @@
                                                     </div>
                                                 </MudTooltip>
                                             }
-                                            <small class="mx-1 fw-light">@startTime.ToString("HH:mm")</small>
+                                            <small class="mx-1 fw-light">@item.GetStartTime(DateOnly.FromDateTime(currentDate), true).ToString("HH:mm")</small>
                                             <div class="text-truncate">@item.Appointment.Name</div>
-                                            @if (item.GetEndDate(true) > DateOnly.FromDateTime(date))
+                                            @if (item.GetEndDate(true) > DateOnly.FromDateTime(currentDate))
                                             {
                                                 <div class="flex-grow-1" />
                                                 <MudTooltip Text="Event ends on future day">
@@ -67,8 +66,8 @@
                                                 </MudTooltip>
                                             }
                                         </div>
-                                    }
-                                }
+                                    </AppointmentTemplate>
+                                </TemplatedAppointments>
                             </div>
                         </td>
                         date = date.AddDays(1);
@@ -76,7 +75,6 @@
                 </tr>
             }
         }
-
     </tbody>
 </table>
 
@@ -92,12 +90,4 @@
 
     [Parameter, EditorRequired]
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
-
-    [Parameter, EditorRequired]
-    public EventCallback<AppointmentDtoBase> OnEditAppointment { get; set; }
-
-    private async Task EditAppointment(AppointmentDtoBase appointment)
-    {
-        await OnEditAppointment.InvokeAsync(appointment);
-    }
 }

@@ -4,7 +4,6 @@ namespace Core.Dto.Appointment
 {
     public record AppointmentDto(string Name, PersonDto Person) : AppointmentDtoBase(Name)
     {
-
         /// <summary>
         /// The person who made the booking
         /// </summary>

@@ -13,11 +13,33 @@ namespace Core.Services
 
         private readonly IMapper _mapper = mapper;
 
+        public async Task<ServiceResult<TimeBlockDto>> GetTimeBlock(Guid guid)
+        {
+            try
+            {
+                var timeBlock = await _appointmentContext.GetTimeBlock(guid);
+
+                if (timeBlock == null)
+                {
+                    return new ServiceResult<TimeBlockDto>(null, ResultType.ClientError, ["Unable to find Time Block with supplied Id"]);
+                }
+
+                var dto = _mapper.Map<TimeBlockDto>(timeBlock);
+                return new ServiceResult<TimeBlockDto>(dto);
+            }
+            catch (Exception)
+            {
+                // TODO logging.
+            }
+
+            return ServiceResult<TimeBlockDto>.DefaultServerFailure();
+        }
+
         public async Task<ServiceResult<TimeBlockDto>> CreateOrUpdateTimeBlock(TimeBlockDto dto)
         {
             try
             {
-                if(dto.RepeatType != null && dto.Repeats.Count == 0)
+                if (dto.RepeatType != null && dto.Repeats.Count == 0)
                 {
                     return new ServiceResult<TimeBlockDto>(null, ResultType.ClientError, ["Cannot create a repeating time block without any repeats!"]);
                 }
@@ -31,7 +53,7 @@ namespace Core.Services
                 }
                 else
                 {
-                    // UPDATE
+                    result = await _appointmentContext.Update(entity);
                 }
 
                 if (result)
@@ -48,19 +70,29 @@ namespace Core.Services
             return ServiceResult<TimeBlockDto>.DefaultServerFailure();
         }
 
-        public Task<ServiceResult<ICollection<TimeBlockInstanceDto>>> GetTimeBlocksBetweenDates(DateOnly start, DateOnly end)
+        public async Task<ServiceResult<ICollection<TimeBlockInstanceDto>>> GetTimeBlocksBetweenDates(DateOnly start, DateOnly end)
         {
             try
             {
-                var timeBlockResult = _appointmentContext.GetTimeBlocks();
+                var timeBlockResult = await _appointmentContext.GetTimeBlocks();
                 var timeBlocks = _mapper.Map<ICollection<TimeBlockDto>>(timeBlockResult);
 
                 var timeBlockInstances = new List<TimeBlockInstanceDto>();
 
                 foreach (var timeBlock in timeBlocks)
                 {
-                    if(end < DateOnly.FromDateTime(timeBlock.StartTime))
+                    if (timeBlock.RepeatType == null)
                     {
+                        if (timeBlock.StartTime <= end.ToDateTime(TimeOnly.MaxValue) && timeBlock.EndTime >= start.ToDateTime(TimeOnly.MinValue))
+                        {
+                            timeBlockInstances.Add(new(timeBlock.Guid, timeBlock.Name, DateOnly.FromDateTime(timeBlock.StartTime), false)
+                            {
+                                StartTime = timeBlock.StartTime,
+                                EndTime = timeBlock.EndTime,
+                            });
+                        }
+
+                        // No repeats to check, continue
                         continue;
                     }
 
@@ -76,28 +108,57 @@ namespace Core.Services
                         {
                             date = result.Result;
 
-
-                            var timeBlockInstance = new TimeBlockInstanceDto(timeBlock.Guid, timeBlock.Name, date)
+                            // Next occurance is outside range
+                            if (date > end)
                             {
-                                StartTime = new DateTime(date, startTime),
-                                EndTime = new DateTime(date, endTime).AddDays(days),
-                            };
+                                break;
+                            }
 
-                            timeBlockInstances.Add(timeBlockInstance);
+                            // Handle all repeats which are NOT exceptions
+                            var exception = timeBlock.Exceptions.SingleOrDefault(e => e.DateToReplace == date);
+                            if (exception == null)
+                            {
+                                var timeBlockInstance = new TimeBlockInstanceDto(timeBlock.Guid, timeBlock.Name, date)
+                                {
+                                    StartTime = new DateTime(date, startTime),
+                                    EndTime = new DateTime(date, endTime).AddDays(days),
+                                };
+
+                                timeBlockInstances.Add(timeBlockInstance);
+                            }
                         }
 
                         date = date.AddDays(1);
                     }
+
+                    // Include any exceptions which occur in the range
+                    var exceptionsInRange = timeBlock.Exceptions.Where(x => x.StartTime <= end.ToDateTime(TimeOnly.MaxValue) && x.EndTime >= start.ToDateTime(TimeOnly.MinValue));
+                    foreach (var exception in exceptionsInRange)
+                    {
+                        var duration = exception.EndTime.Subtract(exception.StartTime);
+
+                        if (duration > TimeSpan.Zero)
+                        {
+
+                            var timeBlockInstance = new TimeBlockInstanceDto(timeBlock.Guid, exception.Name, exception.DateToReplace, true)
+                            {
+                                StartTime = exception.StartTime,
+                                EndTime = exception.EndTime,
+                            };
+
+                            timeBlockInstances.Add(timeBlockInstance);
+                        }
+                    }
                 }
 
-                return Task.FromResult(new ServiceResult<ICollection<TimeBlockInstanceDto>>(timeBlockInstances));
+                return new ServiceResult<ICollection<TimeBlockInstanceDto>>(timeBlockInstances);
             }
             catch (Exception)
             {
                 // TODO logging
             }
 
-            return Task.FromResult(ServiceResult<ICollection<TimeBlockInstanceDto>>.DefaultServerFailure());
+            return ServiceResult<ICollection<TimeBlockInstanceDto>>.DefaultServerFailure();
         }
     }
 }

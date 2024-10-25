@@ -7,7 +7,7 @@ namespace Core.Services
     {
         public static ServiceResult<DateOnly> GetNextRepeaterDate(IRepeatable dto, DateOnly startDate)
         {
-            if (dto.Repeats.Count == 0)
+            if (dto.RepeatType != null && dto.Repeats.Count == 0)
             {
                 return new ServiceResult<DateOnly>(default, ResultType.ServerError, ["Unable to find any dates for this service"]);
             }
