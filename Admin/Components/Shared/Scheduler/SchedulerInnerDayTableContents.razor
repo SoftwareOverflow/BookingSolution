@@ -13,7 +13,7 @@
         </tbody>
     </table>
 
-    <TemplatedAppointments Appointments="Events" Date="_date" Context="item">
+    <TemplatedAppointments @ref="Appointments" Appointments="Events" Date="_date" Context="item">
         <AppointmentTemplate>
             <div class="event-container" style="--event-top: @(item.TopPx(Date, true))px;
                 --event-height: @(item.HeightPx(Date, true))px;
@@ -25,6 +25,15 @@
                         <p>@item.Appointment.Name</p>
                     </div>
                 </div>
+
+                @if(Appointments.IsSyncedToTimeBlock(item))
+                {
+                    <span class="material-symbols-outlined position-absolute m-1 bottom-0 end-0 text-white fs-5">sync</span>
+                }
+                else if (Appointments.IsTimeBlockException(item))
+                {
+                    <span class="material-symbols-outlined position-absolute m-1 bottom-0 end-0 text-white fs-5">sync_disabled</span>
+                }
             </div>
         </AppointmentTemplate>
     </TemplatedAppointments>
@@ -38,4 +47,6 @@
     public List<PositionedAppointment> Events { get; set; } = new List<PositionedAppointment>();
 
     private DateTime _date => new DateTime(Date, new TimeOnly(0, 0));
+
+    private TemplatedAppointments Appointments = default!;
 }

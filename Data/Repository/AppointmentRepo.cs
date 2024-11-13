@@ -115,7 +115,7 @@ namespace Data.Repository
 
         public Task<TimeBlock?> GetTimeBlock(Guid guid)
         {
-            return ExecuteAsync(async (db, _) => await db.TimeBlocks.Include(tb => tb.Repeats).SingleOrDefaultAsync(x => x.Guid == guid));
+            return ExecuteAsync(async (db, _) => await db.TimeBlocks.Include(tb => tb.Exceptions).Include(tb => tb.Repeats).SingleOrDefaultAsync(x => x.Guid == guid));
         }
 
         public async Task<bool> Create(TimeBlock timeBlock)
@@ -141,17 +141,20 @@ namespace Data.Repository
         {
             await ExecuteVoidAsync(async (db, _) =>
             {
-                var existing = await db.TimeBlocks.Include(tb => tb.Repeats).Include(tb => tb.Exceptions).SingleOrDefaultAsync(tb => tb.Guid == timeBlock.Guid) ?? throw new ArgumentException("Cannot find Time Block to update");
+                using var transaction = await db.Database.BeginTransactionAsync();
 
-                // Check the repeats
-                if (existing.RepeatType != timeBlock.RepeatType || !timeBlock.Repeats.Equals(existing.Repeats))
-                {
-                    timeBlock.Exceptions = [];
-                }
+                var existing = await db.TimeBlocks.Include(tb => tb.Repeats).Include(tb => tb.Exceptions).SingleOrDefaultAsync(tb => tb.Guid == timeBlock.Guid) ?? throw new ArgumentException("Cannot find Time Block to update");
 
                 // Manually map the foreign keys first to ensure we don't try and create any new objects
                 timeBlock.Id = existing.Id;
                 timeBlock.BusinessId = existing.BusinessId;
+
+                // Check the repeats - updates to RepeatType or Repeaters are not allowed.
+                if (existing.RepeatType != timeBlock.RepeatType || !timeBlock.Repeats.Equals(existing.Repeats))
+                {
+                    db.TimeBlockExceptions.RemoveRange(existing.Exceptions);
+                    await db.SaveChangesAsync();
+                }
 
                 // The nested repeat objects do NOT get updated by default. Manually copy them
                 existing.Repeats = timeBlock.Repeats;
@@ -159,29 +162,167 @@ namespace Data.Repository
                 db.TimeBlocks.Entry(existing).CurrentValues.SetValues(timeBlock);
 
                 await db.SaveChangesAsync();
+
+                await transaction.CommitAsync();
             });
 
             return true;
         }
 
-        public Task<bool> DeleteTimeBlock(Guid id)
+        public async Task<bool> DeleteTimeBlock(Guid id, bool deleteExceptions)
         {
-            throw new NotImplementedException();
+            await ExecuteVoidAsync(async (db, _) =>
+            {
+                var timeBlock = db.TimeBlocks.Include(tb => tb.Exceptions).SingleOrDefault(tb => tb.Guid == id) ?? throw new ArgumentException("Cannot find time block");
+                var businessId = db.GetBusinessId();
+
+                using var transaction = await db.Database.BeginTransactionAsync();
+
+                if (!deleteExceptions)
+                {
+                    // If we're keeping the TimeBlock exceptions they need to be unlinked from the TimeBlock instance
+                    foreach (var exception in timeBlock.Exceptions)
+                    {
+                        exception.TimeBlockId = null;
+                    }
+
+                    await db.SaveChangesAsync();
+                }
+
+                db.TimeBlocks.Remove(timeBlock);
+                await db.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            });
+
+            return true;
         }
 
-        public Task<bool> Create(TimeBlockException exception)
+        public async Task<bool> Create(TimeBlockException exception, Guid timeBlockGuid)
         {
-            throw new NotImplementedException();
+            await ExecuteVoidAsync(async (db, _) =>
+            {
+                var businessId = await db.GetBusinessId();
+
+                var timeBlock = db.TimeBlocks.Include(tb => tb.Exceptions).SingleOrDefault(tb => tb.Guid == timeBlockGuid) ?? throw new ArgumentException("Cannot find time block");
+                var existing = timeBlock.Exceptions.SingleOrDefault(tbe => tbe.DateToReplace == exception.DateToReplace);
+                if (existing != null)
+                {
+                    throw new ArgumentException("Time Block Exception exists - call Update instead.");
+                }
+
+                exception.BusinessId = businessId;
+                exception.TimeBlockId = timeBlock.Id;
+
+                db.TimeBlockExceptions.Add(exception);
+                await db.SaveChangesAsync();
+            });
+
+            return true;
         }
 
-        public Task<bool> Update(TimeBlockException exception)
+        public async Task<bool> Update(TimeBlockException exception, Guid timeBlockGuid)
         {
-            throw new NotImplementedException();
+            await ExecuteVoidAsync(async (db, _) =>
+            {
+                var businessId = await db.GetBusinessId();
+
+                var timeBlock = db.TimeBlocks.Include(tb => tb.Exceptions).SingleOrDefault(tb => tb.Guid == timeBlockGuid) ?? throw new ArgumentException("Cannot find time block");
+                var existing = timeBlock.Exceptions.SingleOrDefault(tbe => tbe.Guid == exception.Guid) ?? throw new ArgumentException("Cannot find time block exception");
+
+                exception.BusinessId = businessId;
+                exception.TimeBlockId = timeBlock.Id;
+                exception.Id = existing.Id;
+
+                db.TimeBlockExceptions.Entry(existing).CurrentValues.SetValues(exception);
+                await db.SaveChangesAsync();
+            });
+
+            return true;
         }
 
-        public Task<bool> DeleteException(TimeBlockException exception)
+        public async Task<bool> DeleteException(TimeBlockException exception, Guid timeBlockGuid)
         {
-            throw new NotImplementedException();
+            // TODO consider adding a boolean for revertSequence or something, and then either delete or change the start and end times to match
+
+            await ExecuteVoidAsync(async (db, _) =>
+            {
+                var existing = db.TimeBlockExceptions.SingleOrDefault(tbe => tbe.Guid == exception.Guid);
+
+                // If we don't have an existing entity, we're creating an exception in the 'deleted' state (i.e. a single instance is being removed)
+                if (existing == null)
+                {
+                    var timeBlock = db.TimeBlocks.SingleOrDefault(tb => tb.Guid == timeBlockGuid) ?? throw new ArgumentException("Cannot find time block");
+
+                    exception.BusinessId = await db.GetBusinessId();
+                    exception.TimeBlockId = timeBlock.Id;
+
+                    existing = exception;
+                }
+
+                // If the timeBlockId is null, the assosciated timeblock has already been separately deleted and so it's safe to delete the exception.
+                // Otherwise just set the duration to 0
+                if (existing.TimeBlockId == null)
+                {
+                    db.TimeBlockExceptions.Remove(existing);
+                }
+                else
+                {
+                    var newTime = new DateTime(DateOnly.FromDateTime(exception.StartTime), new TimeOnly(0, 0, 0));
+                    existing.StartTime = newTime;
+                    existing.EndTime = newTime;
+
+                    // Possible to create a new TimeBlockException in the 'deleted' state, so make sure we add it in this case.
+                    if (existing.Guid == Guid.Empty)
+                    {
+                        db.TimeBlockExceptions.Add(existing);
+                    }
+                }
+
+                await db.SaveChangesAsync();
+
+            });
+
+            return true;
+        }
+
+        public Dictionary<Guid, ICollection<TimeBlockException>> GetTimeBlockExceptionsBetweenDates(DateOnly startDate, DateOnly endDate)
+        {
+            return Execute((db, _) =>
+            {
+                var result = new Dictionary<Guid, ICollection<TimeBlockException>>();
+
+                var exceptions = db.TimeBlockExceptions.AsQueryable().BetweenDates(startDate, endDate).ToList();
+
+                foreach (var exception in exceptions)
+                {
+                    var timeBlockGuid = Guid.Empty;
+
+                    if (exception.TimeBlockId != null)
+                    {
+                        var timeBlock = db.TimeBlocks.Find(exception.TimeBlockId);
+                        if (timeBlock != null)
+                        {
+                            timeBlockGuid = timeBlock.Guid;
+                        }
+                        else
+                        {
+                            // TODO logging - shouldn't end up here 
+                        }
+                    }
+
+                    if (result.TryGetValue(timeBlockGuid, out var list))
+                    {
+                        list.Add(exception);
+                    }
+                    else
+                    {
+                        result.Add(timeBlockGuid, [exception]);
+                    }
+                }
+
+                return result;
+            });
         }
     }
 }

@@ -39,7 +39,7 @@
                                     @(date.Day == 1 ? date.ToString("MMM ") : "")@date.Day
                                 </a>
 
-                                <TemplatedAppointments Appointments="Events" Date="currentDate" Context="item" >
+                                <TemplatedAppointments @ref="Appointments" Appointments="Events" Date="currentDate" Context="item">
                                     <AppointmentTemplate>
                                         <div class="flex-row-center justify-content-start overflow-hidden rounded-pill text-nowrap bg-primary text-white m-1 pe-1 pointer-event">
                                             @if (item.GetStartDate(true) < DateOnly.FromDateTime(currentDate))
@@ -54,9 +54,20 @@
                                             }
                                             <small class="mx-1 fw-light">@item.GetStartTime(DateOnly.FromDateTime(currentDate), true).ToString("HH:mm")</small>
                                             <div class="text-truncate">@item.Appointment.Name</div>
+                                            <div class="flex-grow-1" />
+
+                                            @if (Appointments.IsSyncedToTimeBlock(item))
+                                            {
+                                                <span class="material-symbols-outlined m-0 text-white fs-6">sync</span>
+                                            }
+                                            else if (Appointments.IsTimeBlockException(item))
+                                            {
+                                                <span class="material-symbols-outlined m-0 text-white fs-6">sync_disabled</span>
+                                            }
+
                                             @if (item.GetEndDate(true) > DateOnly.FromDateTime(currentDate))
                                             {
-                                                <div class="flex-grow-1" />
+
                                                 <MudTooltip Text="Event ends on future day">
                                                     <div class="icon-tooltip float-end">
                                                         <span class="material-symbols-outlined">
@@ -90,4 +101,6 @@
 
     [Parameter, EditorRequired]
     public Func<CalendarLayoutType, DateTime, Task> OnCalendarStateChange { get; set; } = default!;
+
+    private TemplatedAppointments Appointments = default!;
 }

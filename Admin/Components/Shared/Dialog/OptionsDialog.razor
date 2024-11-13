@@ -15,6 +15,13 @@
                 </div>
             }
 
+            @if (!string.IsNullOrEmpty(Warning))
+            {
+                <div class="alert alert-danger my-0 text-center">
+                    <p class="lead my-0">@Warning</p>
+                </div>
+            }
+
             <div class="card-footer">
                 <div class="d-flex flex-column">
                     @foreach (var option in Options)
@@ -39,6 +46,9 @@
 
     [Parameter]
     public string Content { get; set; } = "";
+
+    [Parameter]
+    public string Warning { get; set; } = "";
 
     [Parameter, EditorRequired]
     public Dictionary<string, Action> Options { get; set; } = [];

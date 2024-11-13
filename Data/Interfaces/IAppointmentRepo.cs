@@ -6,6 +6,14 @@ namespace Data.Interfaces
     {
         public ICollection<Appointment> GetAppointmentsBetweenDates(DateOnly startDate, DateOnly endDate);
 
+        /// <summary>
+        /// Get exceptions to time block sequences in a given range, grouped by time block guid
+        /// </summary>
+        /// <param name="startDate">Start date (inclusive)</param>
+        /// <param name="endDate">End date (inclusive)</param>
+        /// <returns>All the exceptions occuring in the requested range, grouped by time block guid</returns>
+        public Dictionary<Guid, ICollection<TimeBlockException>> GetTimeBlockExceptionsBetweenDates(DateOnly startDate, DateOnly endDate);
+
         public Task<bool> Create(Appointment appointment);
 
         public Task<bool> Update(Appointment appointment);
@@ -20,10 +28,10 @@ namespace Data.Interfaces
 
         public Task<bool> Update(TimeBlock timeBlock);
 
-        public Task<bool> DeleteTimeBlock(Guid id);
+        public Task<bool> DeleteTimeBlock(Guid id, bool deleteExceptions);
 
-        public Task<bool> Create(TimeBlockException exception);
-        public Task<bool> Update(TimeBlockException exception);
-        public Task<bool> DeleteException(TimeBlockException exception);
+        public Task<bool> Create(TimeBlockException exception, Guid timeBlockGuid);
+        public Task<bool> Update(TimeBlockException exception, Guid timeBlockGuid);
+        public Task<bool> DeleteException(TimeBlockException exception, Guid timeBlockGuid);
     }
 }

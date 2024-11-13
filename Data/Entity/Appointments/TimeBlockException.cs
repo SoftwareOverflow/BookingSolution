@@ -1,4 +1,6 @@
-﻿namespace Data.Entity.Appointments
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Data.Entity.Appointments
 {
     /// <summary>
     /// Holds exceptions to the normal repeaters
@@ -9,6 +11,7 @@
         /// Foreign Keys to the assosciated TimeBlock recurring sequence.
         /// Nullable - the exception could still exist after the TimeBlock repeats have been deleted.
         /// </summary>
+        
         public int? TimeBlockId { get; set; }
 
         /// <summary>

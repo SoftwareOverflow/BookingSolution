@@ -37,11 +37,8 @@
         if (timeBlockInstance != null)
         {
             // If the instance is part of the sequence, offer the option to edit just this instance or all occurances.
-            if (!timeBlockInstance.IsException)
+            if (!timeBlockInstance.IsException && !timeBlockInstance.IsOneOff)
             {
-                var options = new Dictionary<string, Action>();
-                options.Add("abc", () => { });
-
                 var parameters = new DialogParameters<OptionsDialog>
                 {
                     { x => x.Title, "Instance is part of a recurring sequence" },
@@ -70,5 +67,28 @@
         {
             Scheduler.SetAppointmentToEdit(aptInstance);
         }
+    }
+
+    public bool IsSyncedToTimeBlock(PositionedAppointment apt)
+    {
+        var timeBlock = apt.Appointment as TimeBlockInstanceDto;
+
+        if(timeBlock != null)
+        {
+            if(timeBlock.IsOneOff)
+            {
+                return false;
+            }
+
+            return !timeBlock.IsException;
+        }
+
+        return false;
+    }
+
+    public bool IsTimeBlockException(PositionedAppointment apt)
+    {
+        var timeBlock = apt.Appointment as TimeBlockInstanceDto;
+        return timeBlock?.IsException ?? false;
     }
 }

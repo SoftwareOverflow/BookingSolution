@@ -1,4 +1,5 @@
 ﻿using Core.Dto.Validation;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Dto.Appointment
@@ -19,7 +20,7 @@ namespace Core.Dto.Appointment
         /// <summary>
         /// The EndTime of the booking, excluding any padding
         /// </summary>
-        [DateMustBeAfter(nameof(StartTime))]
+        [DateMustBeAfter(nameof(StartTime), "Start Time", "End Time")]
         public DateTime EndTime { get; set; }
 
         /// <summary>

@@ -6,8 +6,11 @@ using Core.Mapping;
 using Core.Responses;
 using Core.Services;
 using Data.Entity.Appointments;
+using Data.Extensions;
 using Data.Interfaces;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Moq;
+using System;
 
 namespace Core.Tests.Services
 {
@@ -41,7 +44,7 @@ namespace Core.Tests.Services
                 RepeatType = repeaterType
             };
 
-            var result = await _timeBlockService.CreateOrUpdateTimeBlock(tb);
+            var result = await _timeBlockService.CreateOrUpdate(tb);
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
@@ -70,7 +73,7 @@ namespace Core.Tests.Services
             };
 
             var expectedEntity = _mapper.Map<TimeBlock>(tb);
-            var result = await _timeBlockService.CreateOrUpdateTimeBlock(tb);
+            var result = await _timeBlockService.CreateOrUpdate(tb);
 
             Assert.True(result.IsSuccess);
             Assert.Equivalent(expectedEntity, entity);
@@ -83,7 +86,21 @@ namespace Core.Tests.Services
             _appointmentRepo.Setup(a => a.Create(It.IsAny<TimeBlock>())).ReturnsAsync(false);
 
             var tb = new TimeBlockDto("New Time Block");
-            var result = await _timeBlockService.CreateOrUpdateTimeBlock(tb);
+            var result = await _timeBlockService.CreateOrUpdate(tb);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+            Assert.Null(result.Result);
+            _appointmentRepo.Verify(a => a.Create(It.IsAny<TimeBlock>()), Times.Once);
+        }
+
+        [Fact]
+        public async void Create_DatabaseException()
+        {
+            _appointmentRepo.Setup(a => a.Create(It.IsAny<TimeBlock>())).ThrowsAsync(new Exception());
+
+            var tb = new TimeBlockDto("New Time Block");
+            var result = await _timeBlockService.CreateOrUpdate(tb);
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ServerError, result.ResultType);
@@ -112,7 +129,7 @@ namespace Core.Tests.Services
             };
 
             var expectedEntity = _mapper.Map<TimeBlock>(tb);
-            var result = await _timeBlockService.CreateOrUpdateTimeBlock(tb);
+            var result = await _timeBlockService.CreateOrUpdate(tb);
 
             Assert.True(result.IsSuccess);
             Assert.Equivalent(expectedEntity, entity);
@@ -129,7 +146,25 @@ namespace Core.Tests.Services
             {
                 Guid = guid
             };
-            var result = await _timeBlockService.CreateOrUpdateTimeBlock(tb);
+            var result = await _timeBlockService.CreateOrUpdate(tb);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+            Assert.Null(result.Result);
+            _appointmentRepo.Verify(a => a.Update(It.Is<TimeBlock>(tb => tb.Guid == guid)), Times.Once);
+        }
+
+        [Fact]
+        public async void Update_DatabaseException()
+        {
+            _appointmentRepo.Setup(a => a.Update(It.IsAny<TimeBlock>())).ThrowsAsync(new Exception());
+
+            var guid = Guid.NewGuid();
+            var tb = new TimeBlockDto("New Time Block")
+            {
+                Guid = guid
+            };
+            var result = await _timeBlockService.CreateOrUpdate(tb);
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ServerError, result.ResultType);
@@ -148,6 +183,21 @@ namespace Core.Tests.Services
 
             Assert.False(result.IsSuccess);
             Assert.Equal(ResultType.ClientError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.GetTimeBlock(guid), Times.Once);
+        }
+
+        [Fact]
+        public async void GetTimeBlock_DatabaseFails()
+        {
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ThrowsAsync(new Exception());
+
+            var guid = Guid.NewGuid();
+
+            var result = await _timeBlockService.GetTimeBlock(guid);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equivalent(result, ServiceResult<TimeBlockDto>.DefaultServerFailure());
 
             _appointmentRepo.Verify(a => a.GetTimeBlock(guid), Times.Once);
         }
@@ -279,7 +329,7 @@ namespace Core.Tests.Services
             };
 
             _appointmentRepo.Setup(a => a.GetTimeBlocks()).ReturnsAsync(timeBlocks);
-
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns([]);
 
             var result = await _timeBlockService.GetTimeBlocksBetweenDates(new DateOnly(2024, 10, 4), new DateOnly(2024, 10, 7));
 
@@ -290,10 +340,16 @@ namespace Core.Tests.Services
         [Fact]
         public async void GetTimeBlocksBetweenDates()
         {
-            Guid[] guids = new Guid[7];
+            Guid[] guids = new Guid[8];
             for (int i = 0; i < guids.Length; i++)
             {
                 guids[i] = Guid.NewGuid();
+            }
+
+            Guid[] exceptionGuids = new Guid[4];
+            for (int i = 0; i < exceptionGuids.Length; i++)
+            {
+                exceptionGuids[i] = Guid.NewGuid();
             }
 
             var timeBlocks = new List<TimeBlock>()
@@ -366,7 +422,8 @@ namespace Core.Tests.Services
                             Name = "TB4 - Moved",
                             DateToReplace = new DateOnly(2024, 10, 18),
                             StartTime = new DateTime(2024, 10, 18, 16, 0, 0),
-                            EndTime = new DateTime(2024, 10, 18, 18, 0, 0)
+                            EndTime = new DateTime(2024, 10, 18, 18, 0, 0),
+                            Guid = exceptionGuids[0]
                         }
                         ]
                 },
@@ -389,7 +446,8 @@ namespace Core.Tests.Services
                             Name = "TB5 - MOVED INSIDE RANGE",
                             DateToReplace = new DateOnly(2024, 10, 1),
                             StartTime = new DateTime(2024, 10, 18, 16, 0, 0), // Moved inside range
-                            EndTime = new DateTime(2024, 10, 18, 18, 0, 0)
+                            EndTime = new DateTime(2024, 10, 18, 18, 0, 0),
+                            Guid = exceptionGuids[1],
                         }
                         ]
                 },
@@ -421,7 +479,8 @@ namespace Core.Tests.Services
                             Name = "Moved within",
                             DateToReplace = new DateOnly(2024, 10, 11),
                             StartTime = new DateTime(2024, 10, 11, 18, 0, 0),
-                            EndTime = new DateTime(2024, 10, 11, 22, 0, 0)
+                            EndTime = new DateTime(2024, 10, 11, 22, 0, 0),
+                            Guid = exceptionGuids[2],
                         },
                         new () {
                             Name = "MOVED OUTSIDE RANGE",
@@ -431,13 +490,53 @@ namespace Core.Tests.Services
                         }
                         ]
                 },
+
+                new()
+                {
+                    Guid = guids[7],
+                    Name = "TB7",
+                    StartTime = new DateTime(2024, 11, 1, 12, 30, 0), // Starts outside range
+                    EndTime = new DateTime(2024, 11, 1, 17, 30, 0),
+                    RepeatType = Data.Entity.RepeatType.MonthlyAbsolute,
+                    Repeats = [
+                        new(){
+                            DayIdentifier = 1,
+                        }
+                        ],
+                    Exceptions = [
+                        new() {
+                            Name = "Sequence starts in future, but this one is moved inside the range",
+                            DateToReplace = new DateOnly(2024, 12, 1),
+                            StartTime = new DateTime(2024, 10, 13, 11, 30, 0),
+                            EndTime = new DateTime(2024, 10, 13, 12, 30, 0),
+                            Guid = exceptionGuids[3],
+                        },
+                        new() {
+                            Name = "Sequence starts in future, but this one is moved BEFORE the range",
+                            DateToReplace = new DateOnly(2025, 3, 1),
+                            StartTime = new DateTime(2024, 1, 1, 11, 30, 0),
+                            EndTime = new DateTime(2024, 1, 1, 12, 30, 0)
+                        },
+                        ]
+                }
             };
 
             var start = new DateOnly(2024, 10, 9);
             var end = new DateOnly(2024, 10, 20);
 
+            var exceptionDict = new Dictionary<Guid, ICollection<TimeBlockException>>();
+            foreach (var tb in timeBlocks)
+            {
+                var exceptionsInRange = tb.Exceptions.AsQueryable().BetweenDates(start, end);
+
+                if (exceptionsInRange.Any())
+                {
+                    exceptionDict.Add(tb.Guid, exceptionsInRange.ToList());
+                }
+            }
 
             _appointmentRepo.Setup(a => a.GetTimeBlocks()).ReturnsAsync(timeBlocks);
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(start, end)).Returns(exceptionDict);
 
             /*
                 EXPECTED:
@@ -448,25 +547,26 @@ namespace Core.Tests.Services
             TB4 => 3 (inc 1 remove, 1 changed)
             TB5 => 3 (inc 1 moved inside)
             TB6 => 1 (inc 1 moved outside, 1 moved within)
-            TOTAL 10
+            TB7 => 1 (inc 1 moved insinde)
+            TOTAL 11
              */
 
             var expectedInstances = new List<TimeBlockInstanceDto>()
             {
                 // TB1
-                new(guids[1], "TB1", DateOnly.FromDateTime(timeBlocks[1].StartTime))
+                new(guids[1], "TB1", DateOnly.FromDateTime(timeBlocks[1].StartTime), IsOneOff: true)
                 {
                    StartTime = timeBlocks[1].StartTime,
                    EndTime = timeBlocks[1].EndTime,
                 },
                 // TB2
-                new(guids[2], "TB2", DateOnly.FromDateTime(timeBlocks[2].StartTime))
+                new(guids[2], "TB2", DateOnly.FromDateTime(timeBlocks[2].StartTime), IsOneOff: true)
                 {
                    StartTime = timeBlocks[2].StartTime,
                    EndTime = timeBlocks[2].EndTime,
                 },
                 // TB3
-                new(guids[3], "TB3", DateOnly.FromDateTime(timeBlocks[3].StartTime))
+                new(guids[3], "TB3", DateOnly.FromDateTime(timeBlocks[3].StartTime), IsOneOff: true)
                 {
                    StartTime = timeBlocks[3].StartTime,
                    EndTime = timeBlocks[3].EndTime,
@@ -486,12 +586,14 @@ namespace Core.Tests.Services
                 {
                     StartTime = new DateTime(2024, 10, 18, 16, 0, 0), // Moved forward vs timeBlock
                     EndTime = new DateTime(2024, 10, 18, 18, 00, 0), // Moved forward vs timeBlock
+                    Guid = exceptionGuids[0],
                 },
                 //TB5
                 new(guids[5], "TB5 - MOVED INSIDE RANGE", new DateOnly(2024, 10, 1), IsException: true) // Moved from 1st to 18th
                 {
                     StartTime = new DateTime(2024, 10, 18, 16, 0, 0),
                     EndTime = new DateTime(2024, 10, 18, 18, 0, 0),
+                    Guid = exceptionGuids[1],
                 },
                 new(guids[5], "TB5", new DateOnly(2024, 10, 9))
                 {
@@ -507,18 +609,26 @@ namespace Core.Tests.Services
                 new(guids[6], "Moved within", new DateOnly(2024, 10, 11), IsException: true)
                 {
                     StartTime = new DateTime(2024, 10, 11, 18, 0, 0),
-                    EndTime = new DateTime(2024, 10, 11, 22, 0, 0)
+                    EndTime = new DateTime(2024, 10, 11, 22, 0, 0),
+                    Guid = exceptionGuids[2],
                 },
+                //TB7
+                new(guids[7], "Sequence starts in future, but this one is moved inside the range", new DateOnly(2024, 12, 1), IsException: true) // Moved from 01/12 inside the range
+                {
+                    StartTime = new DateTime(2024, 10, 13, 11, 30, 0),
+                    EndTime = new DateTime(2024, 10, 13, 12, 30, 0),
+                    Guid = exceptionGuids[3],
+                }
             };
 
             var result = await _timeBlockService.GetTimeBlocksBetweenDates(start, end);
             var instances = result.Result!.ToList();
 
-
             Assert.True(result.IsSuccess);
             Assert.Equal(expectedInstances.Count, instances.Count);
 
             Assert.DoesNotContain(instances, i => i.TimeBlockGuid == guids[0]);
+            Assert.DoesNotContain(instances, i => i.IsException && i.Guid == Guid.Empty); // All exceptions should have proper guids as they are their own entities
 
             Assert.Equivalent(expectedInstances[0], instances[0]);
 
@@ -527,6 +637,314 @@ namespace Core.Tests.Services
                 var matchedInstance = instances.Single(i => i.TimeBlockGuid == item.TimeBlockGuid && i.InstanceDate == item.InstanceDate);
                 Assert.Equivalent(item, matchedInstance);
             }
+        }
+
+        [Fact]
+        public async void CreateTimeBlockException_ClientError()
+        {
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync((TimeBlock?)null);
+            _appointmentRepo.Setup(a => a.GetAppointmentsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns([]);
+
+            var timeBlockEx = new TimeBlockExceptionDto("Example exception");
+
+            var result = await _timeBlockService.CreateOrUpdate(timeBlockEx, Guid.NewGuid());
+
+            Assert.Equal(ResultType.ClientError, result.ResultType);
+        }
+
+        [Fact]
+        public async void CreateTimeBlockException_ServerError()
+        {
+            var tbGuid = Guid.NewGuid();
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync(
+                new TimeBlock()
+                {
+                    Guid = tbGuid,
+                });
+
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(new Dictionary<Guid, ICollection<TimeBlockException>>()
+            {
+                { tbGuid, [new TimeBlockException() {
+                    Name = "Exception Name",
+                    DateToReplace = new DateOnly(2024, 10, 3),
+                    StartTime = new DateTime(2024, 10, 3, 12, 30, 0),
+                    EndTime = new DateTime(2024, 10, 3, 13, 45, 0),
+                }] }
+            });
+
+            _appointmentRepo.Setup(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid)).ThrowsAsync(new Exception());
+
+            var timeBlockEx = new TimeBlockExceptionDto("Example exception")
+            {
+                DateToReplace = new DateOnly(2024, 10, 3),
+            };
+
+            var result = await _timeBlockService.CreateOrUpdate(timeBlockEx, tbGuid);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid), Times.Once);
+        }
+
+        [Fact]
+        public async void CreateTimeBlockException_InstancesFails()
+        {
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync(
+                new TimeBlock()
+                {
+                    Guid = Guid.NewGuid(),
+                });
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Throws(new Exception());
+
+            var timeBlockEx = new TimeBlockExceptionDto("Example exception");
+
+            var result = await _timeBlockService.CreateOrUpdate(timeBlockEx, Guid.NewGuid());
+
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.Create(It.IsAny<TimeBlockException>(), It.IsAny<Guid>()), Times.Never);
+            _appointmentRepo.Verify(a => a.Update(It.IsAny<TimeBlockException>(), It.IsAny<Guid>()), Times.Never);
+        }
+
+        [Fact]
+        public async void CreateTimeBlockException_NoInstanceMatch()
+        {
+            var tbGuid = Guid.NewGuid();
+
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync(
+                new TimeBlock()
+                {
+                    Guid = tbGuid,
+                });
+
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(new Dictionary<Guid, ICollection<TimeBlockException>>()
+            {
+                { tbGuid, [new TimeBlockException() {
+                    Name = "Exception Name",
+                    DateToReplace = new DateOnly(2024, 10, 3),
+                    StartTime = new DateTime(2024, 10, 3, 12, 30, 0),
+                    EndTime = new DateTime(2024, 10, 3, 13, 45, 0),
+                }] }
+            });
+
+            _appointmentRepo.Setup(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid)).ReturnsAsync(true);
+
+            var newEx = new TimeBlockExceptionDto("New TBE")
+            {
+                DateToReplace = DateOnly.MinValue,
+            };
+
+            var result = await _timeBlockService.CreateOrUpdate(newEx, tbGuid);
+
+            Assert.False(result.IsSuccess);
+            Assert.Contains(result.Errors, e => e.Contains("date"));
+
+            _appointmentRepo.Verify(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid), Times.Never);
+            _appointmentRepo.Verify(a => a.Update(It.IsAny<TimeBlockException>(), tbGuid), Times.Never);
+        }
+
+        [Fact]
+        public async void CreateTimeBlockException_DatabaseFails()
+        {
+            var tbGuid = Guid.NewGuid();
+
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync(
+                new TimeBlock()
+                {
+                    Guid = tbGuid,
+                });
+
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(new Dictionary<Guid, ICollection<TimeBlockException>>()
+            {
+                { tbGuid, [new TimeBlockException() {
+                    Name = "Exception Name",
+                    DateToReplace = new DateOnly(2024, 10, 3),
+                    StartTime = new DateTime(2024, 10, 3, 12, 30, 0),
+                    EndTime = new DateTime(2024, 10, 3, 13, 45, 0),
+                }] }
+            });
+
+            _appointmentRepo.Setup(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid)).ReturnsAsync(false);
+
+            var newEx = new TimeBlockExceptionDto("New TBE")
+            {
+                DateToReplace = new DateOnly(2024, 10, 3),
+            };
+
+            var result = await _timeBlockService.CreateOrUpdate(newEx, tbGuid);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid), Times.Once);
+        }
+
+        [Fact]
+        public async void CreateTimeBlockException()
+        {
+            var tbGuid = Guid.NewGuid();
+
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync(
+                new TimeBlock()
+                {
+                    Guid = tbGuid,
+                });
+
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(new Dictionary<Guid, ICollection<TimeBlockException>>()
+            {
+                { tbGuid, [new TimeBlockException() {
+                    Name = "Exception Name",
+                    DateToReplace = new DateOnly(2024, 10, 3),
+                    StartTime = new DateTime(2024, 10, 3, 12, 30, 0),
+                    EndTime = new DateTime(2024, 10, 3, 13, 45, 0),
+                }] }
+            });
+
+            _appointmentRepo.Setup(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid)).ReturnsAsync(true);
+
+            var newEx = new TimeBlockExceptionDto("New TBE")
+            {
+                DateToReplace = new DateOnly(2024, 10, 3),
+            };
+
+            var result = await _timeBlockService.CreateOrUpdate(newEx, tbGuid);
+
+            Assert.True(result.IsSuccess);
+            Assert.NotEqual(Guid.NewGuid(), result.Result!.Guid);
+
+
+            _appointmentRepo.Verify(a => a.Create(It.IsAny<TimeBlockException>(), tbGuid), Times.Once);
+        }
+
+        [Fact]
+        public async void UpdateTimeBlockException()
+        {
+            var tbGuid = Guid.NewGuid();
+
+            _appointmentRepo.Setup(a => a.GetTimeBlock(It.IsAny<Guid>())).ReturnsAsync(
+                new TimeBlock()
+                {
+                    Guid = tbGuid,
+                });
+
+            _appointmentRepo.Setup(a => a.GetTimeBlockExceptionsBetweenDates(It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(new Dictionary<Guid, ICollection<TimeBlockException>>()
+            {
+                { tbGuid, [new TimeBlockException() {
+                    Name = "Exception Name",
+                    DateToReplace = new DateOnly(2024, 10, 3),
+                    StartTime = new DateTime(2024, 10, 3, 12, 30, 0),
+                    EndTime = new DateTime(2024, 10, 3, 13, 45, 0),
+                }] }
+            });
+
+            _appointmentRepo.Setup(a => a.Update(It.IsAny<TimeBlockException>(), tbGuid)).ReturnsAsync(true);
+
+            var existingException = new TimeBlockExceptionDto("Existing TBE")
+            {
+                Guid = Guid.NewGuid(),
+                DateToReplace = new DateOnly(2024, 10, 3),
+            };
+
+            var result = await _timeBlockService.CreateOrUpdate(existingException, tbGuid);
+
+            Assert.True(result.IsSuccess);
+            Assert.NotEqual(Guid.NewGuid(), result.Result!.Guid);
+
+
+            _appointmentRepo.Verify(a => a.Update(It.IsAny<TimeBlockException>(), tbGuid), Times.Once);
+        }
+
+        [Fact]
+        public async void DeleteTimeBlockException()
+        {
+            var guid = Guid.NewGuid();
+            var instanceSpecificGuid = Guid.NewGuid();
+            var instance = new TimeBlockInstanceDto(guid, "Exception to delete", new DateOnly(2024, 10, 2), IsException: true)
+            {
+                Guid = instanceSpecificGuid
+            };
+
+            _appointmentRepo.Setup(a => a.DeleteException(It.IsAny<TimeBlockException>(), guid)).ReturnsAsync(true);
+
+            var result = await _timeBlockService.Delete(instance, false);
+
+            Assert.True(result.IsSuccess);
+            _appointmentRepo.Verify(a => a.DeleteException(It.Is<TimeBlockException>(tbe => tbe.Guid == instanceSpecificGuid), guid), Times.Once);
+        }
+
+        [Fact]
+        public async void DeleteTimeBlockException_DatabaseFails()
+        {
+            var guid = Guid.NewGuid();
+            var instanceSpecificGuid = Guid.NewGuid();
+            var instance = new TimeBlockInstanceDto(guid, "Exception to delete", new DateOnly(2024, 10, 2), IsException: true)
+            {
+                Guid = instanceSpecificGuid
+            };
+
+            _appointmentRepo.Setup(a => a.DeleteException(It.IsAny<TimeBlockException>(), guid)).ReturnsAsync(false);
+
+            var result = await _timeBlockService.Delete(instance, true);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.DeleteException(It.Is<TimeBlockException>(tbe => tbe.Guid == instanceSpecificGuid), guid), Times.Once);
+        }
+
+        [Fact]
+        public async void DeleteTimeBlockException_Errors()
+        {
+            var guid = Guid.NewGuid();
+            var instanceSpecificGuid = Guid.NewGuid();
+            var instance = new TimeBlockInstanceDto(guid, "Exception to delete", new DateOnly(2024, 10, 2), IsException: true)
+            {
+                Guid = instanceSpecificGuid
+            };
+
+            _appointmentRepo.Setup(a => a.DeleteException(It.IsAny<TimeBlockException>(), guid)).ThrowsAsync(new Exception());
+
+            var result = await _timeBlockService.Delete(instance, true);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.DeleteException(It.Is<TimeBlockException>(tbe => tbe.Guid == instanceSpecificGuid), guid), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void DeleteTimeBlock(bool deleteExceptions)
+        {
+            var guid = Guid.NewGuid();
+            var instance = new TimeBlockInstanceDto(guid, "Custom Time Block Instance", new DateOnly(2024, 10, 1), IsException: false);
+
+            _appointmentRepo.Setup(a => a.DeleteTimeBlock(guid, deleteExceptions)).ReturnsAsync(true);
+
+            var result = await _timeBlockService.Delete(instance, deleteExceptions);
+
+            Assert.True(result.IsSuccess);
+            _appointmentRepo.Verify(a => a.DeleteTimeBlock(guid, deleteExceptions), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void DeleteTimeBlock_DatabaseFails(bool deleteExceptions)
+        {
+            var guid = Guid.NewGuid();
+            var instance = new TimeBlockInstanceDto(guid, "Custom Time Block Instance", new DateOnly(2024, 10, 1), IsException: false);
+
+            _appointmentRepo.Setup(a => a.DeleteTimeBlock(guid, deleteExceptions)).ReturnsAsync(false);
+
+            var result = await _timeBlockService.Delete(instance, deleteExceptions);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ResultType.ServerError, result.ResultType);
+
+            _appointmentRepo.Verify(a => a.DeleteTimeBlock(guid, deleteExceptions), Times.Once);
         }
     }
 }

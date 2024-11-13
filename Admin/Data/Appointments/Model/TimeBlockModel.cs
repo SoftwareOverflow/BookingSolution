@@ -17,8 +17,16 @@ namespace Admin.Data.Appointments.Model
 
         public TimeBlockDto MapRepeats()
         {
-            Appointment.Repeats = Repeater.MapToDto();
-            Appointment.RepeatType = Repeater.RepeatType!.Value;
+            if (Repeater.RepeatType != null)
+            {
+                Appointment.Repeats = Repeater.MapToDto();
+                Appointment.RepeatType = Repeater.RepeatType!.Value;
+            }
+            else
+            {
+                Appointment.RepeatType = null;
+                Appointment.Repeats = [];
+            }
 
             return Appointment;
         }

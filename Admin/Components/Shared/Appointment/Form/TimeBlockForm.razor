@@ -6,6 +6,7 @@
 @using Core.Dto
 @using Core.Dto.Appointment
 @using Core.Interfaces
+@using Core.Responses
 @using Microsoft.AspNetCore.Components.Rendering
 
 @inject ITimeBlockService TimeBlockService
@@ -18,7 +19,7 @@
 
     <div class="container text-center position-relative bg-white bg-opacity-75 border-1 border-primary py-5">
         <button class="btn-lg material-symbols-outlined position-absolute top-0 end-0" @onclick="ShowUnsavedChangesDialog">close</button>
-        <h2>@(_model.Appointment!.Guid == Guid.Empty ? "Create New Time Block" : "Manage Time Block")</h2>
+        <h2>@_title</h2>
         <EditForm Model="_model" class="flex-column-center" OnValidSubmit="SaveChangesAsync">
             <ObjectGraphDataAnnotationsValidator />
 
@@ -48,7 +49,7 @@
                     Cancel
                 </button>
 
-                <div style="@(Instance.TimeBlockGuid == Guid.Empty ? "display: none;" : "")">
+                <div style="@(!Instance.IsException && Instance.TimeBlockGuid == Guid.Empty ? "display: none;" : "")">
                     <button type="button" class="btn btn-lg btn-outline-danger border-0 d-flex align-items-center mx-5" @onclick="Delete">
                         <span class="mx-2 material-symbols-outlined">delete</span>
                         Delete Appointment
@@ -75,31 +76,39 @@
 
     private bool _loading = true;
 
+    private string _title => Instance.IsException ? 
+                (_model.Appointment.Guid != Guid.Empty ? "Manage Exception" : "Create Exception") : 
+                (_model.Appointment.Guid != Guid.Empty ? "Manage Time Block" : "Create Time Block");
+
     protected override async Task OnParametersSetAsync()
     {
-        if (Instance.TimeBlockGuid != Guid.Empty)
-        {
-            var result = await TimeBlockService.GetTimeBlock(Instance.TimeBlockGuid);
-
-            if (result.IsSuccess)
-            {
-                _model = new(result.Result!);
-            }
-            else
-            {
-                MessageService.AddMessage(new MessageBase("Failed to load Time Block", MessageBase.MessageType.Error));
-                _loading = false;
-
-                await CloseOverlay();
-            }
-        }
-        else
+        if (Instance.IsException || Instance.TimeBlockGuid == Guid.Empty)
         {
             _model = new(new TimeBlockDto(Instance.Name)
                 {
                     StartTime = Instance.StartTime,
-                    EndTime = Instance.EndTime
+                    EndTime = Instance.EndTime,
+                    Guid = Instance.Guid,
                 });
+        }
+        else
+        {
+            if (Instance.TimeBlockGuid != Guid.Empty)
+            {
+                var result = await TimeBlockService.GetTimeBlock(Instance.TimeBlockGuid);
+
+                if (result.IsSuccess)
+                {
+                    _model = new(result.Result!);
+                }
+                else
+                {
+                    MessageService.AddMessage(new MessageBase("Failed to load Time Block", MessageBase.MessageType.Error));
+                    _loading = false;
+
+                    await CloseOverlay();
+                }
+            }
         }
 
         await base.OnParametersSetAsync();
@@ -109,38 +118,70 @@
 
     public async Task Delete()
     {
-        if (_model.Appointment.Guid == Guid.Empty)
+        var hasExceptions = false;
+
+        if (Instance.TimeBlockGuid != Guid.Empty)
         {
-            return;
+            var timeBlockResult = await TimeBlockService.GetTimeBlock(Instance.TimeBlockGuid);
+            if (timeBlockResult.IsSuccess)
+            {
+                hasExceptions = timeBlockResult.Result!.Exceptions.Any();
+            }
         }
 
-        var parameters = new DialogParameters<ConfirmationDialog>
+        var deleteExceptions = false;
+        DialogResult? result;
+        if (Instance.IsException || !hasExceptions)
         {
-            { x => x.Warning, "This cannot be undone!" },
-        };
+            var parameters = new DialogParameters<ConfirmationDialog>
+                {
+                    { x => x.Warning, "This cannot be undone!" },
+                };
 
-        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters);
-        var result = await dialog.Result;
+            var dialog = await DialogService.ShowAsync<ConfirmationDialog>(null, parameters);
+            result = await dialog.Result;
+        }
+        else
+        {
+            var parameters = new DialogParameters<OptionsDialog>
+                {
+                    { x => x.Title, "Delete exceptions to the sequence too?" },
+                    { x => x.Content, "Would you like to delete exceptions for this sequence as well?" },
+                    { x => x.Options, new Dictionary<string, Action>(){
+                        { "Delete exceptions", () => { deleteExceptions = true; } },
+                        { "Keep exceptions", () => { deleteExceptions = false; } },
+                    }}
+                };
+
+            var dialog = await DialogService.ShowAsync<OptionsDialog>(null, parameters);
+            result = await dialog.Result;
+        }
 
         if (!result?.Canceled ?? false)
         {
-            // var deleteResult = await TimeBlockService.DeleteAppointment(_model.Appointment.Guid);
-            // if (deleteResult.IsSuccess)
-            // {
-            //     MessageService.AddMessage(new MessageBase(
-            //            message: "Appointment deleted succesfully",
-            //            severity: MessageBase.MessageType.Normal
-            //    ));
-            // }
-            // else
-            // {
-            //     MessageService.AddMessage(new MessageBase(message: "Failed to delete appointment", severity: MessageBase.MessageType.Error));
-            //     deleteResult.Errors.ForEach(e =>
-            //     {
-            //         MessageService.AddMessage(new MessageBase(message: e, severity: MessageBase.MessageType.Error));
-            //     });
-            // }
+            _loading = true;
+            StateHasChanged();
 
+
+            var deleteResult = await TimeBlockService.Delete(Instance, deleteExceptions);
+            if (deleteResult.IsSuccess)
+            {
+                MessageService.AddMessage(new MessageBase(
+                       message: "Time Block deleted succesfully",
+                       severity: MessageBase.MessageType.Normal
+               ));
+            }
+            else
+            {
+                MessageService.AddMessage(new MessageBase(message: "Failed to delete time block", severity: MessageBase.MessageType.Error));
+                deleteResult.Errors.ForEach(e =>
+                {
+                    MessageService.AddMessage(new MessageBase(message: e, severity: MessageBase.MessageType.Error));
+                });
+            }
+
+            _loading = false;
+            StateHasChanged();
 
             await CloseOverlay();
         }
@@ -193,12 +234,32 @@
 
     private async Task SaveTimeBlock()
     {
+        var saveResult = await TimeBlockService.CreateOrUpdate(_model.Appointment);
+
+        await HandleSaveResult(saveResult, "Time Block");
+    }
+
+    private async Task SaveTimeBlockException()
+    {
+        var exception = new TimeBlockExceptionDto(_model.Name)
+            {
+                DateToReplace = Instance.InstanceDate,
+                Guid = Instance.Guid,
+                StartTime = _model.Appointment.StartTime,
+                EndTime = _model.Appointment.EndTime
+            };
+
+        var saveResult = await TimeBlockService.CreateOrUpdate(exception, Instance.TimeBlockGuid);
+        await HandleSaveResult(saveResult, "Time Block Exception");
+    }
+
+    private async Task HandleSaveResult<T>(ServiceResult<T> saveResult, string item)
+    {
         var isCreating = Instance.TimeBlockGuid == Guid.Empty;
 
-        var saveResult = await TimeBlockService.CreateOrUpdateTimeBlock(_model.Appointment);
         if (saveResult.IsSuccess)
         {
-            var message = isCreating ? "New Time Block Created" : "Changes Saved Succesfully";
+            var message = isCreating ? $"New {item} Created" : "Changes Saved Succesfully";
 
             MessageService.AddMessage(new MessageBase(
                    message,
@@ -212,11 +273,6 @@
             MessageService.AddMessage(new MessageBase("Failed to save changes", MessageBase.MessageType.Warning));
             saveResult.Errors.ForEach(e => MessageService.AddMessage(new MessageBase(e, MessageBase.MessageType.Error)));
         }
-    }
-
-    private async Task SaveTimeBlockException()
-    {
-        // TODO
     }
 
     private async Task CloseOverlay()
