@@ -30,13 +30,14 @@ namespace Data.Tests.Fixtures
             var businessIdForMockUser = businessses.Single(x => x.Users.SingleOrDefault(u => u.UserId == DockerSqlFixture.UserId) != null).Id;
 
             ICollection<Appointment> appointments = [];
-            foreach(var business in businessses)
+            ICollection<TimeBlock> timeBlocks = [];
+            foreach (var business in businessses)
             {
                 int minAppointments = 0;
                 int maxAppointments = 10;
 
                 List<int?> serviceIds = [null];
-                serviceIds.AddRange(business.Services.Select(s => (int?) s.Id ));
+                serviceIds.AddRange(business.Services.Select(s => (int?)s.Id));
 
 
                 appointments.AddRange(GetAppointments(Random.Shared.Next(minAppointments, maxAppointments), business.Id, false, serviceIds[Random.Shared.Next(serviceIds.Count)]));
@@ -46,12 +47,21 @@ namespace Data.Tests.Fixtures
                     minAppointments = 3;
                     appointments.Add(GetAppointments(1, business.Id, true, null).Single()); // Ensure we have at least one appointment without a service
                     serviceIds.Remove(null); // Ensure we have appointments linked to services
+
+                    timeBlocks.AddRange(GetTimeBlocks(10, business.Id));
+                }
+                else
+                {
+                    timeBlocks.AddRange(GetTimeBlocks(Random.Shared.Next(5), business.Id));
                 }
 
                 appointments.AddRange(GetAppointments(Random.Shared.Next(minAppointments, maxAppointments), business.Id, true, serviceIds[Random.Shared.Next(serviceIds.Count)]));
             }
 
             await context.Appointments.AddRangeAsync(appointments);
+            await context.TimeBlocks.AddRangeAsync(timeBlocks);
+
+
             await context.SaveChangesAsync();
         }
 
@@ -75,7 +85,7 @@ namespace Data.Tests.Fixtures
             .RuleFor(a => a.Address3, (faker, t) => faker.Address.StreetName())
             .RuleFor(a => a.City, (faker, t) => faker.Address.City())
             .RuleFor(a => a.State, (faker, t) => Random.Shared.Next(5) == 1 ? faker.Address.State() : "")
-            .UseSeed(_seed); 
+            .UseSeed(_seed);
 
         private static Faker<BusinessUser> GetBusinessUserFaker(bool ownedByMockUser) => new Faker<BusinessUser>()
             .RuleFor(b => b.UserId, o => ownedByMockUser ? DockerSqlFixture.UserId : Guid.NewGuid().ToString())
@@ -114,6 +124,89 @@ namespace Data.Tests.Fixtures
                 .UseSeed(_seed);
         }
 
+        public static List<TimeBlock> GetTimeBlocks(int count, int businessId) => GetTimeBlockFaker(businessId).Generate(count);
+
+        private static Faker<TimeBlock> GetTimeBlockFaker(int businessId)
+        {
+            return new Faker<TimeBlock>()
+                .RuleFor(tb => tb.Name, o => o.Name.JobType())
+                .RuleFor(tb => tb.BusinessId, businessId)
+                .RuleFor(a => a.StartTime, (faker, t) => faker.Date.Past())
+                .RuleFor(a => a.EndTime, (faker, t) => t.StartTime.AddTicks(Random.Shared.Next(1000) * 60000))
+                .RuleFor(s => s.RepeatType, o => o.PickRandom<RepeatType>())
+                .RuleFor(s => s.Repeats, (faker, t) => GetTimeBlockRepeats(t.RepeatType!.Value, Random.Shared.Next(6) + 1))
+                .UseSeed(_seed);
+        }
+
+        private static List<TimeBlockRepeater> GetTimeBlockRepeats(RepeatType repeatType, int count)
+        {
+            var picks = new Dictionary<int, List<int>>();
+
+            if (repeatType == RepeatType.Weekly)
+            {
+                picks.Add(0, Enumerable.Range(0, 6).ToList());
+            }
+            else if (repeatType == RepeatType.MonthlyAbsolute)
+            {
+                picks.Add(0, Enumerable.Range(0, 31).ToList());
+            }
+            else if (repeatType == RepeatType.MonthlyRelative)
+            {
+                picks.Add(-1, Enumerable.Range(0, 6).ToList());
+                picks.Add(1, Enumerable.Range(0, 6).ToList());
+                picks.Add(2, Enumerable.Range(0, 6).ToList());
+                picks.Add(3, Enumerable.Range(0, 6).ToList());
+            }
+
+            var result = new List<TimeBlockRepeater>();
+
+            for (int i = 0; i < count; i++)
+            {
+                var repeater = GetTimeBlockRepeaterFaker(repeatType, picks).Generate(1).Single();
+
+                picks[repeater.Index ?? 0].Remove(repeater.DayIdentifier);
+                if (picks[repeater.Index ?? 0].Count == 0)
+                {
+                    picks.Remove(repeater.Index ?? 0);
+                }
+
+                result.Add(repeater);
+
+                if (picks.Keys.Count == 0)
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        private static Faker<TimeBlockRepeater> GetTimeBlockRepeaterFaker(RepeatType type, Dictionary<int, List<int>> picks)
+        {
+            if (type == RepeatType.Weekly)
+            {
+                return new Faker<TimeBlockRepeater>()
+                   .RuleFor(r => r.DayIdentifier, o => o.PickRandom(picks[0]))
+                   .UseSeed(_seed);
+            }
+            else if (type == RepeatType.MonthlyAbsolute)
+            {
+                return new Faker<TimeBlockRepeater>()
+                    .RuleFor(r => r.Index, o => o.PickRandom<int>(picks.Keys))
+                    .RuleFor(r => r.DayIdentifier, (faker, t) => faker.PickRandom(picks[0]))
+                    .UseSeed(_seed);
+            }
+            else if (type == RepeatType.MonthlyRelative)
+            {
+                return new Faker<TimeBlockRepeater>()
+                   .RuleFor(r => r.Index, o => o.PickRandom<int>(picks.Keys))
+                   .RuleFor(r => r.DayIdentifier, (faker, t) => faker.PickRandom(picks[t.Index!.Value]))
+                   .UseSeed(_seed);
+            }
+
+            throw new NotImplementedException();
+        }
+
         private static Entity.Appointments.Person GetPerson() => GetPeopleFaker().Generate(1).Single();
 
         private static Faker<Entity.Appointments.Person> GetPeopleFaker() => new Faker<Entity.Appointments.Person>()
@@ -123,7 +216,8 @@ namespace Data.Tests.Fixtures
             .RuleFor(p => p.EmailAddress, (faker, p) => faker.Internet.Email())
             .UseSeed(_seed);
 
-        private static List<ServiceRepeater> GetRepeats(RepeatType repeatType, int count) {
+        private static List<ServiceRepeater> GetRepeats(RepeatType repeatType, int count)
+        {
             var picks = new Dictionary<int, List<int>>();
 
             if (repeatType == RepeatType.Weekly)
@@ -146,7 +240,7 @@ namespace Data.Tests.Fixtures
 
             for (int i = 0; i < count; i++)
             {
-               var repeater =  GetServiceRepeaterFaker(repeatType, picks).Generate(1).Single();
+                var repeater = GetServiceRepeaterFaker(repeatType, picks).Generate(1).Single();
 
                 picks[repeater.Index ?? 0].Remove(repeater.DayIdentifier);
                 if (picks[repeater.Index ?? 0].Count == 0)
@@ -156,7 +250,7 @@ namespace Data.Tests.Fixtures
 
                 result.Add(repeater);
 
-                if(picks.Keys.Count == 0)
+                if (picks.Keys.Count == 0)
                 {
                     break;
                 }
@@ -167,18 +261,20 @@ namespace Data.Tests.Fixtures
 
         private static Faker<ServiceRepeater> GetServiceRepeaterFaker(RepeatType type, Dictionary<int, List<int>> picks)
         {
-            if(type == RepeatType.Weekly)
+            if (type == RepeatType.Weekly)
             {
                 return new Faker<ServiceRepeater>()
                    .RuleFor(r => r.DayIdentifier, o => o.PickRandom(picks[0]))
                    .UseSeed(_seed);
-            } else if (type == RepeatType.MonthlyAbsolute)
+            }
+            else if (type == RepeatType.MonthlyAbsolute)
             {
                 return new Faker<ServiceRepeater>()
                     .RuleFor(r => r.Index, o => o.PickRandom<int>(picks.Keys))
                     .RuleFor(r => r.DayIdentifier, (faker, t) => faker.PickRandom(picks[0]))
                     .UseSeed(_seed);
-            } else if (type == RepeatType.MonthlyRelative)
+            }
+            else if (type == RepeatType.MonthlyRelative)
             {
                 return new Faker<ServiceRepeater>()
                    .RuleFor(r => r.Index, o => o.PickRandom<int>(picks.Keys))

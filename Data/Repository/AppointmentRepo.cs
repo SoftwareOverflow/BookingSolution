@@ -1,5 +1,4 @@
 ﻿using Data.Context;
-using Data.Entity;
 using Data.Entity.Appointments;
 using Data.Extensions;
 using Data.Interfaces;
@@ -127,7 +126,7 @@ namespace Data.Repository
 
                 if (await db.TimeBlocks.AnyAsync(x => x.Guid == timeBlock.Guid))
                 {
-                    throw new ArgumentException("Unable to create appointment - id already exists");
+                    throw new ArgumentException("Unable to create Time Block - id already exists");
                 }
 
                 db.TimeBlocks.Add(timeBlock);
@@ -174,25 +173,22 @@ namespace Data.Repository
             await ExecuteVoidAsync(async (db, _) =>
             {
                 var timeBlock = db.TimeBlocks.Include(tb => tb.Exceptions).SingleOrDefault(tb => tb.Guid == id) ?? throw new ArgumentException("Cannot find time block");
-                var businessId = db.GetBusinessId();
 
-                using var transaction = await db.Database.BeginTransactionAsync();
-
-                if (!deleteExceptions)
+                if (deleteExceptions)
+                {
+                    db.TimeBlockExceptions.RemoveRange(timeBlock.Exceptions);
+                }
+                else
                 {
                     // If we're keeping the TimeBlock exceptions they need to be unlinked from the TimeBlock instance
                     foreach (var exception in timeBlock.Exceptions)
                     {
                         exception.TimeBlockId = null;
                     }
-
-                    await db.SaveChangesAsync();
                 }
 
                 db.TimeBlocks.Remove(timeBlock);
                 await db.SaveChangesAsync();
-
-                await transaction.CommitAsync();
             });
 
             return true;
@@ -246,41 +242,42 @@ namespace Data.Repository
             // TODO consider adding a boolean for revertSequence or something, and then either delete or change the start and end times to match
 
             await ExecuteVoidAsync(async (db, _) =>
-            {
+            {                
                 var existing = db.TimeBlockExceptions.SingleOrDefault(tbe => tbe.Guid == exception.Guid);
 
-                // If we don't have an existing entity, we're creating an exception in the 'deleted' state (i.e. a single instance is being removed)
+                var newTime = new DateTime(DateOnly.FromDateTime(exception.StartTime), new TimeOnly(0, 0, 0));
+                exception.StartTime = newTime;
+                exception.EndTime = newTime;
+
+                exception.Id = existing?.Id ?? exception.Id;
+                exception.BusinessId = await db.GetBusinessId();
+
                 if (existing == null)
                 {
                     var timeBlock = db.TimeBlocks.SingleOrDefault(tb => tb.Guid == timeBlockGuid) ?? throw new ArgumentException("Cannot find time block");
 
-                    exception.BusinessId = await db.GetBusinessId();
+                    // Create the new new exception
                     exception.TimeBlockId = timeBlock.Id;
 
                     existing = exception;
-                }
-
-                // If the timeBlockId is null, the assosciated timeblock has already been separately deleted and so it's safe to delete the exception.
-                // Otherwise just set the duration to 0
-                if (existing.TimeBlockId == null)
-                {
-                    db.TimeBlockExceptions.Remove(existing);
+                    db.TimeBlockExceptions.Add(existing);
                 }
                 else
                 {
-                    var newTime = new DateTime(DateOnly.FromDateTime(exception.StartTime), new TimeOnly(0, 0, 0));
-                    existing.StartTime = newTime;
-                    existing.EndTime = newTime;
-
-                    // Possible to create a new TimeBlockException in the 'deleted' state, so make sure we add it in this case.
-                    if (existing.Guid == Guid.Empty)
+                    // If the timeBlockId is null, the assosciated timeblock has already been separately deleted and so it's safe to delete the exception.
+                    // Otherwise just set the duration to 0
+                    if (existing.TimeBlockId == null)
                     {
-                        db.TimeBlockExceptions.Add(existing);
+                        db.TimeBlockExceptions.Remove(existing);
                     }
-                }
+                    else
+                    {
+                        exception.TimeBlockId = existing.TimeBlockId;
+                        db.TimeBlockExceptions.Entry(existing).CurrentValues.SetValues(exception);
+                    }
+                };
 
                 await db.SaveChangesAsync();
-
             });
 
             return true;
