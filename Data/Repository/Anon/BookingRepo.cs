@@ -9,26 +9,51 @@ namespace Data.Repository.Anon
 {
     internal class BookingRepo(IDbContextFactory<BookingServiceDbContext> factory) : BaseAnonRepo<BookingServiceDbContext>(factory), IBookingRepo
     {
+        public async Task<ICollection<Service>> GetServicesForBusiness(Guid businessGuid)
+        {
+            return await ExecuteAsync(async (db) =>
+            {
+                var business = await db.Businesses.Include(b => b.Services).SingleOrDefaultAsync(b => b.Guid == businessGuid) ?? throw new ArgumentException("Cannot find business");
+
+                return business?.Services;
+            }) ?? [];
+        }
+
         public async Task<Service?> GetService(Guid businessGuid, Guid serviceGuid)
         {
             return await ExecuteAsync(async (db) =>
             {
-                var business = await db.Businesses.IgnoreQueryFilters().Where(x => x.Guid == businessGuid).Include(x => x.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync();
+                var business = await db.Businesses.Where(x => x.Guid == businessGuid).Include(x => x.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync();
                 return business?.Services.SingleOrDefault(s => s.Guid == serviceGuid);
             });
+        }
+
+        public async Task<ICollection<TimeBlock>> GetTimeBlocksForBusiness(Guid businessGuid)
+        {
+            return await ExecuteAsync(async (db) =>
+            {
+                var business = await db.Businesses.SingleOrDefaultAsync(b => b.Guid == businessGuid) ?? throw new ArgumentException("Cannot find business");
+                return db.TimeBlocks.Include(tb => tb.Repeats).Include(tb => tb.Exceptions).Where(tb => tb.BusinessId == business.Id).ToList();
+            }) ?? [];
+        }
+
+        public async Task<ICollection<TimeBlockException>> GetTimeBlockExceptionsBetweenDates(Guid businessGuid, DateOnly startDate, DateOnly endDate)
+        {
+            return await ExecuteAsync(async (db) =>
+            {
+                var business = await db.Businesses.SingleOrDefaultAsync(b => b.Guid == businessGuid) ?? throw new ArgumentException("Cannot find business");
+                return db.TimeBlockExceptions.Where(tb => tb.BusinessId == business.Id).AsQueryable().BetweenDates(startDate, endDate).ToList();
+            }) ?? [];
         }
 
         public async Task<ICollection<Appointment>> GetBookingsBetweenDates(Guid businessGuid, DateOnly startDate, DateOnly endDate)
         {
             return await ExecuteAsync(async (db) =>
             {
-                // TODO write test for this, it should NOT return as I missed the imporant IgnoreQueryFilters
                 var business = await db.Businesses.SingleOrDefaultAsync(x => x.Guid == businessGuid);
                 var businessId = business?.Id ?? throw new ArgumentException("Cannot find business");
 
-                // Ignore the filter queries because we won't be logged in at this point, but we still need to match to the business
-                // TODO Write a test for this - this DOES NOT currently filter businesses and SHOULD NOT work!
-                return db.Appointments.IgnoreQueryFilters().BetweenDates(startDate, endDate).ToList();
+                return db.Appointments.Where(a => a.BusinessId == businessId).BetweenDates(startDate, endDate).ToList();
             }) ?? [];
         }
 
@@ -41,13 +66,12 @@ namespace Data.Repository.Anon
 
             await ExecuteVoidAsync(async (db) =>
             {
-                //Ignore filter queries - not logged in here but need to match business and service.
-                var business = await db.Businesses.Where(x => x.Guid == businessGuid).Include(b => b.Services).IgnoreQueryFilters().SingleOrDefaultAsync();
+                var business = await db.Businesses.Where(x => x.Guid == businessGuid).Include(b => b.Services).SingleOrDefaultAsync();
                 var service = business?.Services.SingleOrDefault(s => s.Guid == appointment.Service!.Guid);
 
                 if (business == null || service == null)
                 {
-                    throw new ArgumentException("Unable to create booking request - unable to find business and service");
+                    throw new ArgumentException("Unable to create booking request - Cannot find business and service");
                 }
 
                 appointment.BusinessId = business.Id;

@@ -14,6 +14,10 @@ namespace Data.Context
 
         public DbSet<Person> People { get; set; }
 
+        public DbSet<TimeBlock> TimeBlocks { get; set; }
+
+        public DbSet<TimeBlockException> TimeBlockExceptions { get; set; }
+
         public override int SaveChanges()
         {
             ContextCommon.SetGuidsOnAdd(ChangeTracker);

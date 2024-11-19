@@ -61,7 +61,7 @@ namespace Data.Repository
             var userId = context.GetCurrentUserId();
             if (userId.IsNullOrEmpty())
             {
-                throw new InvalidOperationException("Unable to create business. Cannot find logged in user");
+                throw new InvalidOperationException("Cannot find logged in user");
             }
 
             return task(context, userId);

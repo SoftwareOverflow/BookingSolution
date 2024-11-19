@@ -9,7 +9,7 @@ namespace Data.Tests.Fixtures
     public class DockerSqlFixture : IAsyncLifetime, IDbContextFactory<ApplicationDbContext>
     {
 
-        private MsSqlContainer _container;
+        protected MsSqlContainer _container;
 
         private Mock<IUserService> _userServiceMock = new();
         public static readonly string UserId = Guid.NewGuid().ToString();
@@ -48,7 +48,7 @@ namespace Data.Tests.Fixtures
             mock?.Object ?? _userServiceMock.Object
         );
 
-        public async Task InitializeAsync()
+        public virtual async Task InitializeAsync()
         {
             try
             {
@@ -57,15 +57,17 @@ namespace Data.Tests.Fixtures
                 using var context = CreateContext();
                 await context.Database.MigrateAsync();
                 ClearDatabase(context);
-                await SeedData.SeedDatabase(context);
-
-                var abc = await context.Businesses.IgnoreQueryFilters().ToListAsync();
+                await SeedDatabase(context);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
 
+        internal virtual async Task SeedDatabase(ApplicationDbContext context)
+        {
+            await SeedData.SeedDatabase(context);
         }
 
         public Task DisposeAsync()

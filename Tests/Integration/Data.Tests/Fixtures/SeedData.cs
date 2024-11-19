@@ -74,7 +74,7 @@ namespace Data.Tests.Fixtures
             .RuleFor(b => b.Name, (faker, t) => faker.Company.CompanyName())
             .RuleFor(b => b.Url, (faker, t) => faker.Internet.Url())
             .RuleFor(b => b.Users, (faker, t) => GetBusinessUserFaker(ownedByMockUser).Generate(1))
-            .RuleFor(b => b.Services, (faker, t) => GetServices(ownedByMockUser ? 2 : 0 + Random.Shared.Next(5)))
+            .RuleFor(b => b.Services, (faker, t) => GetServices(ownedByMockUser ? 2 : 1 + Random.Shared.Next(5)))
             .UseSeed(_seed);
 
         private static Address GetAddress() => GetAddressFaker().Generate(1).Single();
