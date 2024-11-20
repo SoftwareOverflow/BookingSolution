@@ -19,7 +19,7 @@ namespace Core.Tests.Services
         private readonly Mock<IBookingRepo> _bookingContext = new();
         private readonly IMapper _mapper;
 
-        private readonly BookingService _bookingService;
+        private readonly IBookingService _bookingService;
 
         public BookingServiceTests()
         {
@@ -427,7 +427,31 @@ namespace Core.Tests.Services
             var startDate = new DateOnly(2024, 8, 31); // Saturday
             var endDate = new DateOnly(2024, 9, 3); // Tuesday
 
-            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).Returns(Task.FromResult<ICollection<Appointment>>([]));
+            _bookingContext.Setup(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).ReturnsAsync([]);
+
+            var timeBlockException = new TimeBlockException()
+            {
+                Name = "Tuesday moved to 15:00",
+                DateToReplace = new DateOnly(2024, 9, 3),
+                StartTime = new DateTime(2024, 9, 3, 15, 0, 0),
+                EndTime = new DateTime(2024, 9, 3, 17, 0, 0),
+            };
+
+            _bookingContext.Setup(x => x.GetTimeBlocksForBusiness(It.IsAny<Guid>())).ReturnsAsync([
+                new() {
+                    StartTime = new DateTime(2024, 8, 26, 9, 0, 0),
+                    EndTime = new DateTime(2024, 8, 26, 10, 0, 0),
+                    RepeatType = RepeatType.Weekly,
+                    Repeats = [new() { DayIdentifier = (int) DayOfWeek.Monday}, new() { DayIdentifier = (int) DayOfWeek.Tuesday}],
+                    Exceptions = [
+                        new() {
+                            DateToReplace = new DateOnly(2024, 9, 3) // Replace the tuesday, instead moving it later
+                        }
+                        ]
+                }
+                ]);
+
+            _bookingContext.Setup(x => x.GetTimeBlockExceptionsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).ReturnsAsync([timeBlockException]);
 
             var service = new ServiceTypeDto()
             {
@@ -450,8 +474,29 @@ namespace Core.Tests.Services
             Assert.All(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 8, 31)).Times, x => Assert.Equal(AvailabilityState.NotAvailable, x.State));
             Assert.All(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 1)).Times, x => Assert.Equal(AvailabilityState.NotAvailable, x.State));
 
-            Assert.All(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 2)).Times, x => Assert.Equal(AvailabilityState.Available, x.State));
-            Assert.All(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 3)).Times, x => Assert.Equal(AvailabilityState.Available, x.State));
+            Assert.All(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 2)).Times, x =>
+            {
+                // TimeBlock should prevent 9-10 slot being available
+                if (x.Time >= new TimeOnly(10, 0)) {
+                    Assert.Equal(AvailabilityState.Available, x.State);
+                }
+                else
+                {
+                    Assert.Equal(AvailabilityState.NotAvailable, x.State);
+                }
+            });
+            Assert.All(dates!.Availability.Single(x => x.Date == new DateOnly(2024, 9, 3)).Times, x =>
+            {
+                // TimeBlock should at 15:00-16:00 prevents any after 13:00 (2h booking).
+                if (x.Time <= new TimeOnly(13, 0))
+                {
+                    Assert.Equal(AvailabilityState.Available, x.State);
+                }
+                else
+                {
+                    Assert.Equal(AvailabilityState.NotAvailable, x.State);
+                }
+            });
 
             var expectedTimes = new List<TimeOnly>([
                 new TimeOnly(9, 0, 0),
@@ -476,7 +521,6 @@ namespace Core.Tests.Services
             });
 
             _bookingContext.Verify(x => x.GetBookingsBetweenDates(It.IsAny<Guid>(), startDate, endDate), Times.Once);
-
         }
 
         [Fact]
@@ -527,6 +571,30 @@ namespace Core.Tests.Services
                     },
             ]));
 
+            _bookingContext.Setup(b => b.GetTimeBlocksForBusiness(It.IsAny<Guid>())).ReturnsAsync([
+                new TimeBlock(){
+                    Name = "Monthly Abs Repeats",
+                    RepeatType = RepeatType.MonthlyAbsolute,
+                    Repeats = [new(){DayIdentifier = 9}, new() { DayIdentifier = 25 }],
+                    StartTime = new DateTime(2020, 1, 9, 9, 0, 0),
+                    EndTime = new DateTime(2020, 1, 9, 11, 0, 0),
+                    Exceptions = [
+                        new(){
+                            DateToReplace = new DateOnly(2024, 6, 25)
+                        }
+                        ]
+                }
+                ]);
+
+            // Mocking the 25th as deleted. It should NOT be returned
+            _bookingContext.Setup(b => b.GetTimeBlockExceptionsBetweenDates(It.IsAny<Guid>(), startDate, endDate)).ReturnsAsync([
+                new TimeBlockException(){
+                    DateToReplace = new DateOnly(2024, 6, 25),
+                    StartTime = new DateTime(2024, 6, 25, 0, 0, 0),
+                    EndTime = new DateTime(2024, 6, 25, 0, 0, 0),
+                }
+                ]);
+
             var service = new ServiceTypeDto()
             {
                 StartDate = DateTime.MinValue,
@@ -560,6 +628,9 @@ namespace Core.Tests.Services
             Assert.Equal(6, date2.Times.Where(x => x.State == AvailabilityState.AlreadyBooked).Count());
             Assert.All(date2.Times.Where(x => x.Time >= new TimeOnly(10, 30) && x.Time <= new TimeOnly(13, 0)), x => Assert.Equal(AvailabilityState.AlreadyBooked, x.State));
             Assert.All(date2.Times.Where(x => x.Time >= new TimeOnly(15, 0) && x.Time <= new TimeOnly(17, 0)), x => Assert.Equal(AvailabilityState.AlreadyBooked, x.State));
+
+            // Check that the TimeBlockException which has no duration is NOT affecting the date
+            Assert.Empty(result.Result!.Availability.Single(x => x.Date == new DateOnly(2024, 6, 25)).Times.Where(t => t.State == AvailabilityState.NotAvailable));
         }
 
         [Fact]
@@ -791,11 +862,12 @@ namespace Core.Tests.Services
 
 
             // Attempt to book 10:00 -> 11:30
-            var service = new ServiceTypeDto() { 
-                DurationMins = 90, 
-                StartDate = DateTime.MinValue, 
-                BookingFrequencyMins = 30, 
-                EarliestTime = new TimeSpan(9, 0, 0), 
+            var service = new ServiceTypeDto()
+            {
+                DurationMins = 90,
+                StartDate = DateTime.MinValue,
+                BookingFrequencyMins = 30,
+                EarliestTime = new TimeSpan(9, 0, 0),
                 LatestTime = new TimeSpan(15, 0, 0),
                 Repeats = [new RepeaterDto(30)],
                 RepeatType = RepeaterTypeDto.MonthlyAbsolute
@@ -834,7 +906,7 @@ namespace Core.Tests.Services
                 ]));
 
             Appointment appointment;
-            _bookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Callback((Appointment app, Guid _) => appointment = app ).Returns(Task.FromResult(true));  
+            _bookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Callback((Appointment app, Guid _) => appointment = app).Returns(Task.FromResult(true));
 
             // Attempt to book 10:00 -> 11:30
             var service = new ServiceTypeDto()

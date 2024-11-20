@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Core.Dto.Appointment;
+using Core.Helpers;
 using Core.Interfaces;
 using Core.Responses;
 using Data.Entity.Appointments;
 using Data.Interfaces;
-using System;
 
 namespace Core.Services
 {
@@ -78,69 +78,11 @@ namespace Core.Services
                 var timeBlockResult = await _appointmentContext.GetTimeBlocks();
                 var timeBlocks = _mapper.Map<ICollection<TimeBlockDto>>(timeBlockResult);
 
-                var timeBlockInstances = new List<TimeBlockInstanceDto>();
+                var exceptionsDict = _appointmentContext.GetTimeBlockExceptionsBetweenDates(start, end) ?? [];
 
-                foreach (var timeBlock in timeBlocks)
-                {
-                    if (timeBlock.RepeatType == null)
-                    {
-                        if (timeBlock.StartTime <= end.ToDateTime(TimeOnly.MaxValue) && timeBlock.EndTime >= start.ToDateTime(TimeOnly.MinValue))
-                        {
-                            timeBlockInstances.Add(new(timeBlock.Guid, timeBlock.Name, DateOnly.FromDateTime(timeBlock.StartTime), IsException: false, IsOneOff: true)
-                            {
-                                StartTime = timeBlock.StartTime,
-                                EndTime = timeBlock.EndTime,
-                            });
-                        }
-
-                        // No repeats to check, continue
-                        continue;
-                    }
-
-                    var days = timeBlock.EndTime.Subtract(timeBlock.StartTime).Days;
-                    var startTime = TimeOnly.FromDateTime(timeBlock.StartTime);
-                    var endTime = TimeOnly.FromDateTime(timeBlock.EndTime);
-
-                    var date = start;
-
-                    if (date < DateOnly.FromDateTime(timeBlock.StartTime))
-                    {
-                        date = DateOnly.FromDateTime(timeBlock.StartTime);
-                    }
-
-                    while (date <= end)
-                    {
-                        var result = RepeaterService.GetNextRepeaterDate(timeBlock, date);
-                        if (result.IsSuccess)
-                        {
-                            date = result.Result;
-
-                            // Next occurance is outside range
-                            if (date > end)
-                            {
-                                break;
-                            }
-
-                            // Handle all repeats which are NOT exceptions
-                            var exception = timeBlock.Exceptions.SingleOrDefault(e => e.DateToReplace == date);
-                            if (exception == null)
-                            {
-                                var timeBlockInstance = new TimeBlockInstanceDto(timeBlock.Guid, timeBlock.Name, date, IsException: false)
-                                {
-                                    StartTime = new DateTime(date, startTime),
-                                    EndTime = new DateTime(date, endTime).AddDays(days),
-                                };
-
-                                timeBlockInstances.Add(timeBlockInstance);
-                            }
-                        }
-
-                        date = date.AddDays(1);
-                    }
-                }
+                var instances = TimeBlockHelper.GetTimeBlockInstancesBetweenDates(timeBlocks, start, end);
 
                 // Include any exceptions which occur in the range. This is separate as we might have exceptions where the assosciated TimeBlock has been deleted.
-                var exceptionsDict = _appointmentContext.GetTimeBlockExceptionsBetweenDates(start, end);
                 foreach (var entry in exceptionsDict)
                 {
                     var exceptionsInRange = _mapper.Map<ICollection<TimeBlockExceptionDto>>(entry.Value);
@@ -157,14 +99,14 @@ namespace Core.Services
                                 Guid = exception.Guid, // Explicitly set the guid for exceptions as these are actual entities,
                             };
 
-                            timeBlockInstances.Add(timeBlockInstance);
+                            instances.Add(timeBlockInstance);
                         }
                     }
                 }
 
-                return new ServiceResult<ICollection<TimeBlockInstanceDto>>(timeBlockInstances);
+                return new ServiceResult<ICollection<TimeBlockInstanceDto>>(instances);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // TODO logging
             }

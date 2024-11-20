@@ -6,7 +6,7 @@ cd ~/source/repos/BookingSolution
 find -name TestResults -exec rm -r {} \; #Delete all historical TestResults
 rm -r ./coveragereport/ #Delete the coveragereport folder
 
-dotnet test ./BookingSolution.sln --collect:"XPlat Code Coverage"
+dotnet test ./BookingSolution.sln --collect:"XPlat Code Coverage" > codeCov.log
 
 # Generate the Code Coverage HTML Report, ignoring EF migrations
 reportgenerator -reports:"./**/coverage.cobertura.xml" -targetdir:"./coveragereport" -reporttypes:Html -classfilters:-Data.Migrations.*

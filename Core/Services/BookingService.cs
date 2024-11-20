@@ -2,6 +2,7 @@
 using Core.Dto;
 using Core.Dto.Appointment;
 using Core.Dto.BookingRequest;
+using Core.Helpers;
 using Core.Interfaces;
 using Core.Responses;
 using Data.Entity.Appointments;
@@ -79,18 +80,39 @@ namespace Core.Services
                     }).ToList()
                 };
 
-                var appointments = await _bookingContext.GetBookingsBetweenDates(businessGuid, startDate, endDate);
-                var existingAppointments = _mapper.Map<ICollection<Appointment>, ICollection<AppointmentDto>>(appointments);
+                // Retrieve the bookings, time blocks and exceptions
+                var appointmentsTask = _bookingContext.GetBookingsBetweenDates(businessGuid, startDate, endDate);
+                var timeBlocksTask = _bookingContext.GetTimeBlocksForBusiness(businessGuid);
+                var timeBlockExceptionsTask = _bookingContext.GetTimeBlockExceptionsBetweenDates(businessGuid, startDate, endDate);
+
+                var appointmentsResult = await appointmentsTask;
+                var timeBlocksResult = await timeBlocksTask;
+                var timeBlocksExceptionResult = await timeBlockExceptionsTask;
+
+                // Map to DTOs
+                var timeBlocks = _mapper.Map<ICollection<TimeBlockDto>>(timeBlocksResult);
+                var exceptions = _mapper.Map<ICollection<TimeBlockExceptionDto>>(timeBlocksExceptionResult);
+                var appointments = _mapper.Map<ICollection<AppointmentDto>>(appointmentsResult);
+
+                var existingTimeBlockInstances = TimeBlockHelper.GetTimeBlockInstancesBetweenDates(timeBlocks, startDate, endDate);
+
+                // Create all the current appointments
+                var existingAppointments = new List<AppointmentDtoBase>();
+                existingAppointments.AddRange(existingTimeBlockInstances);
+                existingAppointments.AddRange(exceptions);
+                existingAppointments.AddRange(appointments);
 
                 foreach (var dateAvailability in availabilityDto.Availability)
                 {
                     var dateToCheck = dateAvailability.Date;
 
-                    var appointmentsOnDate = existingAppointments.Where(a =>
+                    var appointmentsOnDate = new List<AppointmentDtoBase>();
+                    appointmentsOnDate.AddRange(
+                        existingAppointments.Where(a =>
                         dateToCheck.ToDateTime(new TimeOnly()) <= a.EndTimePadded && dateToCheck.ToDateTime(new TimeOnly(23, 59, 59)) >= a.StartTimePadded
-                    );
+                    ));
 
-                    HashSet<TimeOnly> clashedTimes = [];
+                    Dictionary<TimeOnly, AvailabilityState> clashedTimes = [];
                     foreach (var appointment in appointmentsOnDate)
                     {
                         var appointmentStart = appointment.GetStartTime(dateToCheck, true);
@@ -99,20 +121,29 @@ namespace Core.Services
                         dateAvailability.Times.Where(t =>
                                 appointmentStart < t.Time.Add(TimeSpan.FromMinutes(dto.DurationMins)) &&
                                 appointmentEnd > t.Time
-                        ).ToList().ForEach(x => clashedTimes.Add(x.Time));
+                        ).ToList().ForEach(x =>
+                        {
+                            var state = AvailabilityState.AlreadyBooked;
+                            if (appointment as TimeBlockInstanceDto != null || appointment as TimeBlockExceptionDto != null)
+                            {
+                                state = AvailabilityState.NotAvailable;
+                            }
+
+                            clashedTimes.Add(x.Time, state);
+                        });
                     }
 
                     for (int i = 0; i < dateAvailability.Times.Count; i++)
                     {
-                        var t = dateAvailability.Times[i];
+                        var timeAvailability = dateAvailability.Times[i];
 
-                        var isClash = clashedTimes.Contains(t.Time);
+                        var isClash = clashedTimes.ContainsKey(timeAvailability.Time);
 
                         if (isClash)
                         {
-                            dateAvailability.Times[i] = new TimeAvailability(t.Time)
+                            dateAvailability.Times[i] = new TimeAvailability(timeAvailability.Time)
                             {
-                                State = AvailabilityState.AlreadyBooked,
+                                State = clashedTimes[timeAvailability.Time],
                             };
                         }
                     }
@@ -193,7 +224,7 @@ namespace Core.Services
         {
             try
             {
-                if(dto.SelectedTime == null)
+                if (dto.SelectedTime == null)
                 {
                     return new ServiceResult<AppointmentDto>(null, ResultType.ClientError, ["Booking time is required"]);
                 }
@@ -215,12 +246,12 @@ namespace Core.Services
                 if (clashResult.IsSuccess)
                 {
                     var day = clashResult.Result!.Availability.Single();
-                    if(day.Times.Count == 0)
+                    if (day.Times.Count == 0)
                     {
                         return new ServiceResult<AppointmentDto>(null, ResultType.ClientError, ["Unable to book this service on this day"]);
                     }
 
-                    if(day.Times.Single(x => x.Time == dto.SelectedTime.Value).State == AvailabilityState.Available)
+                    if (day.Times.Single(x => x.Time == dto.SelectedTime.Value).State == AvailabilityState.Available)
                     {
                         var entity = _mapper.Map<Appointment>(appointment);
 
@@ -232,7 +263,8 @@ namespace Core.Services
 
                             return new ServiceResult<AppointmentDto>(appointment);
                         }
-                    } else
+                    }
+                    else
                     {
                         return new ServiceResult<AppointmentDto>(null, ResultType.ClientError, ["Requested time is not available"]);
                     }
