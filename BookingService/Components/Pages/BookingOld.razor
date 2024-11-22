@@ -1,9 +1,8 @@
-﻿@page "/{BusinessGuid:guid}"
+﻿@page "/{BusinessGuid:guid}/{ServiceGuid:guid}"
 
 @using BookingService.Data.Booking
 @using BookingService.Components.Shared
 @using Core.Dto
-@using Core.Dto.BookingRequest
 @using Core.Interfaces
 @using Microsoft.AspNetCore.Components.Rendering
 
@@ -38,7 +37,7 @@
         }
         else
         {
-            <BookingForm ServiceTypes="_serviceTypes" Model="_bookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
+            <BookingFormOld Model="_bookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
         }
     </div>
 
@@ -51,10 +50,13 @@
     [Parameter]
     public Guid? BusinessGuid { get; set; }
 
+    [Parameter]
+    public Guid? ServiceGuid { get; set; }
+
+    private ServiceTypeDto? ServiceTypeDto { get; set; } = null;
+
     [SupplyParameterFromQuery]
     public Boolean IsDemo { get; set; } = false;
-
-    private ICollection<ServiceTypeDto> _serviceTypes = [];
 
     private bool _loading = true;
 
@@ -70,23 +72,19 @@
     {
         _loading = true;
 
-        if (BusinessGuid.HasValue)
+        if (BusinessGuid.HasValue && ServiceGuid.HasValue)
         {
-            var servicesResult = await BookingService.GetServiceTypesForBusiness(BusinessGuid.Value);
+            var result = await BookingService.GetNewBookingRequest(BusinessGuid.Value, ServiceGuid.Value);
 
-            if (servicesResult.IsSuccess && servicesResult.Result!.Count > 0)
+            if (result.IsSuccess)
             {
-                _serviceTypes = servicesResult.Result!;
-                _bookingRequest = new BookingRequestModel(new BookingRequestDto(BusinessGuid.Value));
+                _bookingRequest = new BookingRequestModel(result.Result!);
             }
             else
             {
-                MessageService.AddMessage(new MessageBase("Unable to load services for the business", MessageBase.MessageType.Error));
+                // TODO logging
             }
-        }
-        else
-        {
-            // TODO redirect to a 404 page?
+
         }
 
         _loading = false;

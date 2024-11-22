@@ -1,17 +1,64 @@
-﻿﻿::deep .mud-day.mud-current {
-    color: unset !important;
-    border: none;
+﻿.header-date {
+    border-bottom: 8px solid slategray;
+    border-top-left-radius: 10px;
+    padding-top: 8px;
 }
 
-::deep .mud-day.mud-current:hover {
-    color: unset !important;
-    border: none;
+.header-time {
+    border-bottom: 8px solid slategray;
+    border-top-right-radius: 10px;
+    padding-top: 8px;
 }
 
-::deep .mud-button-root.red-important:disabled {
-    color: red !important;
+ul {
+    overflow-y: scroll;
+    overflow-x: visible;
 }
 
-.unavailable {
-    text-decoration: line-through;
+#time-picker-container {
+    overflow-y: scroll;
+}
+
+/* Solid border */
+hr.solid {
+    border-top: 2px solid grey;
+}
+
+/* Rounded border */
+hr.rounded {
+    margin: 8px 0px;
+    border-top: 3px solid #ffffff;
+    border-radius: 1px;
+}
+
+.calendar-date {
+    width: 50px;
+    height: 50px;
+}
+
+.square {
+    aspect-ratio: 1;
+}
+
+.cell-placeholder .today {
+    outline: 1px solid darkgreen;
+    outline-offset: -1px;
+    border-radius: 100%;
+}
+
+.cell-placeholder .active {
+    background-color: darkgreen;
+    border-radius: 100px;
+    color: white;
+}
+
+.booking-sidebar {
+    overflow-y: scroll;
+}
+
+.time-list-container {
+    overflow-y: scroll;
+    width: 100%;
+    text-align: center;
+    flex-grow: 1;
 }

@@ -277,5 +277,21 @@ namespace Core.Services
 
             return ServiceResult<AppointmentDto>.DefaultServerFailure();
         }
+
+        public async Task<ServiceResult<ICollection<ServiceTypeDto>>> GetServiceTypesForBusiness(Guid businessGuid)
+        {
+            try
+            {
+                var result = await _bookingContext.GetServicesForBusiness(businessGuid);
+                var dtos = _mapper.Map<ICollection<ServiceTypeDto>>(result ?? []);
+                return new ServiceResult<ICollection<ServiceTypeDto>>(dtos);
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return ServiceResult<ICollection<ServiceTypeDto>>.DefaultServerFailure();
+        }
     }
 }

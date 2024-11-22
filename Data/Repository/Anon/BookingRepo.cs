@@ -13,7 +13,7 @@ namespace Data.Repository.Anon
         {
             return await ExecuteAsync(async (db) =>
             {
-                var business = await db.Businesses.Include(b => b.Services).SingleOrDefaultAsync(b => b.Guid == businessGuid) ?? throw new ArgumentException("Cannot find business");
+                var business = await db.Businesses.Include(b => b.Services).ThenInclude(s => s.Repeats).SingleOrDefaultAsync(b => b.Guid == businessGuid) ?? throw new ArgumentException("Cannot find business");
 
                 return business?.Services;
             }) ?? [];

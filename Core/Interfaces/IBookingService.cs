@@ -7,6 +7,8 @@ namespace Core.Interfaces
 {
     public interface IBookingService
     {
+        public Task<ServiceResult<ICollection<ServiceTypeDto>>> GetServiceTypesForBusiness(Guid businessGuid);
+
         /// <summary>
         /// Check if the service exists for the given business
         /// </summary>

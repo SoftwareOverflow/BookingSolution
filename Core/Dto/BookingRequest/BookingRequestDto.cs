@@ -15,20 +15,20 @@ namespace Core.Dto.BookingRequest
         /// The Service
         /// </summary>
         [Required]
-        public ServiceTypeDto Service { get; set; }
+        public ServiceTypeDto? Service { get; set; } = null;
 
         /// <summary>
         /// The person making the booking request
         /// </summary>
         [ValidateComplexType]
-        public PersonDto Person { get; set; }
+        public PersonDto Person { get; set; } = new PersonDto();
 
         /// <summary>
         /// Date the booking is being requested
         /// </summary>
         [Required]
         [DisplayName("Date")]
-        public DateOnly SelectedDate { get; set; }
+        public DateOnly SelectedDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
         /// <summary>
         /// The time at which the booking is being requested
@@ -48,6 +48,11 @@ namespace Core.Dto.BookingRequest
             BusinessGuid = businessGuid;
             Person = person;
             SelectedDate = selectedDate;
+        }
+
+        public BookingRequestDto(Guid businessGuid)
+        {
+            BusinessGuid = businessGuid;
         }
     }
 }
