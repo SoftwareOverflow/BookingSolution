@@ -8,393 +8,25 @@
 @inject IMessageService MessageService
 @inject IJSRuntime JsInterop
 
+<LoadingSpinner Visible="_loading" />
 
-@* <LoadingSpinner Visible="_loading" /> *@
-
-<div class="vh-100 vw-100">
-    <EditForm class="w-100 h-100" Model="Model" OnValidSubmit="SaveBookingRequest">
-        <ObjectGraphDataAnnotationsValidator />
-
-        <div class="d-flex flex-row h-100">
-            <div class="left-section flex-grow-1">
-                <div id="section-choice" class="p-3 pt-5">
-                    <div class="dropdown">
-                        <span class="btn btn-outline-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="pe-3 fs-4">@(Model.BookingRequest.Service?.Name ?? "Choose Your Service...")</span>
-                        </span>
-
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                            @foreach (var service in ServiceTypes)
-                            {
-                                <li><span class="dropdown-item" @onclick="@(() => OnServiceChange(service))">@service.Name</span></li>
-                            }
-                        </ul>
-                    </div>
-                    <div class="d-flex flex-row mt-1 mt-md-3 mt-lg-5">
-                        <p class="lead me-3">Duration: 30m</p>
-                        <p class="lead ms-3">Price: £19.99</p>
-                    </div>
+<CascadingValue Value="this" Name="BookingParams">
+            <EditForm class="w-100 h-100" Model="Model" OnValidSubmit="SaveBookingRequest">
+                <ObjectGraphDataAnnotationsValidator />
+                <div class="d-block d-sm-none h-100">
+                    <BookingFormMobileContents />
                 </div>
 
-                <hr class="solid" />
-
-                <div class="d-flex align-items-start justify-content-evenly px-5 mx-5 @_dateTimeSectionHidden">
-                    <div class="w-50 border-1 my-2">
-                        <div class="mw-100 text-white text-center">
-                            <p class="lead py-1 m-0 bg-dark">Date</p>
-                            <div class="flex-row-center justify-content-between bg-dark bg-opacity-75">
-                                <button class="text-white btn fw-bold fs-1" type="button" @onclick="(() => OnMonthChange(_startDate.AddDays(-1)))">
-                                    &larr;
-                                </button>
-                                <p class="lead muted m-0">@_startDate.AddMonths(1).AddDays(-1).ToString("MMMM yyyy")</p>
-                                <button class="text-white btn fw-bold fs-1" type="button" @onclick="(() => OnMonthChange(_startDate.AddMonths(2).AddDays(1)))">
-                                    &rarr;
-                                </button>
-                            </div>
-                        </div>
-                        <table class="w-100 position-relative scheduler-table-container">
-                            <thead>
-                                <tr>
-                                    @for (int i = 0; i < 7; i++)
-                                    {
-                                        <th class="inner-table-cell p-2 calendar-date square">
-                                            <div class="text-center">
-                                                <span>
-                                                    @_startDate.AddDays(i).ToString("ddd")
-                                                </span>
-                                            </div>
-                                        </th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var date = _startDate;
-                                    while (date.Date <= _endDate.Date)
-                                    {
-                                        <tr>
-                                            @for (int i = 0; i < 7; i++)
-                                            {
-                                                var activeClass = date.Date == _today ? "active" : "";
-                                                var currentDate = date;
-                                                var classes = "";
-                                                if (date.Date == _today.Date)
-                                                {
-                                                    classes = "today";
-                                                }
-                                                if (date.Date == Model.SelectedDateTime?.Date)
-                                                {
-                                                    classes = "active";
-                                                }
-                                                if (Model.SelectedDateTime.HasValue && date.Date.Month != Model.SelectedDateTime?.Date.Month)
-                                                {
-                                                    classes = "text-muted";
-                                                }
-
-                                                <td class="border-1 square">
-                                                    <div class="cell-placeholder h-100 text-center square">
-                                                        <div class="h-100 square m-1 heading p-2 flex-row-center">
-                                                            <h5 role="button" class="@classes m-0 h-50 square p-2" @onclick="@(() => OnDateChange(currentDate))">
-                                                                @date.Day
-                                                            </h5>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                date = date.AddDays(1);
-                                            }
-                                        </tr>
-                                    }
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="w-25 border-1 my-2 position-relative align-self-stretch">
-                        <div class="position-absolute top-0 left-0 w-100 h-100">
-                            <div class="flex-column-center h-100 w-100">
-                                <div class="w-100 text-white text-center">
-                                    <p class="lead py-1 m-0 px-5 bg-dark">Time</p>
-                                </div>
-                                <div class="time-list-container">
-                                    @if (TimesByDate(Model.BookingRequest.SelectedDate) is var times && times.Any())
-                                    {
-                                        if (times.All(x => x.State == AvailabilityState.AlreadyBooked))
-                                        {
-                                            <div class="flex-row-center">
-                                                <p class="lead text-muted">Fully Booked!</p>
-                                            </div>
-                                        }
-
-                                        <ul class="list-group list-group-flush overflow-hidden" role="group" aria-label="Select Time">
-                                            @foreach (var timeAvail in times)
-                                            {
-                                                var disabled = timeAvail.State != AvailabilityState.Available;
-                                                var disabledAttr = disabled ? "disabled" : "";
-
-                                                var time = timeAvail.Time;
-                                                var timeString = $"{time:HH:mm} - {time.AddMinutes(Model.BookingRequest.Service!.DurationMins):HH:mm}";
-                                                var buttonId = $"time-select-{timeString}";
-
-                                                var activeAttr = Model.BookingRequest.SelectedTime == time ? "active" : "";
-
-                                                <li class="list-group-item @activeAttr">
-                                                    <div>
-                                                        @if (disabled)
-                                                        {
-                                                            <button type="button" class="text-decoration-line-through @disabledAttr">@timeString</button>
-                                                        }
-                                                        else
-                                                        {
-                                                            @if (Model.BookingRequest.SelectedTime == time)
-                                                            {
-                                                                <button type="button" class="btn text-white">@timeString</button>
-                                                            }
-                                                            else
-                                                            {
-                                                                <button type="button" class="btn" @onclick="@(() => Model.BookingRequest.SelectedTime = time)">@timeString</button>
-                                                            }
-                                                        }
-                                                    </div>
-                                                </li>
-                                            }
-                                        </ul>
-                                    }
-                                    else
-                                    {
-                                        <p class=" m-0 p-2 lead text-muted">No Availability Found...</p>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="d-none d-sm-block h-100">
+                    <BookingFormContents />
                 </div>
 
-            </div>
-
-            <div class="booking-sidebar bg-dark h-100 w-25 text-white">
-                <div class="flex-column-center h-100 align-items-start p-4">
-                    <h4 class="fw-bold">Summary</h4>
-
-                    <hr class="w-100 rounded" />
-
-                    <p>@Model.BookingRequest.Service?.Name</p>
-                    <p>Duration: @($"{Model.BookingRequest.Service?.Duration.Hours ?? 0} hour {Model.BookingRequest.Service?.Duration.Minutes ?? 0} mins")</p>
-                    <p>Price: @($"{Model.BookingRequest.Service?.Price:C}")</p>
-
-                    <p>When: @($"{Model.BookingRequest.SelectedDate:D} at {Model.BookingRequest.SelectedTime:t}")</p>
-
-                    <hr class="w-100 rounded" />
-
-                    <h4 class="fw-bold">Your Details</h4>
-                    <div class="w-100">
-                        <div class="form-floating mx-1 mb-3">
-                            <InputText @bind-Value="Model.BookingRequest.Person.FirstName" class="form-control bg-transparent text-white" autocomplete="given-name" aria-required="true" placeholder="Name" />
-                            <label for="name">First Name</label>
-                            <ValidationMessage For="() => Model.BookingRequest.Person.FirstName" class="text-danger" />
-                        </div>
-                    </div>
-                    <div class="w-100">
-                        <div class="form-floating mx-1 mb-3">
-                            <InputText @bind-Value="Model.BookingRequest.Person.LastName" class="form-control bg-transparent text-white" autocomplete="family-name" aria-required="true" placeholder="Name" />
-                            <label for="name">Last Name</label>
-                            <ValidationMessage For="() => Model.BookingRequest.Person.LastName" class="text-danger" />
-                        </div>
-                    </div>
-                    <div class="w-100">
-                        <div class="form-floating mx-1 mb-3">
-                            <InputText @bind-Value="Model.BookingRequest.Person.EmailAddress" class="form-control bg-transparent text-white" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                            <label for="email" class="form-label">Email</label>
-                            <ValidationMessage For="() => Model.BookingRequest.Person.EmailAddress" class="text-danger" />
-                        </div>
-                    </div>
-                    <div class="w-100">
-                        <div class="form-floating mx-1 mb-3">
-                            <InputText @bind-Value="Model.BookingRequest.Person.PhoneNumber" class="form-control bg-transparent text-white" autocomplete="phone" aria-required="true" placeholder="name@example.com" />
-                            <label for="email" class="form-label">Phone</label>
-                            <ValidationMessage For="() => Model.BookingRequest.Person.PhoneNumber" class="text-danger" />
-                        </div>
-                    </div>
-
-                    <hr class="w-100 rounded" />
-
-                    <div class="flex-grow-1" />
-
-                    <span class="small text-warning align-self-end w-50 text-end">
-                        *This is only a booking request. You won't pay anything now.
-                    </span>
-
-                    <div class="d-flex flex-row justify-content-between w-100 align-items-center">
-                        <span class="small text-secondary">Powered by Indebook</span>
-                        <button type="submit" class="mb-5 btn btn-light">Submit</button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </EditForm>
-</div>
-
-@* <div class="flex-row-center">
-    <div class="d-block flex-column-center">
-    <h4 class="header-date border-0">
-
-    </h4>
-    <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="true">
-    Choose Service...
-    </button>
-    <ul class="dropdown-menu px-1">
-    <li>Service #1 with a much longer name. Extending past</li>
-    <li>Service #2 with normal length</li>
-    <li>Service #3</li>
-    <li>Service #4 with about right.</li>
-    <li>Service #5 - Something</li>
-    </ul>
-    </div>
-    </div>
-    <div class="col-5 bg-dark header-date">
-    <h4 class="w-100">Pick a Date</h4>
-    </div>
-    <div class="col-3 bg-dark header-time">
-    <h4 class="w-100">Pick a Time</h4>
-    </div>
-    </div>
-    <div class="flex-row-center">
-    <div class="col-4">
-    <div class="flex-column-center p-3">
-    </div>
-
-    </div>
-    <div class="d-block">
-    <MudDatePicker PickerVariant="PickerVariant.Static"
-    Label="Select Date"
-    Orientation="Orientation.Landscape"
-    Class="w-100 flex-row-center"
-    Date="@(DateTime.Today.AddDays(1))" />
-    </div>
-    <div class="col-3">
-    <ul>
-    <li>09:00</li>
-    <li>10:00</li>
-    <li>11:00</li>
-    <li>12:00</li>
-    <li>13:00</li>
-    <li>14:00</li>
-    <li>15:00</li>
-    <li>16:00</li>
-    </ul>
-    </div>
-    </div> *@
-@*<div class="flex-row-center w-100">
-    <table class="mx-1 mb-1 p-2 shadow-lg" style="height:fit-content;">
-    <thead>
-    <tr>
-    <th class="bg-transparent"></th>
-    <th>
-    <div class="bg-dark header-date">
-    <h4 class="px-2 w-100">Pick a Date</h4>
-    </div>
-    </th>
-    <th>
-    <div class="bg-dark header-time">
-    <h4 class="px-2 w-100">Pick a Time</h4>
-    </div>
-    </th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr class="h-100">
-    <td class="bg-black rounded-start">
-    <div class="flex-column-center h-100 p-1">
-    <div class="dropdown">
-    <button class="d-block btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="true">
-    Choose Your Service...Reeally long
-    </button>
-    <ul class="dropdown-menu px-1">
-    <li>Service #1 with a much longer name. Extending past</li>
-    <li>Service #2 with normal length</li>
-    <li>Service #3</li>
-    <li>Service #4 with about right.</li>
-    <li>Service #5 - Something</li>
-    </ul>
-    </div>
-    <div class="flex-row-center w-100 justify-content-between p-1">
-    <p class="small">Duration: 30m</p>
-    <p class="small">Price: £19.99</p>
-    </div>
-
-    <div class="flex-grow-1" />
-    <div class="flex-column">
-    <div class="form-floating mx-1 mb-3">
-    First Name
-    </div>
-    <div class="form-floating mx-1 mb-3">
-    Last Name
-    </div>
-    <div class="form-floating mx-1 mb-3">
-    Email
-    </div>
-    <div class="form-floating mx-1 mb-3">
-    Phone Number
-    </div>
-    </div>
-    </div>
-    </td>
-    <td>
-    <div class="h-100">
-    <MudDatePicker PickerVariant="PickerVariant.Static"
-    Label="Select Date"
-    Class="flex-row-center"
-    Color="Color.Success"
-    AdditionalDateClassesFunc="@((DateTime dt) => ("bg-red"))"
-    Date="@(DateTime.Today.AddDays(1))" />
-    </div>
-    </td>
-    <td class="bg-light text-dark">
-    <div id="time-picker-container" class="container h-100">
-    <div class="btn-group" role="group" aria-label="Select Time">
-    <div class="flex-column-center h-100">
-    @{
-    var currentHour = times[0].Hour;
-
-    @for (int i = 0; i < times.Count; i++)
-    {
-    <div class="flex-row-center justify-content-start w-100">
-    @while (i < times.Count && times[i].Hour <= currentHour)
-    {
-    var time = times[i];
-    var timeString = time.ToString("HH:mm");
-    var buttonId = $"time-select-{timeString}";
-
-    <div class="flex-row-center justify-content-start m-2">
-    <input type="radio" class="btn-check" name="btn-repeat-type" id="@buttonId" autocomplete="off" checked="@(selected == time)" @onchange="@(() => selected = time)" />
-    <label class="btn btn-outline-primary w-100 m-1" for="@buttonId">
-    <span>@timeString</span>
-    </label>
-    </div>
-
-    i++;
-    }
-    </div>
-
-    i--;
-    currentHour += 1;
-    }
-
-    }
-    </div>
-    </div>
-    </div>
-    </td>
-
-    </tr>
-    </tbody>
-    </table>
-    </div> *@
+            </EditForm>
+        </CascadingValue>
 
 @code {
     [Parameter, EditorRequired]
-    public BookingRequestModel Model { get; set; }
+    public BookingRequestModel Model { get; set; } = default!;
 
     [Parameter, EditorRequired]
     public ICollection<ServiceTypeDto> ServiceTypes { get; set; } = [];
@@ -402,84 +34,54 @@
     [Parameter, EditorRequired]
     public bool IsDemo { get; set; }
 
+
     [Parameter, EditorRequired]
-    public EventCallback OnRequestSent { get; set; }
+    public EventCallback OnFormSubmitted { get; set; }
 
     private bool _loading = true;
 
-    public AvailabilityDto? _timesDto = null;
+    public AvailabilityDto? _timesDto { get; private set; } = null;
 
-    private DateTime _today = DateTime.Now;
+    public DateTime Today { get; private set; } = DateTime.Now;
 
-    private List<TimeAvailability> TimesByDate(DateOnly? date)
-    {
-        Console.WriteLine("Calling TimesByDate with " + date);
-        var abc = _timesDto?.Availability.SingleOrDefault(x => x.Date == date);
-        if (abc != null)
-        {
-            foreach (var t in abc.Times)
-            {
-                Console.WriteLine("TIMES: " + t.Time + " - " + t.State);
-            }
-        }
-        else
-        {
-            Console.WriteLine("Couldn't find anything");
-        }
-
-        return _timesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times ?? [];
-    }
+    public List<TimeAvailability> TimesByDate(DateOnly? date) => _timesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times ?? [];
 
     private Tuple<DateTime, DateTime> _dateRange = new Tuple<DateTime, DateTime>(DateTime.Now, DateTime.Now);
 
-    private DateTime _startDate => _dateRange.Item1;
-    private DateTime _endDate => _dateRange.Item2;
+    public DateTime StartDate => _dateRange.Item1;
+    public DateTime EndDate => _dateRange.Item2;
 
-    private string _dateTimeSectionHidden => Model.BookingRequest.Service == null ? "d-none" : "";
-
-    /*
-    Potential performance improvements:
-        - Split method to get the available days and available times
-        - Get available days the whole month on month change.
-        - Load selected date, then start loading (with cancellation token) each day in the month in background
-        - If date changes, cancel long running background task and load current date.
-        - Potentially store some information in cache in service.
-    */
 
     protected override async Task OnParametersSetAsync()
     {
         var localDate = await JavascriptHelpers.GetLocatDateAsync(JsInterop);
-        _today = localDate ?? _today;
+        Today = localDate ?? Today;
 
-        _dateRange = DateHelpers.GetDateRange(_today);
+        _dateRange = DateHelpers.GetDateRange(Today);
 
         await base.OnParametersSetAsync();
+        _loading = false;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    public async Task OnServiceChange(ServiceTypeDto service)
     {
-        //await _datePicker.GoToDate(Model.SelectedDateTime ?? _today);
-
-        await base.OnAfterRenderAsync(firstRender);
-    }
-
-    private async Task OnServiceChange(ServiceTypeDto service)
-    {
+        _loading = true;
         Model.BookingRequest.Service = service;
-        var next = BookingService.GetNextServiceDate(Model.BookingRequest.Service, DateOnly.FromDateTime(_today));
+        var next = BookingService.GetNextServiceDate(Model.BookingRequest.Service, DateOnly.FromDateTime(Today));
         if (next.IsSuccess)
         {
             Model.SelectedDateTime = next.Result.ToDateTime(new TimeOnly());
         }
-        else if (Model.SelectedDateTime < _today)
+        else if (Model.SelectedDateTime < Today)
         {
-            Model.SelectedDateTime = _today;
+            Model.SelectedDateTime = Today;
         }
 
-        await LoadMonth(Model.SelectedDateTime!.Value);
+        await LoadAvailability();
+        _loading = false;
     }
 
-    private async Task OnDateChange(DateTime? date)
+    public async Task OnDateChange(DateTime? date)
     {
         Model.BookingRequest.SelectedTime = null;
 
@@ -487,51 +89,44 @@
         {
             if (Model.SelectedDateTime?.Month != date?.Month)
             {
-                await OnMonthChange(date, keepSelection: true);
+                await OnMonthChange(date);
             }
 
             Model.SelectedDateTime = date;
         }
     }
 
-    private async Task OnMonthChange(DateTime? dt, bool keepSelection = false)
+    public async Task OnMonthChange(DateTime? dt)
     {
-        _loading = true;
-
-        Model.SelectedDateTime = keepSelection ? dt : null;
-
         if (dt != null)
         {
             _dateRange = DateHelpers.GetDateRange(dt.Value);
             StateHasChanged();
-            await LoadMonth(dt.Value);
+            await LoadAvailability();
         }
-
-        _loading = false;
     }
 
-    private async Task LoadMonth(DateTime dt)
+    private async Task LoadAvailability()
     {
-        var start = new DateOnly(dt.Year, dt.Month, 1);
-        var end = start.AddMonths(1).AddDays(-1);
+        var start = StartDate;
+        var end = EndDate;
 
-        if (end.ToDateTime(new TimeOnly()) < _today)
+        if (end.Date < Today.Date)
         {
             return;
         }
 
-        if (start < DateOnly.FromDateTime(_today))
+        if (start.Date < Today.Date)
         {
-            start = DateOnly.FromDateTime(_today);
+            start = Today;
         }
 
-        var result = await BookingService.GetAvailabilityBetweenDates(Model.BookingRequest.Service!, Model.BookingRequest.BusinessGuid, start, end);
-        Console.WriteLine("Called Availability for " + Model.BookingRequest.Service.Name + " and businessGuid " + Model.BookingRequest.BusinessGuid);
+        _loading = true;
+        await Task.Delay(500);
+        var result = await BookingService.GetAvailabilityBetweenDates(Model.BookingRequest.Service!, Model.BookingRequest.BusinessGuid, DateOnly.FromDateTime(start), DateOnly.FromDateTime(end));
         if (result.IsSuccess)
         {
             _timesDto = result.Result!;
-
-            Console.WriteLine("IT was successful! " + _timesDto.Availability.Count + ", " + _timesDto.Availability.Where(x => x.Times.Count > 0).OrderBy(x => x.Date).LastOrDefault()?.Date ?? "NONE");
         }
         else
         {
@@ -539,42 +134,8 @@
             // TODO show error message
         }
 
+        _loading = false;
         StateHasChanged();
-    }
-
-    // TODO use these functions instead of calculating classes inside the html section
-    private bool IsDateDisabled(DateTime dt)
-    {
-        var date = DateOnly.FromDateTime(dt);
-
-        if (dt < (Model.BookingRequest.Service?.StartDate?.Date ?? _today) || dt < _today)
-        {
-            return true;
-        }
-
-        var dateAvail = _timesDto?.Availability.SingleOrDefault(x => x.Date == date);
-
-        return dateAvail?.Times.Count == 0;
-    }
-
-    private string GetDateStyle(DateTime dt)
-    {
-        var date = DateOnly.FromDateTime(dt);
-
-        if (IsDateDisabled(dt) && dt >= _today)
-        {
-            if (_timesDto?.Availability.SingleOrDefault(x => x.Date == date)?.Times.Count == 0)
-            {
-                return "red-important ";
-            }
-        }
-
-        if (TimesByDate(DateOnly.FromDateTime(dt)).All(x => x.State != AvailabilityState.Available))
-        {
-            return "text-muted";
-        }
-
-        return string.Empty;
     }
 
     private async Task SaveBookingRequest()
@@ -583,14 +144,14 @@
 
         if (IsDemo)
         {
-            await OnRequestSent.InvokeAsync();
+            await OnFormSubmitted.InvokeAsync();
         }
         else
         {
-            var result = await BookingService.SendBookingRequest(Model.BookingRequest, Model.BookingRequest.BusinessGuid);
+            var result = await BookingService.SendBookingRequest(Model!.BookingRequest, Model.BookingRequest.BusinessGuid);
             if (result.IsSuccess)
             {
-                await OnRequestSent.InvokeAsync();
+                await OnFormSubmitted.InvokeAsync();
             }
             else
             {
@@ -600,4 +161,13 @@
 
         _loading = false;
     }
+
+    /*
+    Potential performance improvements:
+        - Split method to get the available days and available times
+        - Get available days the whole month on month change.
+        - Load selected date, then start loading (with cancellation token) each day in the month in background
+        - If date changes, cancel long running background task and load current date.
+        - Potentially store some information in cache in service.
+    */
 }

@@ -1,0 +1,56 @@
+﻿@using BookingService.Data.Booking
+@using Core.Dto.BookingRequest
+
+<ul class="list-group list-group-flush overflow-hidden" role="group" aria-label="Select Time">
+    @foreach (var timeAvail in Times)
+    {
+        var disabled = timeAvail.State != AvailabilityState.Available;
+        var disabledAttr = disabled ? "disabled small" : "";
+
+        var time = timeAvail.Time;
+        var timeString = $"{time:HH:mm} - {time.AddMinutes(Model.BookingRequest.Service!.DurationMins):HH:mm}";
+        var buttonId = $"time-select-{timeString}";
+
+        var activeAttr = Model.BookingRequest.SelectedTime == time ? "active" : "";
+
+        <li class="list-group-item @activeAttr">
+            <div class="@ListItemButtonClass">
+                @if (disabled)
+                {
+                    <button type="button" class="btn p-0 w-100 h-100 text-decoration-line-through @disabledAttr @ListItemButtonClass">@timeString</button>
+                }
+                else
+                {
+                    @if (Model.BookingRequest.SelectedTime == time)
+                    {
+                        <button type="button" class="btn p-0 text-white p-0 w-100 h-100 @ListItemButtonClass">@timeString</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn p-0 w-100 h-100 @ListItemButtonClass" @onclick="@(async () => await TimeChanged(time))">@timeString</button>
+                    }
+                }
+            </div>
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter, EditorRequired]
+    public BookingRequestModel Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public ICollection<TimeAvailability> Times { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public EventCallback OnTimeChange { get; set; }
+
+    [Parameter]
+    public string ListItemButtonClass { get; set; } = "";
+
+    private async Task TimeChanged(TimeOnly time)
+    {
+        Model.BookingRequest.SelectedTime = time;
+        await OnTimeChange.InvokeAsync();
+    }
+}

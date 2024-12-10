@@ -1,0 +1,124 @@
+﻿@using BookingService.Components.Shared.Booking
+@using BookingService.Components.Pages
+@using BookingService.Data
+@using BookingService.Data.Booking
+@using Core.Dto
+@using Core.Dto.BookingRequest
+@using Core.Interfaces
+@using System.Text
+
+<div id="form-container" class="flex-column align-items-center w-100 h-100 fs-6">
+    <div class="dropdown bg-dark text-white p-2">
+        <span class="btn btn-outline-secondary dropdown-toggle text-white" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="true">
+            <span class="pe-3">@(Model.BookingRequest.Service?.Name ?? "Choose Your Service...")</span>
+        </span>
+
+        <ServiceDropdownList ServiceTypes="ServiceTypes" OnServiceChange="BookingParams.OnServiceChange" />
+
+        <div class="bg-dark px-4">
+            <div class="flex-row-center justify-content-between @_dateTimeSectionHidden">
+                <span class="col-6">Duration: @($"{Model.BookingRequest.Service?.Duration.Hours ?? 0} hour {Model.BookingRequest.Service?.Duration.Minutes ?? 0} mins")</span>
+                <span class="col-6 text-end">Price: @($"{Model.BookingRequest.Service?.Price:C}")</span>
+            </div>
+            <p class="m-0 my-2 small text-warning">
+                *This is only a booking request. You won't pay anything now.
+            </p>
+        </div>
+    </div>
+
+    <div class="w-100 @_dateTimeSectionHidden">
+        <DatePicker StartDate="_startDate" EndDate="_endDate" Model="Model" OnMonthChange="BookingParams.OnMonthChange" TimesByDate="@((DateOnly dt) => BookingParams.TimesByDate(dt))" Today="_today" OnDateChange="@(() => StateHasChanged())" />
+    </div>
+
+    <div class="@_dateTimeSectionHidden">
+        <h3 class="bg-dark text-white p-2 m-0">Choose a Time</h3>
+        <div id="time-list-container">
+            @if (BookingParams.TimesByDate(Model.BookingRequest.SelectedDate) is var times && times.Any())
+            {
+                <ServiceTimeList Times="times" Model="Model" ListItemButtonClass="text-start" OnTimeChange="@(() => StateHasChanged())" />
+            }
+            else
+            {
+                <p class=" m-0 p-2 lead text-muted">No Availability Found...</p>
+            }
+        </div>
+    </div>
+
+    <div class="@_dateTimeSectionHidden">
+        <h3 class="bg-dark text-white p-2">Your Details</h3>
+        <div class="w-100">
+            <div class="form-floating mx-1 mb-3">
+                <InputText @bind-Value="Model.BookingRequest.Person.FirstName" class="form-control bg-transparent text-white" autocomplete="given-name" aria-required="true" placeholder="Name" />
+                <label for="name">First Name</label>
+                <ValidationMessage For="() => Model.BookingRequest.Person.FirstName" class="text-danger" />
+            </div>
+        </div>
+        <div class="w-100">
+            <div class="form-floating mx-1 mb-3">
+                <InputText @bind-Value="Model.BookingRequest.Person.LastName" class="form-control bg-transparent text-white" autocomplete="family-name" aria-required="true" placeholder="Name" />
+                <label for="name">Last Name</label>
+                <ValidationMessage For="() => Model.BookingRequest.Person.LastName" class="text-danger" />
+            </div>
+        </div>
+        <div class="w-100">
+            <div class="form-floating mx-1 mb-3">
+                <InputText @bind-Value="Model.BookingRequest.Person.EmailAddress" class="form-control bg-transparent text-white" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="() => Model.BookingRequest.Person.EmailAddress" class="text-danger" />
+            </div>
+        </div>
+        <div class="w-100">
+            <div class="form-floating mx-1 mb-3">
+                <InputText @bind-Value="Model.BookingRequest.Person.PhoneNumber" class="form-control bg-transparent text-white" autocomplete="phone" aria-required="true" placeholder="name@example.com" />
+                <label for="email" class="form-label">Phone</label>
+                <ValidationMessage For="() => Model.BookingRequest.Person.PhoneNumber" class="text-danger" />
+            </div>
+        </div>
+    </div>
+
+    <div class="@_dateTimeSectionHidden">
+        <h3 class="bg-dark text-white p-2">Summary</h3>
+        <div class="px-2">
+            <p>@Model.BookingRequest.Service?.Name</p>
+            <p>Duration: @($"{Model.BookingRequest.Service?.Duration.Hours ?? 0} hour {Model.BookingRequest.Service?.Duration.Minutes ?? 0} mins")</p>
+            <p>Price: @($"{Model.BookingRequest.Service?.Price:C}")</p>
+
+            <p>@($"{Model.BookingRequest.SelectedDate:D} at {Model.BookingRequest.SelectedTime:t}")</p>
+
+            <ValidationMessage For="() => Model.BookingRequest.SelectedDate" class="text-danger" />
+            <ValidationMessage For="() => Model.BookingRequest.SelectedTime" class="text-danger mb-1" />
+        </div>
+
+        <div class="mx-2 hl"></div>
+    </div>
+
+    <div class="flex-row-center w-100 p-2">
+        <div class="flex-grow-1"></div>
+        <button type="submit" class="btn btn-secondary p-2 @_dateTimeSectionHidden">
+            <span class="lead fs-5">Submit</span>
+        </button>
+    </div>
+
+    <div class="w-100 @_dateTimeSectionHidden bg-dark text-end px-2 py-1 text-white">
+        <span>
+            Powered by Indebook
+        </span>
+    </div>
+
+</div>
+
+@code {
+    [CascadingParameter(Name = "BookingParams")]
+    public BookingForm BookingParams { get; set; } = default!;
+
+    public BookingRequestModel Model => BookingParams.Model;
+
+    public ICollection<ServiceTypeDto> ServiceTypes => BookingParams.ServiceTypes;
+
+    private DateTime _today => BookingParams.Today;
+
+    private DateTime _startDate => BookingParams.StartDate;
+    private DateTime _endDate => BookingParams.EndDate;
+
+    private string _dateTimeSectionHidden => Model.BookingRequest.Service == null ? "hidden" : "";
+}

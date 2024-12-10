@@ -1,0 +1,89 @@
+﻿.header-date {
+    border-bottom: 8px solid slategray;
+    border-top-left-radius: 10px;
+    padding-top: 8px;
+}
+
+.header-time {
+    border-bottom: 8px solid slategray;
+    border-top-right-radius: 10px;
+    padding-top: 8px;
+}
+
+#time-picker-container {
+    overflow-y: scroll;
+}
+
+/* Solid border */
+hr.solid {
+    border-top: 2px solid grey;
+}
+
+/* Rounded border */
+hr.rounded {
+    margin: 8px 0px;
+    border-top: 3px solid #ffffff;
+    border-radius: 1px;
+}
+
+#booking-sidebar {
+    overflow-y: scroll;
+    box-shadow: -10px -5px 5px -5px gray;
+}
+
+#time-list-container {
+    overflow-y: scroll;
+    width: 100%;
+    text-align: center;
+    flex-grow: 1;
+}
+
+#section-choice {
+    box-shadow: -10px -5px 5px -5px gray;
+}
+
+#indebook-text {
+    right: 0;
+}
+
+button:disabled {
+    cursor: unset;
+}
+
+/* Applies a shadow to the bottom-end */
+.shadow-be {
+    box-shadow: 6px 6px 10px 6px #a5a5a5;
+}
+
+
+#date-time-picker-section.hidden {
+    display: none;
+}
+
+/* Match to the bootstrap breakpoint size */
+@media (max-width: 992px) {
+    #booking-sidebar {
+        display: none;
+    }
+
+    #booking-bottombar {
+        display: block !important;
+    }
+
+        #booking-bottombar.hidden {
+            display: none !important;
+        }
+
+    #indebook-text {
+        display: none;
+    }
+
+    #indebook-text-small {
+        display: inline !important
+    }
+}
+
+.vl {
+    border-left: 2px solid grey;
+    align-self: stretch;
+}

@@ -1,0 +1,156 @@
+﻿@using BookingService.Data.Booking
+@using System.Text
+@using Core.Dto.BookingRequest
+
+
+<div class="w-100">
+    <div class="w-100 text-white text-center">
+        <div class="flex-row-center justify-content-between bg-dark bg-opacity-75">
+            <button class="text-white btn fw-bold fs-1" type="button" @onclick="(() => MonthChanged(StartDate.AddDays(-1)))">
+                &larr;
+            </button>
+            <p class="lead muted m-0">@StartDate.AddMonths(1).AddDays(-1).ToString("MMMM yyyy")</p>
+            <button class="text-white btn fw-bold fs-1" type="button" @onclick="(() => MonthChanged(StartDate.AddMonths(2).AddDays(1)))">
+                &rarr;
+            </button>
+        </div>
+    </div>
+    <table class="w-100 position-relative scheduler-table-container">
+        <thead>
+            <tr>
+                @for (int i = 0; i < 7; i++)
+                {
+                    <th class="inner-table-cell py-2 square">
+                        <div class="text-center">
+                            <span>
+                                @StartDate.AddDays(i).ToString("ddd").Substring(0, 1)
+                            </span>
+                        </div>
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var date = StartDate;
+                while (date.Date <= EndDate.Date)
+                {
+                    <tr>
+                        @for (int i = 0; i < 7; i++)
+                        {
+                            var currentDate = date;
+
+                            <td class="border-1 square">
+                                <div class="cell-placeholder h-100 text-center square">
+                                    <div class="h-100 square p-1 heading flex-row-center">
+                                        <button type="button" class="h-75 square flex-row-center @GetDateStyle(date)" disabled="@IsDateDisabled(date)" @onclick="@(async () => await DateChanged(currentDate))">
+                                            <p class="calendar-day">
+                                                @date.Day
+                                            </p>
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                            date = date.AddDays(1);
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public DateTime StartDate { get; set; }
+
+    [Parameter, EditorRequired]
+    public DateTime EndDate { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<DateTime?> OnMonthChange { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<DateTime?> OnDateChange { get; set; }
+
+    [Parameter, EditorRequired]
+    public BookingRequestModel Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public Func<DateOnly, List<TimeAvailability>> TimesByDate { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public DateTime Today { get; set; }
+
+    public async Task DateChanged(DateTime? date)
+    {
+        Model.BookingRequest.SelectedTime = null;
+
+        if (date != null)
+        {
+            if (Model.SelectedDateTime?.Month != date?.Month)
+            {
+                await MonthChanged(date);
+            }
+
+            Model.SelectedDateTime = date;
+        }
+
+        await OnDateChange.InvokeAsync(Model.SelectedDateTime);
+    }
+
+    public async Task MonthChanged(DateTime? dt) => await OnMonthChange.InvokeAsync(dt);
+
+    // TODO use these functions instead of calculating classes inside the html section
+    private bool IsDateDisabled(DateTime dt)
+    {
+        var date = DateOnly.FromDateTime(dt);
+
+        if (dt < (Model.BookingRequest.Service?.StartDate?.Date ?? Today) || dt < Today)
+        {
+            return true;
+        }
+
+        return TimesByDate(date).Count == 0;
+    }
+
+    private string GetDateStyle(DateTime dt)
+    {
+        var currentMonth = StartDate.AddMonths(1).AddDays(-1).Month;
+
+        var date = DateOnly.FromDateTime(dt);
+        var classes = new StringBuilder();
+
+        if (dt.Date == Model.SelectedDateTime?.Date)
+        {
+            classes.Append("active ");
+        }
+        else if (dt.Date == Today)
+        {
+            classes.Append("today ");
+        }
+
+        if (dt.Month != currentMonth)
+        {
+            classes.Append("small ");
+        }
+
+        if (IsDateDisabled(dt))
+        {
+            if (TimesByDate(date).Count == 0 && dt.Date >= Today)
+            {
+                classes.Append("text-danger");
+            }
+            else
+            {
+                classes.Append("text-muted ");
+            }
+        }
+        else if (TimesByDate(date).All(x => x.State != AvailabilityState.Available))
+        {
+            classes.Append("text-muted text-decoration-line-through");
+        }
+
+        return classes.ToString();
+    }
+}

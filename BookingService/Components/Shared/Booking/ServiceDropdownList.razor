@@ -1,0 +1,20 @@
+﻿@using Core.Dto
+<ul class="dropdown-menu mw-100" aria-labelledby="dropdownMenuLink">
+    @foreach (var service in ServiceTypes)
+    {
+        <li class="dropdown-item">
+            <div class="d-flex align-items-center" @onclick="@(async () => await OnServiceChange.InvokeAsync(service))">
+                <div class="service-name">@service.Name</div>
+                <div class="service-price ms-2">@($"{service.Price:C}")</div>
+            </div>
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter, EditorRequired]
+    public ICollection<ServiceTypeDto> ServiceTypes { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public EventCallback<ServiceTypeDto> OnServiceChange { get; set; }
+}

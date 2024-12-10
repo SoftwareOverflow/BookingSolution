@@ -1,0 +1,20 @@
+﻿.cell-placeholder .today {
+    outline: 1px solid darkgreen;
+    outline-offset: -1px;
+    border-radius: 100%;
+}
+
+.cell-placeholder .active {
+    background-color: darkgreen;
+    border-radius: 100px;
+    color: white;
+}
+
+.calendar-day {
+    font-size: 1.25em;
+    margin: 0;
+}
+
+.square {
+    aspect-ratio: 1;
+}

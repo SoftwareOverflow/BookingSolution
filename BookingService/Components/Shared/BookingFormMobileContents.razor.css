@@ -1,0 +1,34 @@
+﻿#form-container {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#time-list-container {
+    height: 50vh !important;
+    overflow-y: scroll;
+}
+
+.hidden {
+    display: none;
+    transition: display 0.5s;
+}
+
+.hl {
+    border-bottom: 2px solid grey;
+    align-self: stretch;
+}
+
+.vl {
+    border-left: 2px solid grey;
+    align-self: stretch;
+}
+
+.w-10 {
+    width: 10% !important;
+}
+
+.dropdown-toggle {
+    max-width: 100%;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}

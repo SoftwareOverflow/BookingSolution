@@ -1,0 +1,212 @@
+﻿@using BookingService.Components.Shared.Booking
+@using BookingService.Data
+@using BookingService.Data.Booking
+@using Core.Dto
+@using Core.Dto.BookingRequest
+@using Core.Interfaces
+@using System.Text
+
+@inject IBookingService BookingService
+@inject IMessageService MessageService
+@inject IJSRuntime JsInterop
+
+
+<div class="d-flex flex-row h-100">
+    <div class="left-section flex-grow-1">
+        <div class="d-flex flex-column justify-content-start align-items-start w-100 h-100 overflow-auto">
+            <div id="section-choice" class="px-3 pb-0 pt-5 w-100">
+                <div class="dropdown">
+                    <span class="btn btn-outline-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="pe-3 fs-4">@(Model.BookingRequest.Service?.Name ?? "Choose Your Service...")</span>
+                    </span>
+
+                    <ServiceDropdownList ServiceTypes="ServiceTypes" OnServiceChange="BookingParams.OnServiceChange" />
+                </div>
+                <div class="d-flex flex-row mt-1 mt-md-3 mt-lg-5 px-1">
+                    <p class="lead m-0 me-3">Duration: @($"{Model.BookingRequest.Service?.Duration.Hours ?? 0} hour {Model.BookingRequest.Service?.Duration.Minutes ?? 0} mins")</p>
+                    <p class="lead m-0 ms-3">Price: @($"{Model.BookingRequest.Service?.Price:C}")</p>
+                </div>
+            </div>
+
+            <hr class="solid w-100" />
+
+            <div id="date-time-picker-section" class="w-100 flex-grow-1 @_hideIfNoServiceChosen">
+                <div class="d-flex align-items-start justify-content-evenly px-0 px-md-1 px-lg-5 mx-0 mx-md-1 mx-lg-5">
+                    <div class="w-50 border-1 my-2 shadow-be">
+                        <DatePicker StartDate="_startDate" EndDate="_endDate" Model="Model" OnMonthChange="BookingParams.OnMonthChange" TimesByDate="@((DateOnly dt) => BookingParams.TimesByDate(dt))" Today="_today" OnDateChange="@(() => StateHasChanged())" />
+
+                        <ValidationMessage For="() => Model.BookingRequest.SelectedDate" class="text-danger" />
+                        <ValidationMessage For="() => Model.BookingRequest.SelectedTime" class="text-danger mb-1" />
+                    </div>
+
+                    <div class="w-25 border-1 my-2 position-relative align-self-stretch shadow-be">
+                        <div class="position-absolute top-0 left-0 w-100 h-100">
+                            <div class="flex-column-center h-100 w-100">
+                                <div class="w-100 text-white text-center">
+                                    <p class="lead py-1 m-0 px-5 bg-dark">Time</p>
+                                </div>
+                                <div id="time-list-container">
+                                    @if (BookingParams.TimesByDate(Model.BookingRequest.SelectedDate) is var times && times.Any())
+                                    {
+                                        <ServiceTimeList Model="Model" Times="times" OnTimeChange="@(() => StateHasChanged())" />
+                                    }
+                                    else
+                                    {
+                                        <p class=" m-0 p-2 lead text-muted">No Availability Found...</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Bottom Bar - Hidden on larger screens when we have a sidebar *@
+            <div id="booking-bottombar" class="bg-dark w-100 text-white d-none position-relative @_hideIfNoServiceChosen">
+                <div class="flex-row-center justify-content-start m-2">
+                    <span>@Model.BookingRequest.Service?.Name</span>
+                    <div class="vl mx-1 py-1"></div>
+                    <span>@Model.BookingRequest.Service?.Duration.ToString("h'h 'm'm'")</span>
+                    <div class="vl mx-1 py-1"></div>
+                    <span>@($"{Model.BookingRequest.Service?.Price:C}")</span>
+                    <div class="vl mx-1 py-1"></div>
+                    <span>@($"{Model.BookingRequest.SelectedDate:D}")</span>
+                    <div class="vl mx-1 py-1"></div>
+                    <span>@($"{Model.BookingRequest.SelectedTime:t}")</span>
+                </div>
+                <div class="flex-row-center w-100 pb-3">
+                    <div class="col col-8">
+                        <div class="flex-row-center">
+                            <div class="form-floating mx-1 mb-1">
+                                <InputText @bind-Value="Model.BookingRequest.Person.FirstName" class="form-control bg-transparent text-white" autocomplete="given-name" aria-required="true" placeholder="Name" />
+                                <label for="name">First Name</label>
+                                <ValidationMessage For="() => Model.BookingRequest.Person.FirstName" class="text-danger" />
+                            </div>
+                            <div class="form-floating mx-1 mb-1">
+                                <InputText @bind-Value="Model.BookingRequest.Person.LastName" class="form-control bg-transparent text-white" autocomplete="family-name" aria-required="true" placeholder="Name" />
+                                <label for="name">Last Name</label>
+                                <ValidationMessage For="() => Model.BookingRequest.Person.LastName" class="text-danger" />
+                            </div>
+                        </div>
+
+                        <div class="flex-row-center">
+                            <div class="form-floating mx-1 mb-1">
+                                <InputText @bind-Value="Model.BookingRequest.Person.EmailAddress" class="form-control bg-transparent text-white" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                <label for="email" class="form-label">Email</label>
+                                <ValidationMessage For="() => Model.BookingRequest.Person.EmailAddress" class="text-danger" />
+                            </div>
+                            <div class="form-floating mx-1 mb-1">
+                                <InputText @bind-Value="Model.BookingRequest.Person.PhoneNumber" class="form-control bg-transparent text-white" autocomplete="phone" aria-required="true" placeholder="name@example.com" />
+                                <label for="email" class="form-label">Phone</label>
+                                <ValidationMessage For="() => Model.BookingRequest.Person.PhoneNumber" class="text-danger" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col col-4 ">
+                        <div class="flex-column-center">
+                            <p class="small text-warning col-12 col-lg-6 col-md-9 text-end p-0 mb-1">
+                                *This is only a booking request. You won't pay anything now.
+                            </p>
+                            <button type="submit" class="mb-1 btn btn-light">Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <span class="flex-grow-1 small text-secondary position-absolute bottom-0 end-0 mb-0 me-2">
+                    Powered by Indebook
+                </span>
+            </div>
+        </div>
+    </div>
+
+    @* Side Bar - Hidden on smaller screens when we have a bottom bar *@
+    <div id="booking-sidebar" class="bg-dark h-100 w-25 text-white position-relative">
+        <div class="d-flex flex-column justify-content-start align-items-start h-100 align-items-start p-2 p-lg-4 pb-0">
+            <h4 class="fw-bold">Summary</h4>
+
+            <p>@Model.BookingRequest.Service?.Name</p>
+            <p>Duration: @($"{Model.BookingRequest.Service?.Duration.Hours ?? 0} hour {Model.BookingRequest.Service?.Duration.Minutes ?? 0} mins")</p>
+            <p>Price: @($"{Model.BookingRequest.Service?.Price:C}")</p>
+
+            <p>When: @($"{Model.BookingRequest.SelectedDate:D} at {Model.BookingRequest.SelectedTime:t}")</p>
+
+            <hr class="w-100 rounded" />
+
+            <h4 class="fw-bold">Your Details</h4>
+            <div class="w-100">
+                <div class="form-floating mx-1 mb-3">
+                    <InputText @bind-Value="Model.BookingRequest.Person.FirstName" class="form-control bg-transparent text-white" autocomplete="given-name" aria-required="true" placeholder="Name" />
+                    <label for="name">First Name</label>
+                    <ValidationMessage For="() => Model.BookingRequest.Person.FirstName" class="text-danger" />
+                </div>
+            </div>
+            <div class="w-100">
+                <div class="form-floating mx-1 mb-3">
+                    <InputText @bind-Value="Model.BookingRequest.Person.LastName" class="form-control bg-transparent text-white" autocomplete="family-name" aria-required="true" placeholder="Name" />
+                    <label for="name">Last Name</label>
+                    <ValidationMessage For="() => Model.BookingRequest.Person.LastName" class="text-danger" />
+                </div>
+            </div>
+            <div class="w-100">
+                <div class="form-floating mx-1 mb-3">
+                    <InputText @bind-Value="Model.BookingRequest.Person.EmailAddress" class="form-control bg-transparent text-white" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label for="email" class="form-label">Email</label>
+                    <ValidationMessage For="() => Model.BookingRequest.Person.EmailAddress" class="text-danger" />
+                </div>
+            </div>
+            <div class="w-100">
+                <div class="form-floating mx-1 mb-3">
+                    <InputText @bind-Value="Model.BookingRequest.Person.PhoneNumber" class="form-control bg-transparent text-white" autocomplete="phone" aria-required="true" placeholder="name@example.com" />
+                    <label for="email" class="form-label">Phone</label>
+                    <ValidationMessage For="() => Model.BookingRequest.Person.PhoneNumber" class="text-danger" />
+                </div>
+            </div>
+
+            <hr class="w-100 rounded" />
+
+            <div class="flex-grow-1" />
+
+            <div class="row w-100 justify-content-end p-0 mb-1">
+                <span class="small text-warning col-12 col-lg-6 col-md-9 text-end p-0 mb-1">
+                    *This is only a booking request. You won't pay anything now.
+                </span>
+            </div>
+
+            <div class="d-flex w-100 justify-content-end p-0 mb-md-2">
+                <span id="indebook-text" class="flex-grow-1 small text-secondary align-self-end mb-1">
+                    Powered by Indebook
+                </span>
+                <button type="submit" class="col-12 col-md-6 col-xl-4 mb-1 btn btn-light">Submit</button>
+            </div>
+
+            <span id="indebook-text-small" class="w100 small text-secondary mb-1 mt-2 d-none">
+                Powered by Indebook
+            </span>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "BookingParams")]
+    public BookingForm BookingParams { get; set; } = default!;
+
+    public BookingRequestModel Model => BookingParams.Model;
+
+    public ICollection<ServiceTypeDto> ServiceTypes => BookingParams.ServiceTypes;
+
+    private DateTime _today => BookingParams.Today;
+
+    private DateTime _startDate => BookingParams.StartDate;
+    private DateTime _endDate => BookingParams.EndDate;
+
+    private string _hideIfNoServiceChosen => Model.BookingRequest.Service == null ? "hidden" : "";
+
+    /*
+    Potential performance improvements:
+        - Split method to get the available days and available times
+        - Get available days the whole month on month change.
+        - Load selected date, then start loading (with cancellation token) each day in the month in background
+        - If date changes, cancel long running background task and load current date.
+        - Potentially store some information in cache in service.
+    */
+}

@@ -1,8 +1,10 @@
-﻿@page "/{BusinessGuid:guid}/{ServiceGuid:guid}"
+﻿@page "/{BusinessGuid:guid}"
 
+@using BookingService.Data
 @using BookingService.Data.Booking
 @using BookingService.Components.Shared
 @using Core.Dto
+@using Core.Dto.BookingRequest
 @using Core.Interfaces
 @using Microsoft.AspNetCore.Components.Rendering
 
@@ -13,50 +15,42 @@
 @implements IDisposable
 
 <LoadingSpinner Visible="_loading" />
-<div class="d-flex position-relative flex-column bg-light border-1 border-opacity-10 border-primary bg-light fix-aspect-ratio @_bgClass">
-    <div class="position-absolute start-0 top-0 w-100 h-100">
-        @if (_isError || _bookingRequest == null)
-        {
-            // TODO show error page
-            <div class="d-flex flex-column justify-content-center text-center h-100">
-                <p class="pt-3">An error occured, please try again.</p>
-            </div>
-        }
-        else if (_requestSent)
-        {
-            <div class="d-flex flex-column justify-content-center text-center h-100">
-                <div class="my-5">
-                    <h3>@(IsDemo ? "Example - " : "")Booking Request Sent</h3>
-                </div>
-                <div class="d-flex flex-column justify-content-center">
-                    <p class="lead">Your booking request has been sent to the business</p>
-                    <p>You'll get an email once they confirm your booking</p>
-                    <small>If you have any questions about your booking you should contact the business directly</small>
-                </div>
-            </div>
-        }
-        else
-        {
-            <BookingFormOld Model="_bookingRequest" IsDemo="IsDemo" OnRequestSent="OnRequestSent" />
-        }
-    </div>
 
-    <div class="d-flex position-fixed bottom-0 end-0 m-3">
-        <small>Powered by IndeBook</small>
+@if (_isError || _bookingRequest == null)
+{
+    // TODO show error page
+    <div class="d-flex flex-column justify-content-center text-center h-100">
+        <p class="pt-3">An error occured, please try again.</p>
     </div>
-</div>
+}
+else if (_requestSent)
+{
+    <div class="d-flex flex-column justify-content-center text-center h-100 @_bgClass">
+        <div class="my-5">
+            <h3>@(IsDemo ? "Example - " : "")Booking Request Sent</h3>
+        </div>
+        <div class="d-flex flex-column justify-content-center">
+            <p class="lead">Your booking request has been sent to the business</p>
+            <p>You'll get an email once they confirm your booking</p>
+            <small>If you have any questions about your booking you should contact the business directly</small>
+        </div>
+    </div>
+}
+else
+{
+    <div class="w-100 h-100 @_bgClass">
+        <BookingForm IsDemo="IsDemo" Model="_bookingRequest" ServiceTypes="_serviceTypes" OnFormSubmitted="OnRequestSent" />
+    </div>
+}
 
 @code {
     [Parameter]
     public Guid? BusinessGuid { get; set; }
 
-    [Parameter]
-    public Guid? ServiceGuid { get; set; }
-
-    private ServiceTypeDto? ServiceTypeDto { get; set; } = null;
-
     [SupplyParameterFromQuery]
-    public Boolean IsDemo { get; set; } = false;
+    public Boolean IsDemo { get; private set; } = false;
+
+    private ICollection<ServiceTypeDto> _serviceTypes = [];
 
     private bool _loading = true;
 
@@ -72,19 +66,23 @@
     {
         _loading = true;
 
-        if (BusinessGuid.HasValue && ServiceGuid.HasValue)
+        if (BusinessGuid.HasValue)
         {
-            var result = await BookingService.GetNewBookingRequest(BusinessGuid.Value, ServiceGuid.Value);
+            var servicesResult = await BookingService.GetServiceTypesForBusiness(BusinessGuid.Value);
 
-            if (result.IsSuccess)
+            if (servicesResult.IsSuccess && servicesResult.Result!.Count > 0)
             {
-                _bookingRequest = new BookingRequestModel(result.Result!);
+                _serviceTypes = servicesResult.Result!;
+                _bookingRequest = new BookingRequestModel(new BookingRequestDto(BusinessGuid.Value));
             }
             else
             {
-                // TODO logging
+                MessageService.AddMessage(new MessageBase("Unable to load services for the business", MessageBase.MessageType.Error));
             }
-
+        }
+        else
+        {
+            // TODO redirect to a 404 page?
         }
 
         _loading = false;
