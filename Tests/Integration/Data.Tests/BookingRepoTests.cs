@@ -636,7 +636,7 @@ namespace Data.Tests
             var apt = new Appointment()
             {
                 BookingType = BookingType.Online,
-                Name = "New Booking",
+                Name = "New Booking - TEST",
                 Person = new()
                 {
                     FirstName = "Mock",
@@ -648,6 +648,11 @@ namespace Data.Tests
             };
 
             var result = await _repo.CreateBookingRequest(apt, BookingSeedData.ValidBusinessGuid);
+
+            var saved = context.Appointments.Single(a => a.Name == "New Booking - TEST");
+
+            Assert.True(result);
+            Assert.Equal(BookingState.Pending, saved.State); // Ensure we create booking requests in the pending state
         }
     }
 }

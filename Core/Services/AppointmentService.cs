@@ -100,5 +100,23 @@ namespace Core.Services
 
             return ServiceResult<bool>.DefaultServerFailure();
         }
+
+        public async Task<ServiceResult<ICollection<AppointmentDto>>> GetPendingAppointments()
+        {
+            try
+            {
+                var entities = await _appointmentContext.GetPendingAppointments();
+
+                var dtos = _mapper.Map<ICollection<AppointmentDto>>(entities);
+
+                return new ServiceResult<ICollection<AppointmentDto>>(dtos);
+            }
+            catch (Exception)
+            {
+                // TODO logging
+            }
+
+            return ServiceResult<ICollection<AppointmentDto>>.DefaultServerFailure();
+        }
     }
 }

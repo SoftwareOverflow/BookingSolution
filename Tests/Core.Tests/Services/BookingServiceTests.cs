@@ -69,7 +69,7 @@ namespace Core.Tests.Services
             var bookingRequest = new BookingRequestDto(serviceDto, businessGuid, new PersonDto(), DateOnly.FromDateTime(DateTime.Now));
 
             Assert.Equal(ResultType.Success, result.ResultType);
-            Assert.Equal(serviceGuid, result.Result!.Service.Guid);
+            Assert.Equal(serviceGuid, result.Result!.Service!.Guid);
             Assert.Equivalent(bookingRequest, result.Result);
 
             _bookingContext.Verify(x => x.GetService(businessGuid, serviceGuid), Times.Once);
@@ -905,7 +905,7 @@ namespace Core.Tests.Services
                 }
                 ]));
 
-            Appointment appointment;
+            Appointment? appointment = null;
             _bookingContext.Setup(x => x.CreateBookingRequest(It.IsAny<Appointment>(), It.IsAny<Guid>())).Callback((Appointment app, Guid _) => appointment = app).Returns(Task.FromResult(true));
 
             // Attempt to book 10:00 -> 11:30
@@ -935,11 +935,13 @@ namespace Core.Tests.Services
                 EndTime = new DateTime(date, new TimeOnly(11, 30)),
                 Service = service,
                 BookingType = BookingTypeDto.Online,
+                State = BookingStateDto.Pending, // Ensure created in Pending state
             };
 
             Assert.True(result.IsSuccess);
             Assert.Equal(ResultType.Success, result.ResultType);
             Assert.Equivalent(expected, result.Result);
+            Assert.Equal(Data.Entity.Appointments.BookingState.Pending, appointment!.State);
         }
 
         [Fact]

@@ -14,6 +14,8 @@ namespace Data.Interfaces
         /// <returns>All the exceptions occuring in the requested range, grouped by time block guid</returns>
         public Dictionary<Guid, ICollection<TimeBlockException>> GetTimeBlockExceptionsBetweenDates(DateOnly startDate, DateOnly endDate);
 
+        public Task<ICollection<Appointment>> GetPendingAppointments();
+
         public Task<bool> Create(Appointment appointment);
 
         public Task<bool> Update(Appointment appointment);

@@ -24,8 +24,8 @@ namespace Core.Mapping
 
             CreateMap<AppointmentDtoBase, BaseAppointment>().Include<AppointmentDto, Appointment>().ReverseMap();
 
-            CreateMap<AppointmentDto, Appointment>().ReverseMap();
             CreateMap<PersonDto, Person>().ReverseMap();
+            CreateMap<AppointmentDto, Appointment>().ReverseMap();
 
             CreateMap<TimeBlockDto, TimeBlock>().ReverseMap();
             CreateMap<TimeBlockExceptionDto, TimeBlockException>().ReverseMap();

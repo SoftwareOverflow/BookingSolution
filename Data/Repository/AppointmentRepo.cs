@@ -104,6 +104,13 @@ namespace Data.Repository
             return true;
         }
 
+        public async Task<ICollection<Appointment>> GetPendingAppointments()
+        {
+            return await ExecuteAsync(async (db, _) => {
+                return await db.Appointments.Where(a => a.State == BookingState.Pending).Include(a => a.Person).Include(a => a.Service).OrderByDescending(a => a.Id).ToListAsync();
+            }) ?? [];
+        }
+
         public async Task<ICollection<TimeBlock>> GetTimeBlocks()
         {
             return await ExecuteAsync<ICollection<TimeBlock>>(async (db, _) =>

@@ -1,4 +1,5 @@
 ﻿using Data.Entity.Appointments;
+using Data.Interfaces;
 using Data.Repository;
 using Data.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +9,8 @@ namespace Data.Tests
 {
     public class AppointmentRepoTests : BaseUserChangeTestClass
     {
-        private readonly AppointmentRepo _repo;
-        private readonly AppointmentRepo _localRepo;
+        private readonly IAppointmentRepo _repo;
+        private readonly IAppointmentRepo _localRepo;
 
         public AppointmentRepoTests(DockerSqlFixture fixture) : base(fixture)
         {
@@ -1227,6 +1228,57 @@ namespace Data.Tests
             Assert.True(result);
             Assert.Equal(initialCount, db.TimeBlockExceptions.Count());
             Assert.Null(db.TimeBlockExceptions.SingleOrDefault(x => x.Guid == toDelete.Guid));
+        }
+
+        [Fact]
+        public async Task GetPendingAppointments()
+        {
+            var allAptsCount = -1;
+            using (var context = GetContext())
+            {
+                var apt = new Appointment()
+                {
+                    Name = "Pending appointment name",
+                    BookingType = BookingType.Online,
+                    BusinessId = await context.GetBusinessId(),
+                    Person = new Person()
+                    {
+                        FirstName = "Alex",
+                        LastName = "Jackson",
+                        EmailAddress = "aj@customdomain.com",
+                        PhoneNumber = "+44 0011223344"
+                    },
+                    State = BookingState.Pending
+                };
+
+                var apt2 = new Appointment()
+                {
+                    Name = "Pending appointment name #2",
+                    BookingType = BookingType.Online,
+                    BusinessId = await context.GetBusinessId(),
+                    Person = new Person()
+                    {
+                        FirstName = "Lucy",
+                        LastName = "Quixiot",
+                        EmailAddress = "LQuix@hotmai.co.uk",
+                        PhoneNumber = "+72 11220033"
+                    },
+                    State = BookingState.Pending
+                };
+
+                context.Appointments.Add(apt);
+                context.Appointments.Add(apt2);
+                await context.SaveChangesAsync();
+
+                var businessId = await context.GetBusinessId();
+                allAptsCount = context.Appointments.Where(a => a.BusinessId == businessId).Count();
+            };
+
+            var result = await _repo.GetPendingAppointments();
+
+            Assert.Equal(2, result.Count);
+            Assert.NotEqual(allAptsCount, result.Count);
+            Assert.DoesNotContain(result, a => a.State != BookingState.Pending);
         }
     }
 }

@@ -121,6 +121,7 @@ namespace Data.Tests.Fixtures
                 .RuleFor(a => a.EndTime, (faker, t) => t.StartTime.AddTicks(Random.Shared.Next(1000) * 60000))
                 .RuleFor(a => a.BookingType, (faker, t) => faker.PickRandom<BookingType>())
                 .RuleFor(a => a.Person, (faker, t) => GetPerson())
+                .RuleFor(a => a.State, BookingState.Confirmed)
                 .UseSeed(_seed);
         }
 

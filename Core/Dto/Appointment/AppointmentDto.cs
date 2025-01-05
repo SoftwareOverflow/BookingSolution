@@ -17,5 +17,7 @@ namespace Core.Dto.Appointment
 
 
         public BookingTypeDto BookingType { get; set; }
+
+        public BookingStateDto State { get; set; }
     }
 }

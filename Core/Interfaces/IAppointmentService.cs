@@ -10,5 +10,7 @@ namespace Core.Interfaces
         public Task<ServiceResult<AppointmentDto>> CreateOrUpdateAppointment(AppointmentDto appointment);
 
         public Task<ServiceResult<bool>> DeleteAppointment(Guid id);
+
+        public Task<ServiceResult<ICollection<AppointmentDto>>> GetPendingAppointments();
     }
 }

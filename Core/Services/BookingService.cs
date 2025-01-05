@@ -237,7 +237,8 @@ namespace Core.Services
                     Service = dto.Service,
                     StartTime = requestStart,
                     EndTime = requestStart.Add(dto.Service.Duration),
-                    BookingType = BookingTypeDto.Online,
+                    BookingType = Dto.Appointment.BookingTypeDto.Online,
+                    State = Dto.Appointment.BookingStateDto.Pending,
                 };
 
                 // TODO check for clashes

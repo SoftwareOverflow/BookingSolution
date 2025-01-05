@@ -10,6 +10,11 @@
         public BookingType BookingType { get; set; }
 
         /// <summary>
+        /// The State of the current booking - e.g. pending or confirmed
+        /// </summary>
+        public BookingState State { get; set; }
+
+        /// <summary>
         /// Foregin Key to the <see cref="Person"/> who made the booking
         /// </summary>
         public int PersonId { get; set; }

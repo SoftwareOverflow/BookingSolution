@@ -74,6 +74,7 @@ namespace Data.Repository.Anon
                     throw new ArgumentException("Unable to create booking request - Cannot find business and service");
                 }
 
+                appointment.State = BookingState.Pending;
                 appointment.BusinessId = business.Id;
                 appointment.Service = service; // Ensure the service mathces (including id) otherwise EF will try and create a new service and break FK constraint to business
 
